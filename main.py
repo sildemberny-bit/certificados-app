@@ -1,13 +1,10 @@
 from flask import Flask, render_template, request, redirect, url_for, session
-import os
 
 app = Flask(__name__)
 app.secret_key = "emitte_super_secreto"
 
-# Contador simples em memória
 total_gerado = 0
 ultima_geracao = "Nenhuma ainda"
-
 
 # =========================
 # LOGIN
@@ -15,11 +12,12 @@ ultima_geracao = "Nenhuma ainda"
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        usuario = request.form.get("usuario")
-        senha = request.form.get("senha")
+        email = request.form.get("email")
+        password = request.form.get("password")
 
-        if usuario == "admin" and senha == "123":
-            session["usuario"] = usuario
+        # LOGIN SIMPLES PARA TESTE
+        if email == "admin@emitte.com" and password == "123":
+            session["usuario"] = email
             return redirect(url_for("dashboard"))
 
     return render_template("login.html")
@@ -55,8 +53,5 @@ def dashboard():
     )
 
 
-# =========================
-# RODAR APP
-# =========================
 if __name__ == "__main__":
     app.run(debug=True)
