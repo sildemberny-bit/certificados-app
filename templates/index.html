@@ -1,50 +1,94 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <title>Gerador de Certificados</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+<meta charset="UTF-8">
+<title>Gerador de Certificados</title>
+<script src="https://cdn.tailwindcss.com"></script>
 </head>
+
 <body class="bg-gray-100 min-h-screen p-10">
 
-<div class="max-w-3xl mx-auto bg-white p-8 rounded-2xl shadow-xl">
-  <h1 class="text-3xl font-bold mb-6 text-center">
-    🎓 Gerador de Certificados
-  </h1>
+<div class="max-w-5xl mx-auto bg-white p-8 rounded-2xl shadow-xl">
 
-  <form method="POST" enctype="multipart/form-data" class="space-y-6">
+<h1 class="text-3xl font-bold mb-6 text-center">🎓 Gerador de Certificados</h1>
 
-    <div>
-      <label class="block font-semibold mb-2">Imagem de Fundo</label>
-      <input type="file" name="background" class="w-full border p-2 rounded">
-    </div>
+<form method="POST" enctype="multipart/form-data" class="space-y-6">
 
-    <div>
-      <label class="block font-semibold mb-2">Planilha Excel</label>
-      <input type="file" name="excel" class="w-full border p-2 rounded">
-    </div>
-
-    <div>
-      <label class="block font-semibold mb-2">Texto do Certificado</label>
-      <textarea name="text" rows="4"
-        class="w-full border p-3 rounded"
-        placeholder="Certificamos que {{Nome}} concluiu o curso {{Curso}}">
-      </textarea>
-    </div>
-
-    <div class="grid grid-cols-3 gap-4">
-      <input type="number" name="pos_x" value="100" class="border p-2 rounded">
-      <input type="number" name="pos_y" value="200" class="border p-2 rounded">
-      <input type="number" name="font_size" value="40" class="border p-2 rounded">
-    </div>
-
-    <button name="generate"
-      class="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl font-semibold">
-      Gerar Certificados
-    </button>
-
-  </form>
+<div>
+<label class="font-semibold">Imagem de Fundo</label>
+<input type="file" name="background" id="bgInput" class="w-full border p-2 rounded">
 </div>
+
+<div>
+<label class="font-semibold">Planilha Excel</label>
+<input type="file" name="excel" class="w-full border p-2 rounded">
+</div>
+
+<div>
+<label class="font-semibold">Texto do Certificado</label>
+<textarea id="textInput" name="text" rows="4"
+class="w-full border p-3 rounded"
+placeholder="Certificamos que {{Nome}} concluiu o curso {{Curso}}">
+</textarea>
+</div>
+
+<div class="grid grid-cols-3 gap-4">
+<input type="number" id="posX" name="pos_x" value="500" class="border p-2 rounded">
+<input type="number" id="posY" name="pos_y" value="300" class="border p-2 rounded">
+<input type="number" id="fontSize" name="font_size" value="40" class="border p-2 rounded">
+</div>
+
+<button name="generate"
+class="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl font-semibold">
+Gerar e Baixar ZIP
+</button>
+
+</form>
+
+<hr class="my-8">
+
+<h2 class="text-xl font-bold mb-4">Preview</h2>
+
+<div class="relative border rounded overflow-hidden">
+<img id="previewImage" class="w-full">
+<div id="previewText" class="absolute text-black font-bold"></div>
+</div>
+
+</div>
+
+<script>
+const bgInput = document.getElementById("bgInput");
+const previewImage = document.getElementById("previewImage");
+const previewText = document.getElementById("previewText");
+const textInput = document.getElementById("textInput");
+const posX = document.getElementById("posX");
+const posY = document.getElementById("posY");
+const fontSize = document.getElementById("fontSize");
+
+bgInput.addEventListener("change", function() {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        previewImage.src = e.target.result;
+    }
+    reader.readAsDataURL(this.files[0]);
+});
+
+function updatePreview() {
+    previewText.innerText = textInput.value;
+    previewText.style.left = posX.value + "px";
+    previewText.style.top = posY.value + "px";
+    previewText.style.fontSize = fontSize.value + "px";
+    previewText.style.whiteSpace = "pre-wrap";
+    previewText.style.transform = "translateX(-50%)";
+}
+
+textInput.addEventListener("input", updatePreview);
+posX.addEventListener("input", updatePreview);
+posY.addEventListener("input", updatePreview);
+fontSize.addEventListener("input", updatePreview);
+
+updatePreview();
+</script>
 
 </body>
 </html>
