@@ -1,135 +1,92 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-br">
 <head>
-<meta charset="UTF-8">
-<title>Editor Profissional de Certificados</title>
-<script src="https://cdn.tailwindcss.com"></script>
+    <meta charset="UTF-8">
+    <title>Emitte - Emissão Inteligente</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
-<body class="bg-gray-100 min-h-screen p-10">
+<body class="bg-[#F4F7FA] text-gray-800">
 
-<div class="max-w-6xl mx-auto bg-white p-8 rounded-2xl shadow-xl">
+<!-- NAVBAR -->
+<nav class="bg-white shadow-md">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+        <div class="flex items-center space-x-3">
+            <img src="{{ url_for('static', filename='logo.png') }}" class="h-10">
+            <div>
+                <h1 class="text-2xl font-bold text-[#0D3B66]">Emitte</h1>
+                <p class="text-xs text-gray-500">Emissão inteligente de certificados</p>
+            </div>
+        </div>
+        <div class="text-sm text-gray-600">
+            Painel Administrativo
+        </div>
+    </div>
+</nav>
 
-<h1 class="text-3xl font-bold mb-6 text-center">
-🎓 Editor Profissional 2.0
-</h1>
+<div class="max-w-6xl mx-auto mt-10 px-6">
 
-<form method="POST" enctype="multipart/form-data" class="space-y-6">
+    <!-- DASHBOARD -->
+    <div class="grid grid-cols-3 gap-6 mb-10">
+        
+        <div class="bg-white p-6 rounded-xl shadow">
+            <h3 class="text-gray-500 text-sm">Total Gerado</h3>
+            <p class="text-3xl font-bold text-[#0D3B66] mt-2">{{ total_gerado }}</p>
+            <p class="text-sm text-gray-400">certificados</p>
+        </div>
 
-<div class="grid grid-cols-2 gap-6">
+        <div class="bg-white p-6 rounded-xl shadow">
+            <h3 class="text-gray-500 text-sm">Última Geração</h3>
+            <p class="text-lg font-semibold mt-2">{{ ultima_geracao }}</p>
+        </div>
 
-<div class="space-y-4">
+        <div class="bg-white p-6 rounded-xl shadow">
+            <h3 class="text-gray-500 text-sm">Status</h3>
+            <p class="text-green-600 font-semibold mt-2">Sistema Online</p>
+        </div>
 
-<label>Imagem de Fundo</label>
-<input type="file" name="background" id="bgInput" class="w-full border p-2 rounded">
+    </div>
 
-<label>Planilha Excel</label>
-<input type="file" name="excel" class="w-full border p-2 rounded">
+    <!-- GERADOR -->
+    <div class="bg-white p-8 rounded-xl shadow">
 
-<label>Fonte Personalizada (.ttf)</label>
-<input type="file" name="fontfile" class="w-full border p-2 rounded">
+        <h2 class="text-xl font-bold text-[#0D3B66] mb-6">Gerar Certificados</h2>
 
-<label>Texto</label>
-<textarea id="textInput" name="text" rows="5"
-class="w-full border p-3 rounded"
-placeholder="CERTIFICAMOS QUE {{Nome}} PARTICIPOU DO EVENTO {{Evento}} NO PERÍODO {{Periodo}} COM CARGA HORÁRIA DE {{CargaHoraria}} HORAS">
-</textarea>
+        <form method="POST" enctype="multipart/form-data">
 
-<input type="hidden" id="posX" name="pos_x" value="400">
-<input type="hidden" id="posY" name="pos_y" value="300">
+            <div class="mb-6">
+                <label class="block mb-2 font-semibold">Imagem de Fundo</label>
+                <input type="file" name="background" required class="w-full border p-3 rounded-lg">
+            </div>
 
-<label>Tamanho da Fonte</label>
-<input type="number" id="fontSize" name="font_size" value="40" class="w-full border p-2 rounded">
+            <div class="mb-6">
+                <label class="block mb-2 font-semibold">Planilha Excel</label>
+                <input type="file" name="excel" required class="w-full border p-3 rounded-lg">
+            </div>
 
-<label>Largura Máxima do Texto</label>
-<input type="number" id="maxWidth" name="max_width" value="900" class="w-full border p-2 rounded">
+            <div class="mb-6">
+                <label class="block mb-2 font-semibold">Texto do Certificado</label>
+                <textarea name="texto" rows="4" required 
+                class="w-full border p-3 rounded-lg"
+                placeholder='Ex: Certificamos que {nome} participou do evento {evento}...'></textarea>
+            </div>
 
-<label>Espaçamento entre Linhas</label>
-<input type="number" name="line_spacing" value="10" class="w-full border p-2 rounded">
+            <div class="grid grid-cols-3 gap-4 mb-8">
+                <input type="number" name="pos_x" placeholder="Posição X" required class="border p-3 rounded-lg">
+                <input type="number" name="pos_y" placeholder="Posição Y" required class="border p-3 rounded-lg">
+                <input type="number" name="fonte" placeholder="Tamanho Fonte" required class="border p-3 rounded-lg">
+            </div>
 
-<label>Alinhamento</label>
-<select name="align" class="w-full border p-2 rounded">
-<option value="left">Esquerda</option>
-<option value="center" selected>Centro</option>
-<option value="right">Direita</option>
-</select>
+            <button type="submit"
+            class="w-full bg-[#0D3B66] hover:bg-[#092a4a] text-white font-semibold py-4 rounded-xl transition">
+                Gerar Certificados
+            </button>
 
-<label>Cor da Fonte</label>
-<input type="color" name="color" value="#000000" class="w-full h-10">
+        </form>
 
-<button name="generate"
-class="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl font-semibold">
-Gerar e Baixar ZIP
-</button>
+    </div>
 
 </div>
-
-<div>
-
-<h2 class="font-bold mb-4">Preview (Arraste o texto)</h2>
-
-<div class="relative border rounded overflow-hidden">
-<img id="previewImage" class="w-full">
-<div id="previewText"
-class="absolute cursor-move font-bold select-none whitespace-pre-wrap">
-Texto exemplo
-</div>
-</div>
-
-</div>
-
-</div>
-</form>
-</div>
-
-<script>
-const bgInput = document.getElementById("bgInput");
-const previewImage = document.getElementById("previewImage");
-const previewText = document.getElementById("previewText");
-const textInput = document.getElementById("textInput");
-const posXInput = document.getElementById("posX");
-const posYInput = document.getElementById("posY");
-const fontSize = document.getElementById("fontSize");
-
-bgInput.addEventListener("change", function() {
-    const reader = new FileReader();
-    reader.onload = e => previewImage.src = e.target.result;
-    reader.readAsDataURL(this.files[0]);
-});
-
-textInput.addEventListener("input", () => {
-    previewText.innerText = textInput.value;
-});
-
-fontSize.addEventListener("input", () => {
-    previewText.style.fontSize = fontSize.value + "px";
-});
-
-let offsetX = 0, offsetY = 0, isDragging = false;
-
-previewText.addEventListener("mousedown", (e) => {
-    isDragging = true;
-    offsetX = e.offsetX;
-    offsetY = e.offsetY;
-});
-
-document.addEventListener("mousemove", (e) => {
-    if (!isDragging) return;
-    const rect = previewImage.getBoundingClientRect();
-    let x = e.clientX - rect.left - offsetX;
-    let y = e.clientY - rect.top - offsetY;
-    previewText.style.left = x + "px";
-    previewText.style.top = y + "px";
-    posXInput.value = x;
-    posYInput.value = y;
-});
-
-document.addEventListener("mouseup", () => isDragging = false);
-
-previewText.style.left = "400px";
-previewText.style.top = "300px";
-previewText.style.fontSize = "40px";
-</script>
 
 </body>
 </html>
