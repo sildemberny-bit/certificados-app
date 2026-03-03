@@ -1,0 +1,14 @@
+<h2>Dashboard</h2>
+
+<p>Total de certificados gerados: <strong>{{ total }}</strong></p>
+
+<h3>Histórico</h3>
+<ul>
+{% for item in history %}
+<li>{{ item[0] }} certificados - {{ item[1] }}</li>
+{% endfor %}
+</ul>
+
+<a href="/">Gerar novos certificados</a>
+<br>
+<a href="/logout">Sair</a>
