@@ -3,3 +3,4 @@ Pillow
 pandas
 openpyxl
 gunicorn
+flask-login
