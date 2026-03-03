@@ -2,58 +2,84 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Gerador de Certificados</title>
+<title>Editor Profissional de Certificados</title>
 <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
 <body class="bg-gray-100 min-h-screen p-10">
 
-<div class="max-w-5xl mx-auto bg-white p-8 rounded-2xl shadow-xl">
+<div class="max-w-6xl mx-auto bg-white p-8 rounded-2xl shadow-xl">
 
-<h1 class="text-3xl font-bold mb-6 text-center">🎓 Gerador de Certificados</h1>
+<h1 class="text-3xl font-bold mb-6 text-center">
+🎓 Editor Profissional 2.0
+</h1>
 
 <form method="POST" enctype="multipart/form-data" class="space-y-6">
 
-<div>
-<label class="font-semibold">Imagem de Fundo</label>
+<div class="grid grid-cols-2 gap-6">
+
+<div class="space-y-4">
+
+<label>Imagem de Fundo</label>
 <input type="file" name="background" id="bgInput" class="w-full border p-2 rounded">
-</div>
 
-<div>
-<label class="font-semibold">Planilha Excel</label>
+<label>Planilha Excel</label>
 <input type="file" name="excel" class="w-full border p-2 rounded">
-</div>
 
-<div>
-<label class="font-semibold">Texto do Certificado</label>
-<textarea id="textInput" name="text" rows="4"
+<label>Fonte Personalizada (.ttf)</label>
+<input type="file" name="fontfile" class="w-full border p-2 rounded">
+
+<label>Texto</label>
+<textarea id="textInput" name="text" rows="5"
 class="w-full border p-3 rounded"
-placeholder="Certificamos que {{Nome}} concluiu o curso {{Curso}}">
+placeholder="CERTIFICAMOS QUE {{Nome}} PARTICIPOU DO EVENTO {{Evento}} NO PERÍODO {{Periodo}} COM CARGA HORÁRIA DE {{CargaHoraria}} HORAS">
 </textarea>
-</div>
 
-<div class="grid grid-cols-3 gap-4">
-<input type="number" id="posX" name="pos_x" value="500" class="border p-2 rounded">
-<input type="number" id="posY" name="pos_y" value="300" class="border p-2 rounded">
-<input type="number" id="fontSize" name="font_size" value="40" class="border p-2 rounded">
-</div>
+<input type="hidden" id="posX" name="pos_x" value="400">
+<input type="hidden" id="posY" name="pos_y" value="300">
+
+<label>Tamanho da Fonte</label>
+<input type="number" id="fontSize" name="font_size" value="40" class="w-full border p-2 rounded">
+
+<label>Largura Máxima do Texto</label>
+<input type="number" id="maxWidth" name="max_width" value="900" class="w-full border p-2 rounded">
+
+<label>Espaçamento entre Linhas</label>
+<input type="number" name="line_spacing" value="10" class="w-full border p-2 rounded">
+
+<label>Alinhamento</label>
+<select name="align" class="w-full border p-2 rounded">
+<option value="left">Esquerda</option>
+<option value="center" selected>Centro</option>
+<option value="right">Direita</option>
+</select>
+
+<label>Cor da Fonte</label>
+<input type="color" name="color" value="#000000" class="w-full h-10">
 
 <button name="generate"
 class="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl font-semibold">
 Gerar e Baixar ZIP
 </button>
 
-</form>
+</div>
 
-<hr class="my-8">
+<div>
 
-<h2 class="text-xl font-bold mb-4">Preview</h2>
+<h2 class="font-bold mb-4">Preview (Arraste o texto)</h2>
 
 <div class="relative border rounded overflow-hidden">
 <img id="previewImage" class="w-full">
-<div id="previewText" class="absolute text-black font-bold"></div>
+<div id="previewText"
+class="absolute cursor-move font-bold select-none whitespace-pre-wrap">
+Texto exemplo
+</div>
 </div>
 
+</div>
+
+</div>
+</form>
 </div>
 
 <script>
@@ -61,33 +87,48 @@ const bgInput = document.getElementById("bgInput");
 const previewImage = document.getElementById("previewImage");
 const previewText = document.getElementById("previewText");
 const textInput = document.getElementById("textInput");
-const posX = document.getElementById("posX");
-const posY = document.getElementById("posY");
+const posXInput = document.getElementById("posX");
+const posYInput = document.getElementById("posY");
 const fontSize = document.getElementById("fontSize");
 
 bgInput.addEventListener("change", function() {
     const reader = new FileReader();
-    reader.onload = function(e) {
-        previewImage.src = e.target.result;
-    }
+    reader.onload = e => previewImage.src = e.target.result;
     reader.readAsDataURL(this.files[0]);
 });
 
-function updatePreview() {
+textInput.addEventListener("input", () => {
     previewText.innerText = textInput.value;
-    previewText.style.left = posX.value + "px";
-    previewText.style.top = posY.value + "px";
+});
+
+fontSize.addEventListener("input", () => {
     previewText.style.fontSize = fontSize.value + "px";
-    previewText.style.whiteSpace = "pre-wrap";
-    previewText.style.transform = "translateX(-50%)";
-}
+});
 
-textInput.addEventListener("input", updatePreview);
-posX.addEventListener("input", updatePreview);
-posY.addEventListener("input", updatePreview);
-fontSize.addEventListener("input", updatePreview);
+let offsetX = 0, offsetY = 0, isDragging = false;
 
-updatePreview();
+previewText.addEventListener("mousedown", (e) => {
+    isDragging = true;
+    offsetX = e.offsetX;
+    offsetY = e.offsetY;
+});
+
+document.addEventListener("mousemove", (e) => {
+    if (!isDragging) return;
+    const rect = previewImage.getBoundingClientRect();
+    let x = e.clientX - rect.left - offsetX;
+    let y = e.clientY - rect.top - offsetY;
+    previewText.style.left = x + "px";
+    previewText.style.top = y + "px";
+    posXInput.value = x;
+    posYInput.value = y;
+});
+
+document.addEventListener("mouseup", () => isDragging = false);
+
+previewText.style.left = "400px";
+previewText.style.top = "300px";
+previewText.style.fontSize = "40px";
 </script>
 
 </body>
