@@ -12,12 +12,17 @@
         }
 
         .hero {
-            padding: 120px 20px;
+            padding: 100px 20px;
+        }
+
+        .logo {
+            width: 120px;
+            margin-bottom: 20px;
         }
 
         h1 {
             font-size: 42px;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
         p {
@@ -36,6 +41,11 @@
             text-decoration: none;
             font-weight: bold;
             border-radius: 8px;
+            transition: 0.3s;
+        }
+
+        .btn:hover {
+            background-color: #f1f1f1;
         }
 
         .features {
@@ -51,17 +61,34 @@
         .feature-list {
             max-width: 800px;
             margin: auto;
+            list-style: none; /* remove bolinhas */
+            padding: 0;
             text-align: left;
         }
 
         .feature-list li {
-            margin: 10px 0;
+            margin: 12px 0;
+            font-size: 17px;
+            position: relative;
+            padding-left: 28px;
+        }
+
+        .feature-list li::before {
+            content: "✔";
+            position: absolute;
+            left: 0;
+            color: #1f3c88;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
 
 <div class="hero">
+
+    <!-- LOGO -->
+    <img src="{{ url_for('static', filename='logo.png') }}" class="logo">
+
     <h1>Emitte</h1>
     <p>Plataforma inteligente para geração automática de certificados acadêmicos e corporativos em segundos.</p>
     <a href="/login" class="btn">Acessar Plataforma</a>
@@ -70,11 +97,11 @@
 <div class="features">
     <h2>Por que usar a Emitte?</h2>
     <ul class="feature-list">
-        <li>✔ Gere centenas de certificados em minutos</li>
-        <li>✔ Integração simples com Excel</li>
-        <li>✔ Personalização total do layout</li>
-        <li>✔ Visualização antes da geração</li>
-        <li>✔ Exportação automática em PDF</li>
+        <li>Gere centenas de certificados em minutos</li>
+        <li>Integração simples com Excel</li>
+        <li>Personalização total do layout</li>
+        <li>Visualização antes da geração</li>
+        <li>Exportação automática em PDF</li>
     </ul>
 </div>
 
