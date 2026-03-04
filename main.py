@@ -86,13 +86,12 @@ def certificados():
 
             linhas = textwrap.wrap(texto_final, width=80)
 
-            # 🔥 Definição de posição vertical
             if posicao_vertical == "superior":
                 y_inicial = altura * 0.65
             elif posicao_vertical == "inferior":
                 y_inicial = altura * 0.35
             else:
-                y_inicial = altura * 0.50  # centro padrão
+                y_inicial = altura * 0.50
 
             espacamento = tamanho_fonte + 8
 
