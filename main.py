@@ -3,6 +3,11 @@ from flask import Flask, render_template, request, redirect, url_for, session
 app = Flask(__name__)
 app.secret_key = "emitte_2025_super_seguro"
 
+# Banco temporário em memória
+usuarios = {
+    "admin": "123"
+}
+
 
 # =========================
 # LOGIN
@@ -13,11 +18,28 @@ def login():
         email = request.form.get("email")
         password = request.form.get("password")
 
-        if email == "admin" and password == "123":
+        if email in usuarios and usuarios[email] == password:
             session["usuario"] = email
             return redirect(url_for("dashboard"))
 
     return render_template("login.html")
+
+
+# =========================
+# REGISTRO
+# =========================
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    if request.method == "POST":
+        email = request.form.get("email")
+        password = request.form.get("password")
+
+        if email not in usuarios:
+            usuarios[email] = password
+            session["usuario"] = email
+            return redirect(url_for("dashboard"))
+
+    return render_template("register.html")
 
 
 # =========================
@@ -41,7 +63,7 @@ def dashboard():
 
 
 # =========================
-# PÁGINA DE CERTIFICADOS
+# CERTIFICADOS
 # =========================
 @app.route("/certificados")
 def certificados():
