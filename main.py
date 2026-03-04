@@ -1,10 +1,8 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 
 app = Flask(__name__)
-app.secret_key = "emitte_super_secreto"
+app.secret_key = "emitte_2025_super_seguro"
 
-total_gerado = 0
-ultima_geracao = "Nenhuma ainda"
 
 # =========================
 # LOGIN
@@ -15,8 +13,8 @@ def login():
         email = request.form.get("email")
         password = request.form.get("password")
 
-        # LOGIN SIMPLES PARA TESTE
-        if email == "admin@emitte.com" and password == "123":
+        # LOGIN SIMPLES TEMPORÁRIO
+        if email == "admin" and password == "123":
             session["usuario"] = email
             return redirect(url_for("dashboard"))
 
@@ -35,22 +33,12 @@ def logout():
 # =========================
 # DASHBOARD
 # =========================
-@app.route("/", methods=["GET", "POST"])
+@app.route("/")
 def dashboard():
-    global total_gerado, ultima_geracao
-
     if "usuario" not in session:
         return redirect(url_for("login"))
 
-    if request.method == "POST":
-        total_gerado += 1
-        ultima_geracao = "Agora mesmo"
-
-    return render_template(
-        "index.html",
-        total_gerado=total_gerado,
-        ultima_geracao=ultima_geracao
-    )
+    return render_template("dashboard.html")
 
 
 if __name__ == "__main__":
