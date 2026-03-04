@@ -1,60 +1,121 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <title>Gerar Certificados - Emitte</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+<meta charset="UTF-8">
+<title>Gerar Certificados - Emitte</title>
+<script src="https://cdn.tailwindcss.com"></script>
 </head>
 
 <body class="bg-gray-100 p-10">
 
-<div class="max-w-3xl mx-auto bg-white p-8 rounded-xl shadow">
+<div class="max-w-5xl mx-auto bg-white p-8 rounded-xl shadow">
 
-    <h2 class="text-2xl font-bold text-blue-900 mb-6">
-        Gerar Certificados
-    </h2>
+<h2 class="text-2xl font-bold text-blue-900 mb-6">
+Gerar Certificados
+</h2>
 
-    <form method="POST" enctype="multipart/form-data" class="space-y-6">
+<form method="POST" enctype="multipart/form-data" class="space-y-6">
 
-        <input type="file" name="fundo" required class="w-full border p-3 rounded-lg">
-        <input type="file" name="planilha" required class="w-full border p-3 rounded-lg">
+<input type="file" id="fundoInput" name="fundo" required class="w-full border p-3 rounded-lg">
+<input type="file" name="planilha" required class="w-full border p-3 rounded-lg">
 
-        <textarea name="texto" rows="4"
-        class="w-full border p-4 rounded-lg"
-        placeholder='CERTIFICAMOS QUE {NOME} PARTICIPOU...'></textarea>
+<textarea id="textoInput" name="texto" rows="3"
+class="w-full border p-4 rounded-lg"
+placeholder='CERTIFICAMOS QUE {NOME} PARTICIPOU...'></textarea>
 
-        <div>
-            <label class="block font-semibold mb-2">Tamanho da Fonte (10 a 20)</label>
-            <input type="number" name="fonte" min="10" max="20" value="18"
-            class="w-full border p-3 rounded-lg">
-        </div>
+<input type="number" id="fonteInput" name="fonte" min="10" max="20" value="18"
+class="w-full border p-3 rounded-lg">
 
-        <div>
-            <label class="block font-semibold mb-2">Alinhamento</label>
-            <select name="alinhamento" class="w-full border p-3 rounded-lg">
-                <option value="centro">Centro</option>
-                <option value="esquerda">Esquerda</option>
-                <option value="direita">Direita</option>
-            </select>
-        </div>
+<select id="alinhamentoInput" name="alinhamento" class="w-full border p-3 rounded-lg">
+<option value="centro">Centro</option>
+<option value="esquerda">Esquerda</option>
+<option value="direita">Direita</option>
+</select>
 
-        <div>
-            <label class="block font-semibold mb-2">Posição Vertical</label>
-            <select name="posicao_vertical" class="w-full border p-3 rounded-lg">
-                <option value="centro">Centro</option>
-                <option value="superior">Superior</option>
-                <option value="inferior">Inferior</option>
-            </select>
-        </div>
+<select id="posicaoInput" name="posicao_vertical" class="w-full border p-3 rounded-lg">
+<option value="centro">Centro</option>
+<option value="superior">Superior</option>
+<option value="inferior">Inferior</option>
+</select>
 
-        <button type="submit"
-        class="w-full bg-blue-900 text-white py-4 rounded-lg hover:bg-blue-800 transition">
-            Gerar Certificados
-        </button>
+<button type="submit"
+class="w-full bg-blue-900 text-white py-4 rounded-lg">
+Gerar Certificados
+</button>
 
-    </form>
+</form>
+
+<hr class="my-10">
+
+<h3 class="text-xl font-bold mb-4">Preview</h3>
+
+<div class="relative w-full max-w-4xl mx-auto border">
+
+<img id="previewImage" class="w-full">
+
+<div id="previewTexto"
+class="absolute left-1/2 transform -translate-x-1/2 text-center px-10"
+style="top:50%; font-size:18px;">
+Texto do Certificado
+</div>
 
 </div>
+
+</div>
+
+<script>
+const texto = document.getElementById("textoInput");
+const fonte = document.getElementById("fonteInput");
+const alinhamento = document.getElementById("alinhamentoInput");
+const posicao = document.getElementById("posicaoInput");
+const previewTexto = document.getElementById("previewTexto");
+const fundoInput = document.getElementById("fundoInput");
+const previewImage = document.getElementById("previewImage");
+
+texto.addEventListener("input", atualizar);
+fonte.addEventListener("input", atualizar);
+alinhamento.addEventListener("change", atualizar);
+posicao.addEventListener("change", atualizar);
+
+function atualizar() {
+    previewTexto.innerText = texto.value;
+    previewTexto.style.fontSize = fonte.value + "px";
+
+    if (alinhamento.value === "centro") {
+        previewTexto.style.textAlign = "center";
+        previewTexto.style.left = "50%";
+        previewTexto.style.transform = "translateX(-50%)";
+    }
+    if (alinhamento.value === "esquerda") {
+        previewTexto.style.textAlign = "left";
+        previewTexto.style.left = "10%";
+        previewTexto.style.transform = "none";
+    }
+    if (alinhamento.value === "direita") {
+        previewTexto.style.textAlign = "right";
+        previewTexto.style.left = "90%";
+        previewTexto.style.transform = "translateX(-100%)";
+    }
+
+    if (posicao.value === "superior") {
+        previewTexto.style.top = "30%";
+    }
+    if (posicao.value === "centro") {
+        previewTexto.style.top = "50%";
+    }
+    if (posicao.value === "inferior") {
+        previewTexto.style.top = "70%";
+    }
+}
+
+fundoInput.addEventListener("change", function(event){
+    const reader = new FileReader();
+    reader.onload = function(){
+        previewImage.src = reader.result;
+    }
+    reader.readAsDataURL(event.target.files[0]);
+});
+</script>
 
 </body>
 </html>
