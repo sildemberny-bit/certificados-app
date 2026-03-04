@@ -16,11 +16,9 @@ OUTPUT_FOLDER = "certificados"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(OUTPUT_FOLDER, exist_ok=True)
 
-# ===== USUÁRIO FIXO (por enquanto simples) =====
 USUARIO_EMAIL = "admin@emitte.com"
 USUARIO_SENHA = "123456"
 
-# ===== LOGIN =====
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
@@ -33,18 +31,15 @@ def login():
 
     return render_template("login.html")
 
-# ===== LOGOUT =====
 @app.route("/logout")
 def logout():
     session.pop("usuario", None)
     return redirect("/login")
 
-# ===== HOME =====
 @app.route("/")
 def home():
     return redirect("/login")
 
-# ===== CERTIFICADOS (PROTEGIDO) =====
 @app.route("/certificados", methods=["GET", "POST"])
 def certificados():
 
@@ -57,6 +52,7 @@ def certificados():
         texto_modelo = request.form["texto"]
         tamanho_fonte = int(request.form["fonte"])
         alinhamento = request.form["alinhamento"]
+        posicao_vertical = request.form["posicao_vertical"]
 
         fundo_path = os.path.join(UPLOAD_FOLDER, fundo.filename)
         planilha_path = os.path.join(UPLOAD_FOLDER, planilha.filename)
@@ -90,7 +86,14 @@ def certificados():
 
             linhas = textwrap.wrap(texto_final, width=80)
 
-            y_inicial = altura / 2
+            # 🔥 Definição de posição vertical
+            if posicao_vertical == "superior":
+                y_inicial = altura * 0.65
+            elif posicao_vertical == "inferior":
+                y_inicial = altura * 0.35
+            else:
+                y_inicial = altura * 0.50  # centro padrão
+
             espacamento = tamanho_fonte + 8
 
             for i, linha in enumerate(linhas):
@@ -98,10 +101,8 @@ def certificados():
 
                 if alinhamento == "centro":
                     c.drawCentredString(largura / 2, y, linha)
-
                 elif alinhamento == "esquerda":
                     c.drawString(100, y, linha)
-
                 elif alinhamento == "direita":
                     c.drawRightString(largura - 100, y, linha)
 
