@@ -1,47 +1,86 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Login - Emitte</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Emitte - Login</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #1f3c88, #4a69bd);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .login-box {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            width: 350px;
+            text-align: center;
+            box-shadow: 0px 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            color: #1f3c88;
+            margin-bottom: 10px;
+        }
+
+        .sub {
+            color: #777;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #1f3c88;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 15px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #162d66;
+        }
+
+        .credenciais {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #999;
+        }
+    </style>
 </head>
+<body>
 
-<body class="bg-gray-100 flex items-center justify-center h-screen">
+<div class="login-box">
 
-    <div class="bg-white p-10 rounded-xl shadow-lg w-96">
+    <div class="logo">Emitte</div>
+    <div class="sub">Emissão inteligente de certificados</div>
 
-        <div class="text-center mb-6">
-            <img src="{{ url_for('static', filename='logo.png') }}" class="h-16 mx-auto mb-4">
-            <h2 class="text-2xl font-bold text-blue-900">Emitte</h2>
-            <p class="text-gray-500 text-sm">Emissão inteligente de certificados</p>
-        </div>
+    <form method="POST">
+        <input name="email" placeholder="Usuário" required>
+        <input name="password" type="password" placeholder="Senha" required>
+        <button type="submit">Entrar</button>
+    </form>
 
-        <form method="POST" action="/login">
-
-            <div class="mb-4">
-                <input name="email" placeholder="Email"
-                class="w-full border rounded-lg p-3">
-            </div>
-
-            <div class="mb-6">
-                <input name="password" type="password" placeholder="Senha"
-                class="w-full border rounded-lg p-3">
-            </div>
-
-            <button type="submit"
-            class="w-full bg-blue-900 text-white py-3 rounded-lg hover:bg-blue-800 transition">
-                Entrar
-            </button>
-
-        </form>
-
-        <div class="text-center mt-6">
-            <a href="/register" class="text-blue-900 font-semibold">
-                Criar conta
-            </a>
-        </div>
-
-    </div>
+</div>
 
 </body>
 </html>
