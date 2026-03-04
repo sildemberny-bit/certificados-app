@@ -16,50 +16,34 @@
 
     <form method="POST" enctype="multipart/form-data" class="space-y-6">
 
+        <input type="file" name="fundo" required class="w-full border p-3 rounded-lg">
+        <input type="file" name="planilha" required class="w-full border p-3 rounded-lg">
+
+        <textarea name="texto" rows="4"
+        class="w-full border p-4 rounded-lg"
+        placeholder='CERTIFICAMOS QUE {NOME} PARTICIPOU...'></textarea>
+
         <div>
-            <label class="block font-semibold mb-2">
-                Imagem de Fundo (PNG ou JPG)
-            </label>
-            <input type="file" name="fundo" required
+            <label class="block font-semibold mb-2">Tamanho da Fonte (10 a 20)</label>
+            <input type="number" name="fonte" min="10" max="20" value="18"
             class="w-full border p-3 rounded-lg">
         </div>
 
         <div>
-            <label class="block font-semibold mb-2">
-                Planilha Excel (.xlsx)
-            </label>
-            <input type="file" name="planilha" required
-            class="w-full border p-3 rounded-lg">
-        </div>
-
-        <div>
-            <label class="block font-semibold mb-2">
-                Texto do Certificado
-            </label>
-            <textarea name="texto"
-            class="w-full border p-4 rounded-lg"
-            rows="4"
-            placeholder='CERTIFICAMOS QUE {NOME} PARTICIPOU...'></textarea>
-        </div>
-
-        <div>
-            <label class="block font-semibold mb-2">
-                Tamanho da Fonte (10 a 20)
-            </label>
-            <input type="number" name="fonte"
-            min="10" max="20" value="18"
-            class="w-full border p-3 rounded-lg">
-        </div>
-
-        <div>
-            <label class="block font-semibold mb-2">
-                Alinhamento
-            </label>
-            <select name="alinhamento"
-            class="w-full border p-3 rounded-lg">
+            <label class="block font-semibold mb-2">Alinhamento</label>
+            <select name="alinhamento" class="w-full border p-3 rounded-lg">
                 <option value="centro">Centro</option>
                 <option value="esquerda">Esquerda</option>
                 <option value="direita">Direita</option>
+            </select>
+        </div>
+
+        <div>
+            <label class="block font-semibold mb-2">Posição Vertical</label>
+            <select name="posicao_vertical" class="w-full border p-3 rounded-lg">
+                <option value="centro">Centro</option>
+                <option value="superior">Superior</option>
+                <option value="inferior">Inferior</option>
             </select>
         </div>
 
