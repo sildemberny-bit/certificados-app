@@ -4,23 +4,58 @@
     <title>Emitte - Gerador</title>
     <style>
         body {
-            font-family: Arial;
-            text-align: center;
+            margin: 0;
+            font-family: Arial, sans-serif;
             background-color: #f4f6f9;
         }
 
+        header {
+            background: #1f3c88;
+            color: white;
+            padding: 15px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h2 {
+            margin: 0;
+            font-weight: normal;
+        }
+
+        header a {
+            color: white;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
         .container {
-            width: 90%;
-            margin: auto;
+            display: flex;
+            gap: 40px;
+            padding: 40px;
+        }
+
+        .form-box {
+            width: 35%;
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 15px rgba(0,0,0,0.1);
         }
 
         .preview-box {
+            width: 65%;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 15px rgba(0,0,0,0.1);
+            position: relative;
+            text-align: center;
+        }
+
+        .preview-wrapper {
             position: relative;
             width: 100%;
-            max-width: 1000px;
-            margin: 20px auto;
-            border: 2px solid #ccc;
-            background-color: white;
         }
 
         #preview-img {
@@ -34,88 +69,103 @@
             left: 10%;
             top: 50%;
             transform: translateY(-50%);
-            font-size: 16px;
             text-align: center;
+            font-size: 16px;
             white-space: pre-wrap;
         }
 
         input, select, textarea {
-            margin: 8px;
-            padding: 8px;
-            width: 300px;
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0 15px 0;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+        }
+
+        label {
+            font-size: 13px;
+            color: #555;
         }
 
         button {
-            padding: 10px 20px;
+            width: 100%;
+            padding: 12px;
             background-color: #1f3c88;
             color: white;
             border: none;
+            border-radius: 6px;
+            font-size: 15px;
             cursor: pointer;
         }
 
         button:hover {
             background-color: #162d66;
         }
+
+        h3 {
+            margin-top: 0;
+        }
     </style>
 </head>
 <body>
 
-<h2>Emitte - Gerador de Certificados</h2>
-
-<a href="/logout">Sair</a>
+<header>
+    <h2>Emitte - Gerador de Certificados</h2>
+    <a href="/logout">Sair</a>
+</header>
 
 <div class="container">
 
-<form method="POST" enctype="multipart/form-data">
+    <div class="form-box">
+        <h3>Configuração</h3>
 
-    <div>
-        <input type="file" name="fundo" id="fundo" accept="image/*" required>
+        <form method="POST" enctype="multipart/form-data">
+
+            <label>Imagem de Fundo</label>
+            <input type="file" name="fundo" id="fundo" accept="image/*" required>
+
+            <label>Planilha Excel (.xlsx)</label>
+            <input type="file" name="planilha" accept=".xlsx" required>
+
+            <label>Texto do Certificado</label>
+            <textarea name="texto" id="texto" rows="4"
+            placeholder="Ex: Certificamos que {nome} participou do curso {curso}..."
+            required></textarea>
+
+            <label>Tamanho da Fonte</label>
+            <select name="fonte" id="fonte">
+                {% for i in range(10,21) %}
+                <option value="{{i}}">{{i}}</option>
+                {% endfor %}
+            </select>
+
+            <label>Alinhamento</label>
+            <select name="alinhamento" id="alinhamento">
+                <option value="centro">Centro</option>
+                <option value="esquerda">Esquerda</option>
+                <option value="direita">Direita</option>
+            </select>
+
+            <label>Posição Vertical</label>
+            <select name="posicao_vertical" id="posicao">
+                <option value="superior">Superior</option>
+                <option value="centro" selected>Centro</option>
+                <option value="inferior">Inferior</option>
+            </select>
+
+            <button type="submit">Gerar Certificados</button>
+
+        </form>
     </div>
 
-    <div>
-        <input type="file" name="planilha" accept=".xlsx" required>
+    <div class="preview-box">
+        <h3>Preview</h3>
+        <div class="preview-wrapper">
+            <img id="preview-img">
+            <div id="preview-text"></div>
+        </div>
     </div>
-
-    <div>
-        <textarea name="texto" id="texto" rows="4" placeholder="Digite o texto do certificado com {NOME}, {CURSO}, etc." required></textarea>
-    </div>
-
-    <div>
-        <label>Tamanho da Fonte:</label><br>
-        <select name="fonte">
-            {% for i in range(10,21) %}
-            <option value="{{i}}">{{i}}</option>
-            {% endfor %}
-        </select>
-    </div>
-
-    <div>
-        <label>Alinhamento:</label><br>
-        <select name="alinhamento">
-            <option value="centro">Centro</option>
-            <option value="esquerda">Esquerda</option>
-            <option value="direita">Direita</option>
-        </select>
-    </div>
-
-    <div>
-        <label>Posição Vertical:</label><br>
-        <select name="posicao_vertical">
-            <option value="superior">Superior</option>
-            <option value="centro" selected>Centro</option>
-            <option value="inferior">Inferior</option>
-        </select>
-    </div>
-
-    <br>
-    <button type="submit">Gerar Certificados</button>
-
-</form>
-
-<div class="preview-box">
-    <img id="preview-img">
-    <div id="preview-text"></div>
-</div>
 
 </div>
 
@@ -124,6 +174,9 @@
     const previewImg = document.getElementById("preview-img");
     const textoInput = document.getElementById("texto");
     const previewText = document.getElementById("preview-text");
+    const fonteInput = document.getElementById("fonte");
+    const alinhamentoInput = document.getElementById("alinhamento");
+    const posicaoInput = document.getElementById("posicao");
 
     fundoInput.addEventListener("change", function(event) {
         const file = event.target.files[0];
@@ -133,9 +186,37 @@
         }
     });
 
-    textoInput.addEventListener("input", function() {
+    textoInput.addEventListener("input", atualizarPreview);
+    fonteInput.addEventListener("change", atualizarPreview);
+    alinhamentoInput.addEventListener("change", atualizarPreview);
+    posicaoInput.addEventListener("change", atualizarPreview);
+
+    function atualizarPreview() {
         previewText.textContent = textoInput.value;
-    });
+        previewText.style.fontSize = fonteInput.value + "px";
+
+        if (alinhamentoInput.value === "centro") {
+            previewText.style.textAlign = "center";
+            previewText.style.left = "10%";
+            previewText.style.right = "10%";
+        }
+        if (alinhamentoInput.value === "esquerda") {
+            previewText.style.textAlign = "left";
+        }
+        if (alinhamentoInput.value === "direita") {
+            previewText.style.textAlign = "right";
+        }
+
+        if (posicaoInput.value === "superior") {
+            previewText.style.top = "30%";
+        }
+        if (posicaoInput.value === "centro") {
+            previewText.style.top = "50%";
+        }
+        if (posicaoInput.value === "inferior") {
+            previewText.style.top = "70%";
+        }
+    }
 </script>
 
 </body>
