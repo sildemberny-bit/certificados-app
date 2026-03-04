@@ -12,36 +12,33 @@
         }
 
         .hero {
-            padding: 100px 20px;
+            padding: 120px 20px;
         }
 
         .logo {
-            width: 120px;
-            margin-bottom: 20px;
+            width: 160px;
+            margin-bottom: 30px;
         }
 
-        h1 {
-            font-size: 42px;
-            margin-bottom: 15px;
-        }
-
-        p {
-            font-size: 18px;
-            max-width: 600px;
+        .headline {
+            font-size: 22px;
+            max-width: 700px;
             margin: auto;
             line-height: 1.6;
+            font-weight: 300;
         }
 
         .btn {
-            margin-top: 40px;
+            margin-top: 45px;
             display: inline-block;
-            padding: 15px 35px;
+            padding: 15px 40px;
             background-color: white;
             color: #1f3c88;
             text-decoration: none;
             font-weight: bold;
             border-radius: 8px;
             transition: 0.3s;
+            font-size: 16px;
         }
 
         .btn:hover {
@@ -51,23 +48,23 @@
         .features {
             background: white;
             color: #333;
-            padding: 60px 20px;
+            padding: 70px 20px;
         }
 
         .features h2 {
-            margin-bottom: 30px;
+            margin-bottom: 40px;
         }
 
         .feature-list {
             max-width: 800px;
             margin: auto;
-            list-style: none; /* remove bolinhas */
+            list-style: none;
             padding: 0;
             text-align: left;
         }
 
         .feature-list li {
-            margin: 12px 0;
+            margin: 14px 0;
             font-size: 17px;
             position: relative;
             padding-left: 28px;
@@ -86,11 +83,12 @@
 
 <div class="hero">
 
-    <!-- LOGO -->
     <img src="{{ url_for('static', filename='logo.png') }}" class="logo">
 
-    <h1>Emitte</h1>
-    <p>Plataforma inteligente para geração automática de certificados acadêmicos e corporativos em segundos.</p>
+    <div class="headline">
+        Plataforma inteligente para geração automática de certificados acadêmicos e corporativos em segundos.
+    </div>
+
     <a href="/login" class="btn">Acessar Plataforma</a>
 </div>
 
