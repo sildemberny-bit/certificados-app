@@ -13,7 +13,6 @@ def login():
         email = request.form.get("email")
         password = request.form.get("password")
 
-        # LOGIN SIMPLES TEMPORÁRIO
         if email == "admin" and password == "123":
             session["usuario"] = email
             return redirect(url_for("dashboard"))
@@ -39,6 +38,17 @@ def dashboard():
         return redirect(url_for("login"))
 
     return render_template("dashboard.html")
+
+
+# =========================
+# PÁGINA DE CERTIFICADOS
+# =========================
+@app.route("/certificados")
+def certificados():
+    if "usuario" not in session:
+        return redirect(url_for("login"))
+
+    return render_template("certificados.html")
 
 
 if __name__ == "__main__":
