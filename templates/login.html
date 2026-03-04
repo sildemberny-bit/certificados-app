@@ -23,16 +23,8 @@
         }
 
         .logo {
-            font-size: 28px;
-            font-weight: bold;
-            color: #1f3c88;
-            margin-bottom: 10px;
-        }
-
-        .sub {
-            color: #777;
-            margin-bottom: 30px;
-            font-size: 14px;
+            width: 140px;
+            margin-bottom: 25px;
         }
 
         input {
@@ -54,16 +46,11 @@
             font-size: 15px;
             cursor: pointer;
             margin-top: 10px;
+            transition: 0.3s;
         }
 
         button:hover {
             background-color: #162d66;
-        }
-
-        .credenciais {
-            margin-top: 20px;
-            font-size: 12px;
-            color: #999;
         }
     </style>
 </head>
@@ -71,8 +58,8 @@
 
 <div class="login-box">
 
-    <div class="logo">Emitte</div>
-    <div class="sub">Emissão inteligente de certificados</div>
+    <!-- LOGO -->
+    <img src="{{ url_for('static', filename='logo.png') }}" class="logo">
 
     <form method="POST">
         <input name="email" placeholder="Usuário" required>
