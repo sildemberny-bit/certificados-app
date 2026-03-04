@@ -1,6 +1,5 @@
 Flask
-Pillow
 pandas
 openpyxl
-gunicorn
-flask-login
+reportlab
+Pillow
