@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, send_file, redirect
+from flask import Flask, render_template, request, send_file, redirect, session
 import pandas as pd
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4, landscape
@@ -8,6 +8,7 @@ import zipfile
 import textwrap
 
 app = Flask(__name__)
+app.secret_key = "emitte_super_secreta"
 
 UPLOAD_FOLDER = "uploads"
 OUTPUT_FOLDER = "certificados"
@@ -15,12 +16,41 @@ OUTPUT_FOLDER = "certificados"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(OUTPUT_FOLDER, exist_ok=True)
 
+# ===== USUÁRIO FIXO (por enquanto simples) =====
+USUARIO_EMAIL = "admin@emitte.com"
+USUARIO_SENHA = "123456"
+
+# ===== LOGIN =====
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        email = request.form["email"]
+        senha = request.form["password"]
+
+        if email == USUARIO_EMAIL and senha == USUARIO_SENHA:
+            session["usuario"] = email
+            return redirect("/certificados")
+
+    return render_template("login.html")
+
+# ===== LOGOUT =====
+@app.route("/logout")
+def logout():
+    session.pop("usuario", None)
+    return redirect("/login")
+
+# ===== HOME =====
 @app.route("/")
 def home():
-    return redirect("/certificados")
+    return redirect("/login")
 
+# ===== CERTIFICADOS (PROTEGIDO) =====
 @app.route("/certificados", methods=["GET", "POST"])
 def certificados():
+
+    if "usuario" not in session:
+        return redirect("/login")
+
     if request.method == "POST":
         fundo = request.files["fundo"]
         planilha = request.files["planilha"]
@@ -76,7 +106,6 @@ def certificados():
                     c.drawRightString(largura - 100, y, linha)
 
             c.save()
-
             arquivos_gerados.append(caminho_pdf)
 
         zip_path = os.path.join(OUTPUT_FOLDER, "certificados.zip")
