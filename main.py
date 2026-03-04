@@ -6,6 +6,7 @@ from reportlab.lib.utils import ImageReader
 import os
 import zipfile
 import textwrap
+import re
 
 app = Flask(__name__)
 app.secret_key = "emitte_super_secreta"
@@ -16,7 +17,6 @@ OUTPUT_FOLDER = "certificados"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(OUTPUT_FOLDER, exist_ok=True)
 
-# 🔐 LOGIN PADRÃO DEFINIDO POR VOCÊ
 USUARIO_LOGIN = "admin"
 USUARIO_SENHA = "123"
 
@@ -44,7 +44,7 @@ def logout():
 def home():
     return redirect("/login")
 
-# ===== CERTIFICADOS (PROTEGIDO) =====
+# ===== CERTIFICADOS =====
 @app.route("/certificados", methods=["GET", "POST"])
 def certificados():
 
@@ -66,7 +66,9 @@ def certificados():
         planilha.save(planilha_path)
 
         df = pd.read_excel(planilha_path)
-        df.columns = df.columns.str.upper()
+
+        # Normaliza colunas
+        df.columns = df.columns.str.strip()
 
         arquivos_gerados = []
 
@@ -74,9 +76,19 @@ def certificados():
 
             texto_final = texto_modelo
 
-            for coluna in df.columns:
-                valor = str(row[coluna])
-                texto_final = texto_final.replace("{" + coluna + "}", valor)
+            # Procura todos os campos {qualquer_coisa}
+            campos = re.findall(r"\{(.*?)\}", texto_modelo)
+
+            for campo in campos:
+                for coluna in df.columns:
+                    if campo.strip().lower() == coluna.strip().lower():
+                        valor = str(row[coluna])
+                        texto_final = re.sub(
+                            r"\{" + campo + r"\}",
+                            valor,
+                            texto_final,
+                            flags=re.IGNORECASE
+                        )
 
             nome_arquivo = f"certificado_{index}.pdf"
             caminho_pdf = os.path.join(OUTPUT_FOLDER, nome_arquivo)
