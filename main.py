@@ -16,30 +16,35 @@ OUTPUT_FOLDER = "certificados"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(OUTPUT_FOLDER, exist_ok=True)
 
-USUARIO_EMAIL = "admin@emitte.com"
-USUARIO_SENHA = "123456"
+# 🔐 LOGIN PADRÃO DEFINIDO POR VOCÊ
+USUARIO_LOGIN = "admin"
+USUARIO_SENHA = "123"
 
+# ===== LOGIN =====
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        email = request.form["email"]
+        login = request.form["email"]
         senha = request.form["password"]
 
-        if email == USUARIO_EMAIL and senha == USUARIO_SENHA:
-            session["usuario"] = email
+        if login == USUARIO_LOGIN and senha == USUARIO_SENHA:
+            session["usuario"] = login
             return redirect("/certificados")
 
     return render_template("login.html")
 
+# ===== LOGOUT =====
 @app.route("/logout")
 def logout():
     session.pop("usuario", None)
     return redirect("/login")
 
+# ===== HOME =====
 @app.route("/")
 def home():
     return redirect("/login")
 
+# ===== CERTIFICADOS (PROTEGIDO) =====
 @app.route("/certificados", methods=["GET", "POST"])
 def certificados():
 
