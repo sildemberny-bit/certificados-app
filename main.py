@@ -20,6 +20,11 @@ os.makedirs(OUTPUT_FOLDER, exist_ok=True)
 USUARIO_LOGIN = "admin"
 USUARIO_SENHA = "123"
 
+# ===== LANDING PAGE =====
+@app.route("/")
+def landing():
+    return render_template("landing.html")
+
 # ===== LOGIN =====
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -37,12 +42,7 @@ def login():
 @app.route("/logout")
 def logout():
     session.pop("usuario", None)
-    return redirect("/login")
-
-# ===== HOME =====
-@app.route("/")
-def home():
-    return redirect("/login")
+    return redirect("/")
 
 # ===== CERTIFICADOS =====
 @app.route("/certificados", methods=["GET", "POST"])
@@ -66,8 +66,6 @@ def certificados():
         planilha.save(planilha_path)
 
         df = pd.read_excel(planilha_path)
-
-        # Normaliza colunas
         df.columns = df.columns.str.strip()
 
         arquivos_gerados = []
@@ -76,7 +74,6 @@ def certificados():
 
             texto_final = texto_modelo
 
-            # Procura todos os campos {qualquer_coisa}
             campos = re.findall(r"\{(.*?)\}", texto_modelo)
 
             for campo in campos:
