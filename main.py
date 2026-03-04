@@ -20,10 +20,15 @@ os.makedirs(OUTPUT_FOLDER, exist_ok=True)
 USUARIO_LOGIN = "admin"
 USUARIO_SENHA = "123"
 
-# ===== LANDING PAGE =====
+# ===== LANDING =====
 @app.route("/")
 def landing():
     return render_template("landing.html")
+
+# ===== GUIA =====
+@app.route("/guia")
+def guia():
+    return render_template("guia.html")
 
 # ===== LOGIN =====
 @app.route("/login", methods=["GET", "POST"])
@@ -73,7 +78,6 @@ def certificados():
         for index, row in df.iterrows():
 
             texto_final = texto_modelo
-
             campos = re.findall(r"\{(.*?)\}", texto_modelo)
 
             for campo in campos:
