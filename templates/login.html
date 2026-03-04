@@ -1,7 +1,41 @@
-<h2>Login</h2>
-<form method="POST">
-<input name="email" placeholder="Email">
-<input name="password" type="password" placeholder="Senha">
-<button>Entrar</button>
-</form>
-<a href="/register">Criar conta</a>
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Login - Emitte</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 flex items-center justify-center h-screen">
+
+    <div class="bg-white p-10 rounded-xl shadow-lg w-96">
+
+        <div class="text-center mb-6">
+            <img src="{{ url_for('static', filename='logo.png') }}" class="h-16 mx-auto mb-4">
+            <h2 class="text-2xl font-bold text-blue-900">Emitte</h2>
+            <p class="text-gray-500 text-sm">Emissão inteligente de certificados</p>
+        </div>
+
+        <form method="POST" action="/login">
+
+            <div class="mb-4">
+                <input name="email" placeholder="Email"
+                class="w-full border rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+
+            <div class="mb-6">
+                <input name="password" type="password" placeholder="Senha"
+                class="w-full border rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+
+            <button type="submit"
+            class="w-full bg-blue-900 text-white py-3 rounded-lg hover:bg-blue-800 transition">
+                Entrar
+            </button>
+
+        </form>
+
+    </div>
+
+</body>
+</html>
