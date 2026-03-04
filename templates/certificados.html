@@ -1,120 +1,141 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html>
 <head>
-<meta charset="UTF-8">
-<title>Gerar Certificados - Emitte</title>
-<script src="https://cdn.tailwindcss.com"></script>
+    <title>Emitte - Gerador</title>
+    <style>
+        body {
+            font-family: Arial;
+            text-align: center;
+            background-color: #f4f6f9;
+        }
+
+        .container {
+            width: 90%;
+            margin: auto;
+        }
+
+        .preview-box {
+            position: relative;
+            width: 100%;
+            max-width: 1000px;
+            margin: 20px auto;
+            border: 2px solid #ccc;
+            background-color: white;
+        }
+
+        #preview-img {
+            width: 100%;
+            display: none;
+        }
+
+        #preview-text {
+            position: absolute;
+            width: 80%;
+            left: 10%;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 16px;
+            text-align: center;
+            white-space: pre-wrap;
+        }
+
+        input, select, textarea {
+            margin: 8px;
+            padding: 8px;
+            width: 300px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #1f3c88;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #162d66;
+        }
+    </style>
 </head>
+<body>
 
-<body class="bg-gray-100 p-10">
+<h2>Emitte - Gerador de Certificados</h2>
 
-<div class="max-w-5xl mx-auto bg-white p-8 rounded-xl shadow">
+<a href="/logout">Sair</a>
 
-<h2 class="text-2xl font-bold text-blue-900 mb-6">
-Gerar Certificados
-</h2>
+<div class="container">
 
-<form method="POST" enctype="multipart/form-data" class="space-y-6">
+<form method="POST" enctype="multipart/form-data">
 
-<input type="file" id="fundoInput" name="fundo" required class="w-full border p-3 rounded-lg">
-<input type="file" name="planilha" required class="w-full border p-3 rounded-lg">
+    <div>
+        <input type="file" name="fundo" id="fundo" accept="image/*" required>
+    </div>
 
-<textarea id="textoInput" name="texto" rows="3"
-class="w-full border p-4 rounded-lg"
-placeholder='CERTIFICAMOS QUE {NOME} PARTICIPOU...'></textarea>
+    <div>
+        <input type="file" name="planilha" accept=".xlsx" required>
+    </div>
 
-<input type="number" id="fonteInput" name="fonte" min="10" max="20" value="18"
-class="w-full border p-3 rounded-lg">
+    <div>
+        <textarea name="texto" id="texto" rows="4" placeholder="Digite o texto do certificado com {NOME}, {CURSO}, etc." required></textarea>
+    </div>
 
-<select id="alinhamentoInput" name="alinhamento" class="w-full border p-3 rounded-lg">
-<option value="centro">Centro</option>
-<option value="esquerda">Esquerda</option>
-<option value="direita">Direita</option>
-</select>
+    <div>
+        <label>Tamanho da Fonte:</label><br>
+        <select name="fonte">
+            {% for i in range(10,21) %}
+            <option value="{{i}}">{{i}}</option>
+            {% endfor %}
+        </select>
+    </div>
 
-<select id="posicaoInput" name="posicao_vertical" class="w-full border p-3 rounded-lg">
-<option value="centro">Centro</option>
-<option value="superior">Superior</option>
-<option value="inferior">Inferior</option>
-</select>
+    <div>
+        <label>Alinhamento:</label><br>
+        <select name="alinhamento">
+            <option value="centro">Centro</option>
+            <option value="esquerda">Esquerda</option>
+            <option value="direita">Direita</option>
+        </select>
+    </div>
 
-<button type="submit"
-class="w-full bg-blue-900 text-white py-4 rounded-lg">
-Gerar Certificados
-</button>
+    <div>
+        <label>Posição Vertical:</label><br>
+        <select name="posicao_vertical">
+            <option value="superior">Superior</option>
+            <option value="centro" selected>Centro</option>
+            <option value="inferior">Inferior</option>
+        </select>
+    </div>
+
+    <br>
+    <button type="submit">Gerar Certificados</button>
 
 </form>
 
-<hr class="my-10">
-
-<h3 class="text-xl font-bold mb-4">Preview</h3>
-
-<div class="relative w-full max-w-4xl mx-auto border">
-
-<img id="previewImage" class="w-full">
-
-<div id="previewTexto"
-class="absolute left-1/2 transform -translate-x-1/2 text-center px-10"
-style="top:50%; font-size:18px;">
-Texto do Certificado
-</div>
-
+<div class="preview-box">
+    <img id="preview-img">
+    <div id="preview-text"></div>
 </div>
 
 </div>
 
 <script>
-const texto = document.getElementById("textoInput");
-const fonte = document.getElementById("fonteInput");
-const alinhamento = document.getElementById("alinhamentoInput");
-const posicao = document.getElementById("posicaoInput");
-const previewTexto = document.getElementById("previewTexto");
-const fundoInput = document.getElementById("fundoInput");
-const previewImage = document.getElementById("previewImage");
+    const fundoInput = document.getElementById("fundo");
+    const previewImg = document.getElementById("preview-img");
+    const textoInput = document.getElementById("texto");
+    const previewText = document.getElementById("preview-text");
 
-texto.addEventListener("input", atualizar);
-fonte.addEventListener("input", atualizar);
-alinhamento.addEventListener("change", atualizar);
-posicao.addEventListener("change", atualizar);
+    fundoInput.addEventListener("change", function(event) {
+        const file = event.target.files[0];
+        if (file) {
+            previewImg.src = URL.createObjectURL(file);
+            previewImg.style.display = "block";
+        }
+    });
 
-function atualizar() {
-    previewTexto.innerText = texto.value;
-    previewTexto.style.fontSize = fonte.value + "px";
-
-    if (alinhamento.value === "centro") {
-        previewTexto.style.textAlign = "center";
-        previewTexto.style.left = "50%";
-        previewTexto.style.transform = "translateX(-50%)";
-    }
-    if (alinhamento.value === "esquerda") {
-        previewTexto.style.textAlign = "left";
-        previewTexto.style.left = "10%";
-        previewTexto.style.transform = "none";
-    }
-    if (alinhamento.value === "direita") {
-        previewTexto.style.textAlign = "right";
-        previewTexto.style.left = "90%";
-        previewTexto.style.transform = "translateX(-100%)";
-    }
-
-    if (posicao.value === "superior") {
-        previewTexto.style.top = "30%";
-    }
-    if (posicao.value === "centro") {
-        previewTexto.style.top = "50%";
-    }
-    if (posicao.value === "inferior") {
-        previewTexto.style.top = "70%";
-    }
-}
-
-fundoInput.addEventListener("change", function(event){
-    const reader = new FileReader();
-    reader.onload = function(){
-        previewImage.src = reader.result;
-    }
-    reader.readAsDataURL(event.target.files[0]);
-});
+    textoInput.addEventListener("input", function() {
+        previewText.textContent = textoInput.value;
+    });
 </script>
 
 </body>
