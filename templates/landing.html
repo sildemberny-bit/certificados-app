@@ -28,8 +28,11 @@
             font-weight: 300;
         }
 
-        .btn {
+        .buttons {
             margin-top: 45px;
+        }
+
+        .btn-primary {
             display: inline-block;
             padding: 15px 40px;
             background-color: white;
@@ -37,12 +40,31 @@
             text-decoration: none;
             font-weight: bold;
             border-radius: 8px;
-            transition: 0.3s;
             font-size: 16px;
+            margin: 10px;
+            transition: 0.3s;
         }
 
-        .btn:hover {
+        .btn-primary:hover {
             background-color: #f1f1f1;
+        }
+
+        .btn-secondary {
+            display: inline-block;
+            padding: 15px 40px;
+            background-color: transparent;
+            border: 2px solid white;
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            border-radius: 8px;
+            font-size: 16px;
+            margin: 10px;
+            transition: 0.3s;
+        }
+
+        .btn-secondary:hover {
+            background-color: rgba(255,255,255,0.1);
         }
 
         .features {
@@ -89,7 +111,11 @@
         Plataforma inteligente para geração automática de certificados acadêmicos e corporativos em segundos.
     </div>
 
-    <a href="/login" class="btn">Acessar Plataforma</a>
+    <div class="buttons">
+        <a href="/login" class="btn-primary">Acessar Plataforma</a>
+        <a href="/guia" class="btn-secondary">Como Funciona</a>
+    </div>
+
 </div>
 
 <div class="features">
