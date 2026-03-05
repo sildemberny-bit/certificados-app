@@ -7,12 +7,14 @@ import os
 import zipfile
 import textwrap
 import re
+from datetime import datetime
 
 app = Flask(__name__)
 app.secret_key = "emitte_super_secreta"
 
 UPLOAD_FOLDER = "uploads"
 OUTPUT_FOLDER = "certificados"
+METRICS_FILE = "metrics.txt"
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(OUTPUT_FOLDER, exist_ok=True)
@@ -20,15 +22,47 @@ os.makedirs(OUTPUT_FOLDER, exist_ok=True)
 USUARIO_LOGIN = "admin"
 USUARIO_SENHA = "123"
 
+# ===== FUNÇÃO PARA REGISTRAR MÉTRICAS =====
+def registrar_metricas(qtd_certificados):
+    agora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    if not os.path.exists(METRICS_FILE):
+        with open(METRICS_FILE, "w") as f:
+            f.write("TOTAL_LOTES=0\n")
+            f.write("TOTAL_CERTIFICADOS=0\n")
+
+    with open(METRICS_FILE, "r") as f:
+        linhas = f.readlines()
+
+    total_lotes = int(linhas[0].split("=")[1])
+    total_certificados = int(linhas[1].split("=")[1])
+
+    total_lotes += 1
+    total_certificados += qtd_certificados
+
+    with open(METRICS_FILE, "w") as f:
+        f.write(f"TOTAL_LOTES={total_lotes}\n")
+        f.write(f"TOTAL_CERTIFICADOS={total_certificados}\n")
+
+    print("===== NOVA GERAÇÃO REALIZADA =====")
+    print(f"Data/Hora: {agora}")
+    print(f"Lote atual: {total_lotes}")
+    print(f"Certificados neste lote: {qtd_certificados}")
+    print(f"Total acumulado certificados: {total_certificados}")
+    print("===================================")
+
+
 # ===== LANDING =====
 @app.route("/")
 def landing():
     return render_template("landing.html")
 
+
 # ===== GUIA =====
 @app.route("/guia")
 def guia():
     return render_template("guia.html")
+
 
 # ===== LOGIN =====
 @app.route("/login", methods=["GET", "POST"])
@@ -43,11 +77,13 @@ def login():
 
     return render_template("login.html")
 
+
 # ===== LOGOUT =====
 @app.route("/logout")
 def logout():
     session.pop("usuario", None)
     return redirect("/")
+
 
 # ===== CERTIFICADOS =====
 @app.route("/certificados", methods=["GET", "POST"])
@@ -132,9 +168,13 @@ def certificados():
             for arquivo in arquivos_gerados:
                 zipf.write(arquivo, os.path.basename(arquivo))
 
+        # 🔥 REGISTRA MÉTRICAS
+        registrar_metricas(len(arquivos_gerados))
+
         return send_file(zip_path, as_attachment=True)
 
     return render_template("certificados.html")
+
 
 if __name__ == "__main__":
     app.run(debug=True)
