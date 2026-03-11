@@ -2,8 +2,6 @@ from flask import Flask, render_template, request, redirect, session, send_file
 import pandas as pd
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import landscape, A4
-from reportlab.pdfbase import pdfmetrics
-from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.lib.utils import ImageReader
 import io
 import zipfile
@@ -14,8 +12,6 @@ app.secret_key = "emitte_secret"
 
 USUARIO = "admin"
 SENHA = "123"
-
-pdfmetrics.registerFont(TTFont('Arial', 'Arial.ttf'))
 
 
 def quebrar_texto(texto, largura=90):
@@ -47,7 +43,7 @@ def gerar_pdf(nome, curso, carga, texto, fundo_file,
     else:
         y = 310
 
-    c.setFont("Arial", int(fonte))
+    c.setFont("Helvetica", int(fonte))
 
     for linha in linhas:
 
@@ -64,7 +60,7 @@ def gerar_pdf(nome, curso, carga, texto, fundo_file,
 
     if municipio:
         data_final = f"{municipio}, {dia} de {mes} de {ano}"
-        c.setFont("Arial", 14)
+        c.setFont("Helvetica", 14)
         c.drawCentredString(420, 120, data_final)
 
     c.save()
