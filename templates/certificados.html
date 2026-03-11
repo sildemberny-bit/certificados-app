@@ -2,65 +2,31 @@
 <html>
 <head>
 
-<title>Emitte - Gerador</title>
+<title>Emitte</title>
 
 <style>
 
 body{
 font-family:Arial;
-background:#f4f6f9;
-margin:0;
-}
-
-.container{
-width:700px;
-margin:auto;
-margin-top:40px;
-background:white;
-padding:30px;
-border-radius:10px;
-box-shadow:0 0 10px rgba(0,0,0,0.1);
-}
-
-h1{
-text-align:center;
-}
-
-label{
-display:block;
-margin-top:15px;
-font-weight:bold;
-}
-
-input, textarea, select{
-width:100%;
-padding:10px;
-margin-top:5px;
-border:1px solid #ccc;
-border-radius:5px;
-}
-
-button{
-margin-top:20px;
-width:100%;
-padding:12px;
-background:#1f3c88;
-color:white;
-border:none;
-border-radius:5px;
-font-size:16px;
-cursor:pointer;
-}
-
-button:hover{
-background:#162d63;
+margin:40px;
 }
 
 .logo{
-display:block;
-margin:auto;
-width:120px;
-margin-bottom:10px;
+width:160px;
+margin-bottom:20px;
+}
+
+input,textarea{
+width:100%;
+padding:10px;
+margin:8px 0;
+}
+
+button{
+padding:12px 20px;
+background:#1f3c88;
+color:white;
+border:none;
 }
 
 </style>
@@ -69,65 +35,54 @@ margin-bottom:10px;
 
 <body>
 
-<div class="container">
+<img src="/static/logo.png" class="logo">
 
-<img src="/static/emitte_logo.png" class="logo">
+<h2>Gerar Certificados</h2>
 
-<h1>Gerador de Certificados</h1>
+<form action="/preview" method="POST" enctype="multipart/form-data" target="_blank">
+
+<label>Fundo do certificado</label>
+<input type="file" name="fundo" required>
+
+<label>Texto</label>
+
+<textarea name="texto" rows="4">
+Certificamos que {NOME} participou do curso {CURSO} com carga horária de {CARGA} horas.
+</textarea>
+
+<button type="submit">Preview</button>
+
+</form>
+
+<hr>
 
 <form method="POST" enctype="multipart/form-data">
 
 <label>Planilha Excel</label>
-<input type="file" name="excel" required>
+<input type="file" name="planilha" required>
 
-<label>Imagem de fundo</label>
+<label>Fundo do certificado</label>
 <input type="file" name="fundo" required>
 
-<label>Texto do certificado</label>
+<label>Texto</label>
 
-<textarea name="texto" rows="6">
+<textarea name="texto" rows="4">
 Certificamos que {NOME} participou do curso {CURSO} com carga horária de {CARGA} horas.
-
-{MUNICIPIO}, {DATA}
 </textarea>
 
-<label>Tamanho da fonte</label>
+<h3>Data</h3>
 
-<select name="tamanho">
-<option value="12">12</option>
-<option value="14">14</option>
-<option value="16">16</option>
-<option value="18">18</option>
-<option value="20">20</option>
-</select>
+<input name="municipio" placeholder="Município">
 
-<label>Alinhamento</label>
+<input name="dia" placeholder="Dia">
 
-<select name="alinhamento">
-<option value="centro">Centralizado</option>
-<option value="esquerda">Esquerda</option>
-<option value="direita">Direita</option>
-</select>
+<input name="mes" placeholder="Mês por extenso">
 
-<label>Município</label>
-<input type="text" name="municipio">
+<input name="ano" placeholder="Ano">
 
-<label>Dia</label>
-<input type="text" name="dia">
-
-<label>Mês</label>
-<input type="text" name="mes">
-
-<label>Ano</label>
-<input type="text" name="ano">
-
-<button type="submit">
-Gerar Certificados
-</button>
+<button type="submit">Gerar certificados</button>
 
 </form>
-
-</div>
 
 </body>
 </html>
