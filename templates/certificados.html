@@ -2,7 +2,7 @@
 <html>
 <head>
 
-<title>Emitte - Gerador de Certificados</title>
+<title>Emitte - Gerador</title>
 
 <style>
 
@@ -10,7 +10,6 @@ body{
 font-family:Arial;
 background:#f4f6f9;
 margin:0;
-padding:0;
 }
 
 .container{
@@ -25,13 +24,12 @@ box-shadow:0 0 10px rgba(0,0,0,0.1);
 
 h1{
 text-align:center;
-margin-bottom:20px;
 }
 
 label{
-font-weight:bold;
 display:block;
 margin-top:15px;
+font-weight:bold;
 }
 
 input, textarea, select{
@@ -82,56 +80,46 @@ margin-bottom:10px;
 <label>Planilha Excel</label>
 <input type="file" name="excel" required>
 
-<label>Imagem de Fundo do Certificado (JPG)</label>
+<label>Imagem de fundo</label>
 <input type="file" name="fundo" required>
 
-<label>Texto do Certificado</label>
+<label>Texto do certificado</label>
 
-<textarea name="texto" rows="6" required>
+<textarea name="texto" rows="6">
 Certificamos que {NOME} participou do curso {CURSO} com carga horária de {CARGA} horas.
 
 {MUNICIPIO}, {DATA}
 </textarea>
 
-<label>Tamanho da Fonte</label>
+<label>Tamanho da fonte</label>
 
 <select name="tamanho">
-
-<option value="10">10</option>
-<option value="11">11</option>
 <option value="12">12</option>
-<option value="13">13</option>
 <option value="14">14</option>
-<option value="15">15</option>
 <option value="16">16</option>
-<option value="17">17</option>
 <option value="18">18</option>
-<option value="19">19</option>
 <option value="20">20</option>
-
 </select>
 
-<label>Alinhamento do Texto</label>
+<label>Alinhamento</label>
 
 <select name="alinhamento">
-
 <option value="centro">Centralizado</option>
 <option value="esquerda">Esquerda</option>
 <option value="direita">Direita</option>
-
 </select>
 
 <label>Município</label>
-<input name="municipio" placeholder="Ex: Fortaleza">
+<input type="text" name="municipio">
 
 <label>Dia</label>
-<input name="dia" placeholder="Ex: 12">
+<input type="text" name="dia">
 
 <label>Mês</label>
-<input name="mes" placeholder="Ex: março">
+<input type="text" name="mes">
 
 <label>Ano</label>
-<input name="ano" placeholder="Ex: 2026">
+<input type="text" name="ano">
 
 <button type="submit">
 Gerar Certificados
