@@ -58,7 +58,7 @@ def gerar_pdf(nome, curso, carga, texto, fundo_file,
 
         y -= 28
 
-    if municipio:
+    if municipio and dia and mes and ano:
         data_final = f"{municipio}, {dia} de {mes} de {ano}"
         c.setFont("Helvetica", 14)
         c.drawCentredString(420, 120, data_final)
@@ -93,58 +93,67 @@ def certificados():
 
     if request.method == "POST":
 
-        planilha = request.files["planilha"]
-        fundo = request.files["fundo"]
+        try:
 
-        texto = request.form.get("texto")
+            planilha = request.files.get("planilha")
+            fundo = request.files.get("fundo")
 
-        municipio = request.form.get("municipio")
-        dia = request.form.get("dia")
-        mes = request.form.get("mes")
-        ano = request.form.get("ano")
+            if not planilha or not fundo:
+                return "Envie a planilha e o fundo do certificado."
 
-        fonte = request.form.get("fonte")
-        alinhamento = request.form.get("alinhamento")
-        posicao = request.form.get("posicao")
+            texto = request.form.get("texto", "")
 
-        df = pd.read_excel(planilha)
+            municipio = request.form.get("municipio", "")
+            dia = request.form.get("dia", "")
+            mes = request.form.get("mes", "")
+            ano = request.form.get("ano", "")
 
-        memoria_zip = io.BytesIO()
+            fonte = request.form.get("fonte", "16")
+            alinhamento = request.form.get("alinhamento", "centro")
+            posicao = request.form.get("posicao", "centro")
 
-        with zipfile.ZipFile(memoria_zip, "w") as z:
+            df = pd.read_excel(planilha)
 
-            for _, row in df.iterrows():
+            memoria_zip = io.BytesIO()
 
-                nome = row["NOME"]
-                curso = row["CURSO"]
-                carga = row["CARGA"]
+            with zipfile.ZipFile(memoria_zip, "w") as z:
 
-                fundo.seek(0)
+                for _, row in df.iterrows():
 
-                pdf_buffer = gerar_pdf(
-                    nome,
-                    curso,
-                    carga,
-                    texto,
-                    fundo,
-                    municipio,
-                    dia,
-                    mes,
-                    ano,
-                    fonte,
-                    alinhamento,
-                    posicao
-                )
+                    nome = row["NOME"]
+                    curso = row["CURSO"]
+                    carga = row["CARGA"]
 
-                z.writestr(f"{nome}.pdf", pdf_buffer.read())
+                    fundo.seek(0)
 
-        memoria_zip.seek(0)
+                    pdf_buffer = gerar_pdf(
+                        nome,
+                        curso,
+                        carga,
+                        texto,
+                        fundo,
+                        municipio,
+                        dia,
+                        mes,
+                        ano,
+                        fonte,
+                        alinhamento,
+                        posicao
+                    )
 
-        return send_file(
-            memoria_zip,
-            download_name="certificados.zip",
-            as_attachment=True
-        )
+                    z.writestr(f"{nome}.pdf", pdf_buffer.read())
+
+            memoria_zip.seek(0)
+
+            return send_file(
+                memoria_zip,
+                download_name="certificados.zip",
+                as_attachment=True
+            )
+
+        except Exception as e:
+
+            return f"Erro interno: {str(e)}"
 
     return render_template("certificados.html")
 
@@ -152,37 +161,47 @@ def certificados():
 @app.route("/preview", methods=["POST"])
 def preview():
 
-    fundo = request.files["fundo"]
-    texto = request.form.get("texto")
+    try:
 
-    municipio = request.form.get("municipio")
-    dia = request.form.get("dia")
-    mes = request.form.get("mes")
-    ano = request.form.get("ano")
+        fundo = request.files.get("fundo")
 
-    fonte = request.form.get("fonte")
-    alinhamento = request.form.get("alinhamento")
-    posicao = request.form.get("posicao")
+        if not fundo:
+            return "Envie o fundo para gerar preview."
 
-    pdf_buffer = gerar_pdf(
-        "NOME EXEMPLO",
-        "CURSO EXEMPLO",
-        "40",
-        texto,
-        fundo,
-        municipio,
-        dia,
-        mes,
-        ano,
-        fonte,
-        alinhamento,
-        posicao
-    )
+        texto = request.form.get("texto", "")
 
-    return send_file(
-        pdf_buffer,
-        download_name="preview.pdf"
-    )
+        municipio = request.form.get("municipio", "")
+        dia = request.form.get("dia", "")
+        mes = request.form.get("mes", "")
+        ano = request.form.get("ano", "")
+
+        fonte = request.form.get("fonte", "16")
+        alinhamento = request.form.get("alinhamento", "centro")
+        posicao = request.form.get("posicao", "centro")
+
+        pdf_buffer = gerar_pdf(
+            "NOME EXEMPLO",
+            "CURSO EXEMPLO",
+            "40",
+            texto,
+            fundo,
+            municipio,
+            dia,
+            mes,
+            ano,
+            fonte,
+            alinhamento,
+            posicao
+        )
+
+        return send_file(
+            pdf_buffer,
+            download_name="preview.pdf"
+        )
+
+    except Exception as e:
+
+        return f"Erro no preview: {str(e)}"
 
 
 if __name__ == "__main__":
