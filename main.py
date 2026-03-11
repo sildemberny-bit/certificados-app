@@ -2,9 +2,12 @@ from flask import Flask, render_template, request, redirect, session, send_file
 import pandas as pd
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import landscape, A4
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.lib.utils import ImageReader
 import io
 import zipfile
+import textwrap
 
 app = Flask(__name__)
 app.secret_key = "emitte_secret"
@@ -12,16 +15,16 @@ app.secret_key = "emitte_secret"
 USUARIO = "admin"
 SENHA = "123"
 
-
-def quebrar_linhas(texto, tamanho=80):
-    linhas = []
-    while texto:
-        linhas.append(texto[:tamanho])
-        texto = texto[tamanho:]
-    return linhas
+pdfmetrics.registerFont(TTFont('Arial', 'Arial.ttf'))
 
 
-def gerar_pdf(nome, curso, carga, texto, fundo_file, municipio, dia, mes, ano):
+def quebrar_texto(texto, largura=90):
+    return textwrap.wrap(texto, largura)
+
+
+def gerar_pdf(nome, curso, carga, texto, fundo_file,
+              municipio, dia, mes, ano,
+              fonte, alinhamento, posicao):
 
     buffer = io.BytesIO()
 
@@ -31,22 +34,37 @@ def gerar_pdf(nome, curso, carga, texto, fundo_file, municipio, dia, mes, ano):
     c.drawImage(fundo, 0, 0, width=842, height=595)
 
     texto_certificado = texto \
-        .replace("{NOME}", nome) \
-        .replace("{CURSO}", curso) \
+        .replace("{NOME}", str(nome)) \
+        .replace("{CURSO}", str(curso)) \
         .replace("{CARGA}", str(carga))
 
-    linhas = quebrar_linhas(texto_certificado)
+    linhas = quebrar_texto(texto_certificado)
 
-    y = 320
+    if posicao == "acima":
+        y = 360
+    elif posicao == "abaixo":
+        y = 260
+    else:
+        y = 310
+
+    c.setFont("Arial", int(fonte))
 
     for linha in linhas:
-        c.setFont("Helvetica", 18)
-        c.drawCentredString(420, y, linha)
-        y -= 30
+
+        if alinhamento == "esquerda":
+            c.drawString(120, y, linha)
+
+        elif alinhamento == "direita":
+            c.drawRightString(720, y, linha)
+
+        else:
+            c.drawCentredString(420, y, linha)
+
+        y -= 28
 
     if municipio:
         data_final = f"{municipio}, {dia} de {mes} de {ano}"
-        c.setFont("Helvetica", 14)
+        c.setFont("Arial", 14)
         c.drawCentredString(420, 120, data_final)
 
     c.save()
@@ -89,6 +107,10 @@ def certificados():
         mes = request.form.get("mes")
         ano = request.form.get("ano")
 
+        fonte = request.form.get("fonte")
+        alinhamento = request.form.get("alinhamento")
+        posicao = request.form.get("posicao")
+
         df = pd.read_excel(planilha)
 
         memoria_zip = io.BytesIO()
@@ -112,7 +134,10 @@ def certificados():
                     municipio,
                     dia,
                     mes,
-                    ano
+                    ano,
+                    fonte,
+                    alinhamento,
+                    posicao
                 )
 
                 z.writestr(f"{nome}.pdf", pdf_buffer.read())
@@ -139,6 +164,10 @@ def preview():
     mes = request.form.get("mes")
     ano = request.form.get("ano")
 
+    fonte = request.form.get("fonte")
+    alinhamento = request.form.get("alinhamento")
+    posicao = request.form.get("posicao")
+
     pdf_buffer = gerar_pdf(
         "NOME EXEMPLO",
         "CURSO EXEMPLO",
@@ -148,7 +177,10 @@ def preview():
         municipio,
         dia,
         mes,
-        ano
+        ano,
+        fonte,
+        alinhamento,
+        posicao
     )
 
     return send_file(
