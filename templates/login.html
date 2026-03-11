@@ -2,7 +2,7 @@
 <html>
 <head>
 
-<title>Emitte</title>
+<title>Login - Emitte</title>
 
 <style>
 
@@ -16,7 +16,7 @@ align-items:center;
 height:100vh;
 }
 
-.login-box{
+.box{
 background:white;
 padding:40px;
 border-radius:10px;
@@ -24,17 +24,10 @@ width:320px;
 text-align:center;
 }
 
-.logo{
-width:160px;
-margin-bottom:20px;
-}
-
 input{
 width:100%;
 padding:12px;
-margin:8px 0;
-border-radius:5px;
-border:1px solid #ccc;
+margin:10px 0;
 }
 
 button{
@@ -43,7 +36,11 @@ padding:12px;
 background:#1f3c88;
 color:white;
 border:none;
-border-radius:5px;
+}
+
+.logo{
+width:140px;
+margin-bottom:20px;
 }
 
 </style>
@@ -52,17 +49,17 @@ border-radius:5px;
 
 <body>
 
-<div class="login-box">
+<div class="box">
 
 <img src="/static/logo.png" class="logo">
 
 <form method="POST">
 
-<input name="usuario" placeholder="Usuário" required>
+<input name="usuario" placeholder="Usuário">
 
-<input name="senha" type="password" placeholder="Senha" required>
+<input type="password" name="senha" placeholder="Senha">
 
-<button type="submit">Entrar</button>
+<button>Entrar</button>
 
 </form>
 
