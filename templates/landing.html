@@ -1,132 +1,83 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-    <title>Emitte - Plataforma de Certificados</title>
-    <style>
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #1f3c88, #4a69bd);
-            color: white;
-            text-align: center;
-        }
 
-        .hero {
-            padding: 120px 20px;
-        }
+<title>Emitte</title>
 
-        .logo {
-            width: 160px;
-            margin-bottom: 30px;
-        }
+<style>
 
-        .headline {
-            font-size: 22px;
-            max-width: 700px;
-            margin: auto;
-            line-height: 1.6;
-            font-weight: 300;
-        }
+body{
+margin:0;
+font-family:Arial;
+background:linear-gradient(135deg,#1f3c88,#4a69bd);
+color:white;
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+text-align:center;
+}
 
-        .buttons {
-            margin-top: 45px;
-        }
+.container{
+max-width:700px;
+}
 
-        .btn-primary {
-            display: inline-block;
-            padding: 15px 40px;
-            background-color: white;
-            color: #1f3c88;
-            text-decoration: none;
-            font-weight: bold;
-            border-radius: 8px;
-            font-size: 16px;
-            margin: 10px;
-            transition: 0.3s;
-        }
+.logo{
+width:180px;
+margin-bottom:30px;
+}
 
-        .btn-primary:hover {
-            background-color: #f1f1f1;
-        }
+h1{
+font-weight:normal;
+margin-bottom:40px;
+}
 
-        .btn-secondary {
-            display: inline-block;
-            padding: 15px 40px;
-            background-color: transparent;
-            border: 2px solid white;
-            color: white;
-            text-decoration: none;
-            font-weight: bold;
-            border-radius: 8px;
-            font-size: 16px;
-            margin: 10px;
-            transition: 0.3s;
-        }
+button{
+padding:15px 28px;
+margin:10px;
+border:none;
+border-radius:6px;
+font-size:16px;
+cursor:pointer;
+}
 
-        .btn-secondary:hover {
-            background-color: rgba(255,255,255,0.1);
-        }
+.acessar{
+background:white;
+color:#1f3c88;
+}
 
-        .features {
-            background: white;
-            color: #333;
-            padding: 70px 20px;
-        }
+.guia{
+background:#162d66;
+color:white;
+}
 
-        .features h2 {
-            margin-bottom: 40px;
-        }
+button:hover{
+opacity:0.9;
+}
 
-        .feature-list {
-            max-width: 800px;
-            margin: auto;
-            list-style: none;
-            padding: 0;
-            text-align: left;
-        }
+</style>
 
-        .feature-list li {
-            margin: 14px 0;
-            font-size: 17px;
-            position: relative;
-            padding-left: 28px;
-        }
-
-        .feature-list li::before {
-            content: "✔";
-            position: absolute;
-            left: 0;
-            color: #1f3c88;
-            font-weight: bold;
-        }
-    </style>
 </head>
+
 <body>
 
-<div class="hero">
+<div class="container">
 
-    <img src="{{ url_for('static', filename='logo.png') }}" class="logo">
+<img src="/static/logo.png" class="logo">
 
-    <div class="headline">
-        Plataforma inteligente para geração automática de certificados acadêmicos e corporativos em segundos.
-    </div>
+<h1>
+Plataforma inteligente para geração automatizada de certificados em segundos
+</h1>
 
-    <div class="buttons">
-        <a href="/login" class="btn-primary">Acessar Plataforma</a>
-        <a href="/guia" class="btn-secondary">Como Funciona</a>
-    </div>
+<a href="/login">
+<button class="acessar">Acessar Plataforma</button>
+</a>
 
-</div>
+<a href="/guia">
+<button class="guia">Como Funciona</button>
+</a>
 
-<div class="features">
-    <h2>Por que usar a Emitte?</h2>
-    <ul class="feature-list">
-        <li>Gere centenas de certificados em minutos</li>
-        <li>Integração simples com Excel</li>
-        <li>Personalização total do layout</li>
-        <li>Visualização antes da geração</li>
-        <li>Exportação automática em PDF</li>
-    </ul>
 </div>
 
 </body>
