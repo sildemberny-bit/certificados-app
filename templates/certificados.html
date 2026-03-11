@@ -12,43 +12,78 @@ margin:0;
 font-family:Arial;
 display:flex;
 height:100vh;
+background:#f4f6fb;
 }
 
-.menu{
-width:40%;
+.sidebar{
+width:35%;
 padding:30px;
 overflow:auto;
+background:white;
+box-shadow:2px 0 8px rgba(0,0,0,0.05);
 }
 
 .preview{
-width:60%;
-background:#f5f5f5;
+width:65%;
 display:flex;
 justify-content:center;
 align-items:center;
 }
 
-iframe{
-width:90%;
-height:90%;
-border:none;
+.preview img{
+max-width:95%;
+max-height:95%;
+box-shadow:0 10px 30px rgba(0,0,0,0.15);
 }
 
 input,select,textarea{
 width:100%;
-margin-bottom:10px;
-padding:8px;
+padding:10px;
+margin-bottom:12px;
+border-radius:6px;
+border:1px solid #ccc;
+}
+
+textarea{
+resize:vertical;
 }
 
 button{
-padding:10px;
-margin-top:5px;
+padding:12px;
+border:none;
+border-radius:6px;
+cursor:pointer;
+font-size:14px;
 }
 
-.topo{
-position:fixed;
-right:20px;
+.gerar{
+background:#1f3c88;
+color:white;
+width:100%;
+}
+
+.previewBtn{
+background:#4a69bd;
+color:white;
+width:100%;
+margin-bottom:10px;
+}
+
+.logout{
+position:absolute;
 top:20px;
+right:20px;
+background:#e74c3c;
+color:white;
+padding:10px 16px;
+border-radius:6px;
+text-decoration:none;
+font-size:14px;
+}
+
+.logo{
+width:130px;
+margin-bottom:20px;
 }
 
 </style>
@@ -57,22 +92,22 @@ top:20px;
 
 <body>
 
-<div class="topo">
-<a href="/logout">SAIR</a>
-</div>
+<a href="/logout" class="logout">Sair</a>
 
-<div class="menu">
+<div class="sidebar">
+
+<img src="/static/logo.png" class="logo">
 
 <form id="form" method="POST" enctype="multipart/form-data">
 
 <label>Planilha Excel</label>
 <input type="file" name="planilha">
 
-<label>Fundo JPG</label>
+<label>Fundo do certificado</label>
 <input type="file" name="fundo" id="fundo">
 
-<label>Texto</label>
-<textarea name="texto" rows="8"></textarea>
+<label>Texto do certificado</label>
+<textarea name="texto" rows="7"></textarea>
 
 <label>Tamanho da fonte</label>
 <select name="fonte">
@@ -91,7 +126,7 @@ top:20px;
 <option value="direita">Direita</option>
 </select>
 
-<label>Posição</label>
+<label>Posição vertical</label>
 <select name="posicao">
 <option value="acima">Acima</option>
 <option value="centro">Centro</option>
@@ -110,9 +145,9 @@ top:20px;
 <label>Ano</label>
 <input name="ano">
 
-<button type="button" onclick="preview()">Atualizar Preview</button>
+<button type="button" class="previewBtn" onclick="preview()">Atualizar Preview</button>
 
-<button type="submit">Gerar Certificados</button>
+<button type="submit" class="gerar">Gerar Certificados</button>
 
 </form>
 
@@ -120,7 +155,7 @@ top:20px;
 
 <div class="preview">
 
-<iframe id="previewFrame"></iframe>
+<img id="previewImg">
 
 </div>
 
@@ -138,11 +173,15 @@ fetch("/preview",{method:"POST",body:data})
 
 let url=URL.createObjectURL(blob)
 
-document.getElementById("previewFrame").src=url
+document.getElementById("previewImg").src=url
 
 })
 
 }
+
+document.querySelectorAll("input, textarea, select").forEach(el=>{
+el.addEventListener("change", preview)
+})
 
 </script>
 
