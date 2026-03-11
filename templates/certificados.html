@@ -27,6 +27,7 @@ padding:12px 20px;
 background:#1f3c88;
 color:white;
 border:none;
+margin-top:10px;
 }
 
 </style>
@@ -37,18 +38,28 @@ border:none;
 
 <img src="/static/logo.png" class="logo">
 
-<h2>Gerar Certificados</h2>
+<h2>Gerador de Certificados</h2>
 
-<form action="/preview" method="POST" enctype="multipart/form-data" target="_blank">
+<form method="POST" action="/preview" enctype="multipart/form-data" target="_blank">
 
 <label>Fundo do certificado</label>
 <input type="file" name="fundo" required>
 
-<label>Texto</label>
+<label>Texto do certificado</label>
 
 <textarea name="texto" rows="4">
 Certificamos que {NOME} participou do curso {CURSO} com carga horária de {CARGA} horas.
 </textarea>
+
+<h3>Data</h3>
+
+<input name="municipio" placeholder="Município">
+
+<input name="dia" placeholder="Dia">
+
+<input name="mes" placeholder="Mês por extenso">
+
+<input name="ano" placeholder="Ano">
 
 <button type="submit">Preview</button>
 
@@ -64,7 +75,7 @@ Certificamos que {NOME} participou do curso {CURSO} com carga horária de {CARGA
 <label>Fundo do certificado</label>
 <input type="file" name="fundo" required>
 
-<label>Texto</label>
+<label>Texto do certificado</label>
 
 <textarea name="texto" rows="4">
 Certificamos que {NOME} participou do curso {CURSO} com carga horária de {CARGA} horas.
@@ -72,13 +83,13 @@ Certificamos que {NOME} participou do curso {CURSO} com carga horária de {CARGA
 
 <h3>Data</h3>
 
-<input name="municipio" placeholder="Município">
+<input name="municipio">
 
-<input name="dia" placeholder="Dia">
+<input name="dia">
 
-<input name="mes" placeholder="Mês por extenso">
+<input name="mes">
 
-<input name="ano" placeholder="Ano">
+<input name="ano">
 
 <button type="submit">Gerar certificados</button>
 
