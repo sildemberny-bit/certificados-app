@@ -14,10 +14,55 @@ USUARIO = "admin"
 SENHA = "123"
 
 
+# =============================
+# LANDING PAGE
+# =============================
+
+@app.route("/")
+def landing():
+    return render_template("landing.html")
+
+
+@app.route("/guia")
+def guia():
+    return render_template("guia.html")
+
+
+# =============================
+# LOGIN
+# =============================
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+
+    if request.method == "POST":
+
+        usuario = request.form.get("usuario")
+        senha = request.form.get("senha")
+
+        if usuario == USUARIO and senha == SENHA:
+            session["logado"] = True
+            return redirect("/certificados")
+
+    return render_template("login.html")
+
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect("/")
+
+
+# =============================
+# CERTIFICADOS
+# =============================
+
 def substituir_variaveis(texto, linha):
+
     for coluna in linha.index:
         chave = "{" + coluna.upper() + "}"
         texto = texto.replace(chave, str(linha[coluna]))
+
     return texto
 
 
@@ -35,6 +80,7 @@ def gerar_pdf(linha, texto, fundo_file, fonte, alinhamento, posicao, municipio, 
     c.drawImage(fundo, 0, 0, width=842, height=595)
 
     texto = substituir_variaveis(texto, linha)
+
     linhas = quebrar_texto(texto)
 
     if posicao == "acima":
@@ -67,35 +113,15 @@ def gerar_pdf(linha, texto, fundo_file, fonte, alinhamento, posicao, municipio, 
     c.save()
 
     buffer.seek(0)
+
     return buffer
-
-
-@app.route("/", methods=["GET", "POST"])
-def login():
-
-    if request.method == "POST":
-
-        usuario = request.form.get("usuario")
-        senha = request.form.get("senha")
-
-        if usuario == USUARIO and senha == SENHA:
-            session["logado"] = True
-            return redirect("/certificados")
-
-    return render_template("login.html")
-
-
-@app.route("/logout")
-def logout():
-    session.clear()
-    return redirect("/")
 
 
 @app.route("/certificados", methods=["GET", "POST"])
 def certificados():
 
     if not session.get("logado"):
-        return redirect("/")
+        return redirect("/login")
 
     if request.method == "POST":
 
@@ -157,6 +183,10 @@ def certificados():
     return render_template("certificados.html")
 
 
+# =============================
+# PREVIEW
+# =============================
+
 @app.route("/preview", methods=["POST"])
 def preview():
 
@@ -177,7 +207,7 @@ def preview():
 
         exemplo = pd.Series({
             "NOME": "Nome Exemplo",
-            "PROJETO": "Projeto de Demonstração"
+            "PROJETO": "Projeto Demonstração"
         })
 
         pdf = gerar_pdf(
@@ -196,6 +226,7 @@ def preview():
         return send_file(pdf, download_name="preview.pdf")
 
     except Exception as e:
+
         return f"Erro preview: {str(e)}"
 
 
