@@ -21,8 +21,8 @@ def login():
 
     if request.method == "POST":
 
-        usuario = request.form["usuario"]
-        senha = request.form["senha"]
+        usuario = request.form.get("usuario")
+        senha = request.form.get("senha")
 
         if usuario == USUARIO and senha == SENHA:
             return redirect("/certificados")
@@ -37,116 +37,118 @@ def certificados():
 
     if request.method == "POST":
 
-        # limpar pasta temp antes de usar
-        if os.path.exists("temp"):
-            shutil.rmtree("temp")
+        try:
 
-        os.makedirs("temp")
+            if os.path.exists("temp"):
+                shutil.rmtree("temp")
 
-        arquivo_excel = request.files["excel"]
-        fundo = request.files["fundo"]
+            os.makedirs("temp")
 
-        texto = request.form["texto"]
+            arquivo_excel = request.files.get("excel")
+            fundo = request.files.get("fundo")
 
-        tamanho = int(request.form["tamanho"])
-        alinhamento = request.form["alinhamento"]
+            texto = request.form.get("texto","")
 
-        municipio = request.form["municipio"]
-        dia = request.form["dia"]
-        mes = request.form["mes"]
-        ano = request.form["ano"]
+            tamanho = int(request.form.get("tamanho",14))
+            alinhamento = request.form.get("alinhamento","centro")
 
-        data = f"{dia} de {mes} de {ano}"
+            municipio = request.form.get("municipio","")
+            dia = request.form.get("dia","")
+            mes = request.form.get("mes","")
+            ano = request.form.get("ano","")
 
-        df = pd.read_excel(arquivo_excel)
+            data = f"{dia} de {mes} de {ano}"
 
-        largura, altura = landscape(A4)
+            df = pd.read_excel(arquivo_excel)
 
-        fundo_path = "temp/fundo.jpg"
-        fundo.save(fundo_path)
+            largura, altura = landscape(A4)
 
-        zip_path = "certificados.zip"
+            fundo_path = "temp/fundo.jpg"
+            fundo.save(fundo_path)
 
-        with zipfile.ZipFile(zip_path, 'w', compression=zipfile.ZIP_DEFLATED) as zipf:
+            zip_path = "certificados.zip"
 
-            for i, linha in df.iterrows():
+            with zipfile.ZipFile(zip_path, 'w', compression=zipfile.ZIP_DEFLATED) as zipf:
 
-                conteudo = texto
+                for i, linha in df.iterrows():
 
-                for coluna in df.columns:
-                    conteudo = conteudo.replace(
-                        "{"+coluna+"}",
-                        str(linha[coluna])
+                    conteudo = texto
+
+                    for coluna in df.columns:
+                        conteudo = conteudo.replace(
+                            "{"+coluna+"}",
+                            str(linha[coluna])
+                        )
+
+                    conteudo = conteudo.replace("{MUNICIPIO}", municipio)
+                    conteudo = conteudo.replace("{DIA}", dia)
+                    conteudo = conteudo.replace("{MES}", mes)
+                    conteudo = conteudo.replace("{ANO}", ano)
+                    conteudo = conteudo.replace("{DATA}", data)
+
+                    nome = str(linha[df.columns[0]]).replace(" ","_")
+
+                    pdf_path = f"temp/{nome}.pdf"
+
+                    c = canvas.Canvas(pdf_path, pagesize=landscape(A4))
+
+                    c.drawImage(
+                        fundo_path,
+                        0,
+                        0,
+                        width=largura,
+                        height=altura
                     )
 
-                conteudo = conteudo.replace("{MUNICIPIO}", municipio)
-                conteudo = conteudo.replace("{DIA}", dia)
-                conteudo = conteudo.replace("{MES}", mes)
-                conteudo = conteudo.replace("{ANO}", ano)
-                conteudo = conteudo.replace("{DATA}", data)
+                    y = altura/2
 
-                nome = str(linha[df.columns[0]]).replace(" ","_")
+                    largura_texto = largura - 6*cm
 
-                pdf_path = f"temp/{nome}.pdf"
+                    linhas = []
+                    palavras = conteudo.split()
 
-                c = canvas.Canvas(pdf_path, pagesize=landscape(A4))
+                    linha_atual = ""
 
-                c.drawImage(
-                    fundo_path,
-                    0,
-                    0,
-                    width=largura,
-                    height=altura
-                )
+                    for palavra in palavras:
 
-                y = altura/2
+                        teste = linha_atual + " " + palavra
 
-                largura_texto = largura - 6*cm
+                        if c.stringWidth(teste,"Helvetica",tamanho) < largura_texto:
+                            linha_atual = teste
+                        else:
+                            linhas.append(linha_atual)
+                            linha_atual = palavra
 
-                linhas = []
-                palavras = conteudo.split()
+                    linhas.append(linha_atual)
 
-                linha_atual = ""
+                    for linha_texto in linhas:
 
-                for palavra in palavras:
+                        if alinhamento == "centro":
+                            c.drawCentredString(largura/2,y,linha_texto)
 
-                    teste = linha_atual + " " + palavra
+                        elif alinhamento == "esquerda":
+                            c.drawString(3*cm,y,linha_texto)
 
-                    if c.stringWidth(teste,"Helvetica",tamanho) < largura_texto:
-                        linha_atual = teste
-                    else:
-                        linhas.append(linha_atual)
-                        linha_atual = palavra
+                        elif alinhamento == "direita":
+                            c.drawRightString(largura-3*cm,y,linha_texto)
 
-                linhas.append(linha_atual)
+                        y -= tamanho + 6
 
-                for linha_texto in linhas:
+                    c.save()
 
-                    if alinhamento == "centro":
-                        c.drawCentredString(largura/2,y,linha_texto)
+                    zipf.write(pdf_path, os.path.basename(pdf_path))
 
-                    elif alinhamento == "esquerda":
-                        c.drawString(3*cm,y,linha_texto)
+                    contador_certificados += 1
 
-                    elif alinhamento == "direita":
-                        c.drawRightString(largura-3*cm,y,linha_texto)
+                    gc.collect()
 
-                    y -= tamanho + 6
+            shutil.rmtree("temp")
 
-                c.save()
+            return send_file(zip_path, as_attachment=True)
 
-                # adiciona ao ZIP imediatamente
-                zipf.write(pdf_path, os.path.basename(pdf_path))
+        except Exception as e:
 
-                contador_certificados += 1
-
-                # libera memória
-                gc.collect()
-
-        # limpar pasta temporária após gerar
-        shutil.rmtree("temp")
-
-        return send_file(zip_path, as_attachment=True)
+            return f"Erro ao gerar certificados: {str(e)}"
 
     return render_template("certificados.html")
 
