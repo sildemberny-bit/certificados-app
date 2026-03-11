@@ -1,28 +1,145 @@
-<h2>Gerador de Certificados</h2>
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>Emitte - Gerador de Certificados</title>
+
+<style>
+
+body{
+font-family:Arial;
+background:#f4f6f9;
+margin:0;
+padding:0;
+}
+
+.container{
+width:700px;
+margin:auto;
+margin-top:40px;
+background:white;
+padding:30px;
+border-radius:10px;
+box-shadow:0 0 10px rgba(0,0,0,0.1);
+}
+
+h1{
+text-align:center;
+margin-bottom:20px;
+}
+
+label{
+font-weight:bold;
+display:block;
+margin-top:15px;
+}
+
+input, textarea, select{
+width:100%;
+padding:10px;
+margin-top:5px;
+border:1px solid #ccc;
+border-radius:5px;
+}
+
+button{
+margin-top:20px;
+width:100%;
+padding:12px;
+background:#1f3c88;
+color:white;
+border:none;
+border-radius:5px;
+font-size:16px;
+cursor:pointer;
+}
+
+button:hover{
+background:#162d63;
+}
+
+.logo{
+display:block;
+margin:auto;
+width:120px;
+margin-bottom:10px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<img src="/static/emitte_logo.png" class="logo">
+
+<h1>Gerador de Certificados</h1>
 
 <form method="POST" enctype="multipart/form-data">
 
-<p>Planilha Excel:</p>
+<label>Planilha Excel</label>
 <input type="file" name="excel" required>
 
-<br><br>
-
-<p>Imagem de fundo do certificado (JPG ou PNG):</p>
+<label>Imagem de Fundo do Certificado (JPG)</label>
 <input type="file" name="fundo" required>
 
-<br><br>
+<label>Texto do Certificado</label>
 
-<p>Texto do certificado:</p>
-<textarea name="texto" rows="4" cols="80" required>
+<textarea name="texto" rows="6" required>
 Certificamos que {NOME} participou do curso {CURSO} com carga horária de {CARGA} horas.
+
+{MUNICIPIO}, {DATA}
 </textarea>
 
-<br><br>
+<label>Tamanho da Fonte</label>
 
-<button type="submit">Gerar certificados</button>
+<select name="tamanho">
+
+<option value="10">10</option>
+<option value="11">11</option>
+<option value="12">12</option>
+<option value="13">13</option>
+<option value="14">14</option>
+<option value="15">15</option>
+<option value="16">16</option>
+<option value="17">17</option>
+<option value="18">18</option>
+<option value="19">19</option>
+<option value="20">20</option>
+
+</select>
+
+<label>Alinhamento do Texto</label>
+
+<select name="alinhamento">
+
+<option value="centro">Centralizado</option>
+<option value="esquerda">Esquerda</option>
+<option value="direita">Direita</option>
+
+</select>
+
+<label>Município</label>
+<input name="municipio" placeholder="Ex: Fortaleza">
+
+<label>Dia</label>
+<input name="dia" placeholder="Ex: 12">
+
+<label>Mês</label>
+<input name="mes" placeholder="Ex: março">
+
+<label>Ano</label>
+<input name="ano" placeholder="Ex: 2026">
+
+<button type="submit">
+Gerar Certificados
+</button>
 
 </form>
 
-<br>
+</div>
 
-<a href="/logout">Sair</a>
+</body>
+</html>
