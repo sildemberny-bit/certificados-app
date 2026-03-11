@@ -13,6 +13,49 @@ USUARIO = "admin"
 SENHA = "123"
 
 
+def quebrar_linhas(texto, tamanho=80):
+    linhas = []
+    while texto:
+        linhas.append(texto[:tamanho])
+        texto = texto[tamanho:]
+    return linhas
+
+
+def gerar_pdf(nome, curso, carga, texto, fundo_file, municipio, dia, mes, ano):
+
+    buffer = io.BytesIO()
+
+    c = canvas.Canvas(buffer, pagesize=landscape(A4))
+
+    fundo = ImageReader(fundo_file)
+    c.drawImage(fundo, 0, 0, width=842, height=595)
+
+    texto_certificado = texto \
+        .replace("{NOME}", nome) \
+        .replace("{CURSO}", curso) \
+        .replace("{CARGA}", str(carga))
+
+    linhas = quebrar_linhas(texto_certificado)
+
+    y = 320
+
+    for linha in linhas:
+        c.setFont("Helvetica", 18)
+        c.drawCentredString(420, y, linha)
+        y -= 30
+
+    if municipio:
+        data_final = f"{municipio}, {dia} de {mes} de {ano}"
+        c.setFont("Helvetica", 14)
+        c.drawCentredString(420, 120, data_final)
+
+    c.save()
+
+    buffer.seek(0)
+
+    return buffer
+
+
 @app.route("/", methods=["GET", "POST"])
 def login():
 
@@ -36,7 +79,7 @@ def certificados():
 
     if request.method == "POST":
 
-        arquivo_excel = request.files["planilha"]
+        planilha = request.files["planilha"]
         fundo = request.files["fundo"]
 
         texto = request.form.get("texto")
@@ -46,56 +89,33 @@ def certificados():
         mes = request.form.get("mes")
         ano = request.form.get("ano")
 
-        df = pd.read_excel(arquivo_excel)
+        df = pd.read_excel(planilha)
 
         memoria_zip = io.BytesIO()
 
-        with zipfile.ZipFile(memoria_zip, mode="w") as zf:
+        with zipfile.ZipFile(memoria_zip, "w") as z:
 
-            for index, row in df.iterrows():
+            for _, row in df.iterrows():
 
-                buffer = io.BytesIO()
+                nome = row["NOME"]
+                curso = row["CURSO"]
+                carga = row["CARGA"]
 
-                c = canvas.Canvas(buffer, pagesize=landscape(A4))
+                fundo.seek(0)
 
-                fundo_img = ImageReader(fundo)
-                c.drawImage(fundo_img, 0, 0, width=842, height=595)
+                pdf_buffer = gerar_pdf(
+                    nome,
+                    curso,
+                    carga,
+                    texto,
+                    fundo,
+                    municipio,
+                    dia,
+                    mes,
+                    ano
+                )
 
-                nome = str(row["NOME"])
-                curso = str(row["CURSO"])
-                carga = str(row["CARGA"])
-
-                texto_certificado = texto \
-                    .replace("{NOME}", nome) \
-                    .replace("{CURSO}", curso) \
-                    .replace("{CARGA}", carga)
-
-                largura = 700
-                linhas = []
-
-                while texto_certificado:
-                    linhas.append(texto_certificado[:80])
-                    texto_certificado = texto_certificado[80:]
-
-                y = 320
-
-                for linha in linhas:
-                    c.setFont("Helvetica", 18)
-                    c.drawCentredString(420, y, linha)
-                    y -= 30
-
-                data_final = f"{municipio}, {dia} de {mes} de {ano}"
-
-                c.setFont("Helvetica", 14)
-                c.drawCentredString(420, 120, data_final)
-
-                c.save()
-
-                buffer.seek(0)
-
-                nome_pdf = f"{nome}.pdf"
-
-                zf.writestr(nome_pdf, buffer.read())
+                z.writestr(f"{nome}.pdf", pdf_buffer.read())
 
         memoria_zip.seek(0)
 
@@ -114,38 +134,27 @@ def preview():
     fundo = request.files["fundo"]
     texto = request.form.get("texto")
 
-    nome = "NOME EXEMPLO"
-    curso = "CURSO EXEMPLO"
-    carga = "40"
+    municipio = request.form.get("municipio")
+    dia = request.form.get("dia")
+    mes = request.form.get("mes")
+    ano = request.form.get("ano")
 
-    texto_certificado = texto \
-        .replace("{NOME}", nome) \
-        .replace("{CURSO}", curso) \
-        .replace("{CARGA}", carga)
+    pdf_buffer = gerar_pdf(
+        "NOME EXEMPLO",
+        "CURSO EXEMPLO",
+        "40",
+        texto,
+        fundo,
+        municipio,
+        dia,
+        mes,
+        ano
+    )
 
-    buffer = io.BytesIO()
-
-    c = canvas.Canvas(buffer, pagesize=landscape(A4))
-
-    fundo_img = ImageReader(fundo)
-    c.drawImage(fundo_img, 0, 0, width=842, height=595)
-
-    y = 320
-
-    while texto_certificado:
-
-        linha = texto_certificado[:80]
-        texto_certificado = texto_certificado[80:]
-
-        c.setFont("Helvetica", 18)
-        c.drawCentredString(420, y, linha)
-        y -= 30
-
-    c.save()
-
-    buffer.seek(0)
-
-    return send_file(buffer, download_name="preview.pdf")
+    return send_file(
+        pdf_buffer,
+        download_name="preview.pdf"
+    )
 
 
 if __name__ == "__main__":
