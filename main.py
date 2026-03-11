@@ -1,113 +1,151 @@
-from flask import Flask, render_template, request, redirect, session, send_file
+from flask import Flask, render_template, request, send_file, redirect
 import pandas as pd
-import os
-import gc
-
-from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4, landscape
+from reportlab.pdfgen import canvas
+from reportlab.lib.units import cm
+import os
+import zipfile
 
 app = Flask(__name__)
-app.secret_key = "emitte_secret"
 
-UPLOAD_FOLDER = "uploads"
-OUTPUT_FOLDER = "certificados"
+USUARIO = "admin"
+SENHA = "123"
 
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-os.makedirs(OUTPUT_FOLDER, exist_ok=True)
+contador_certificados = 0
 
 
-# LOGIN
 @app.route("/", methods=["GET","POST"])
 def login():
 
     if request.method == "POST":
 
-        email = request.form.get("email")
-        password = request.form.get("password")
+        usuario = request.form["usuario"]
+        senha = request.form["senha"]
 
-        if email == "admin" and password == "123":
-            session["logado"] = True
+        if usuario == USUARIO and senha == SENHA:
             return redirect("/certificados")
 
     return render_template("login.html")
 
 
-# LOGOUT
-@app.route("/logout")
-def logout():
-
-    session.clear()
-    return redirect("/")
-
-
-# GUIA
-@app.route("/guia")
-def guia():
-
-    return render_template("guia.html")
-
-
-# PAGINA CERTIFICADOS
 @app.route("/certificados", methods=["GET","POST"])
 def certificados():
 
-    if not session.get("logado"):
-        return redirect("/")
+    global contador_certificados
 
     if request.method == "POST":
 
-        excel = request.files["excel"]
+        arquivo_excel = request.files["excel"]
         fundo = request.files["fundo"]
-        texto_modelo = request.form["texto"]
+        texto = request.form["texto"]
 
-        caminho_excel = os.path.join(UPLOAD_FOLDER, excel.filename)
-        caminho_fundo = os.path.join(UPLOAD_FOLDER, fundo.filename)
+        tamanho = int(request.form["tamanho"])
+        alinhamento = request.form["alinhamento"]
 
-        excel.save(caminho_excel)
-        fundo.save(caminho_fundo)
+        municipio = request.form["municipio"]
+        dia = request.form["dia"]
+        mes = request.form["mes"]
+        ano = request.form["ano"]
 
-        df = pd.read_excel(caminho_excel)
+        data = f"{dia} de {mes} de {ano}"
 
-        contador = 0
+        df = pd.read_excel(arquivo_excel)
 
-        for index, row in df.iterrows():
+        os.makedirs("temp", exist_ok=True)
 
-            nome = str(row["NOME"])
+        arquivos_pdf = []
 
-            curso = str(row["CURSO"]) if "CURSO" in row else ""
-            carga = str(row["CARGA"]) if "CARGA" in row else ""
+        largura, altura = landscape(A4)
 
-            texto = texto_modelo.replace("{NOME}", nome)
-            texto = texto.replace("{CURSO}", curso)
-            texto = texto.replace("{CARGA}", carga)
+        fundo_path = "temp/fundo.jpg"
+        fundo.save(fundo_path)
 
-            nome_arquivo = nome.replace(" ","_") + ".pdf"
+        for i, linha in df.iterrows():
 
-            caminho_pdf = os.path.join(OUTPUT_FOLDER, nome_arquivo)
+            conteudo = texto
+
+            for coluna in df.columns:
+                conteudo = conteudo.replace(
+                    "{"+coluna+"}",
+                    str(linha[coluna])
+                )
+
+            conteudo = conteudo.replace("{MUNICIPIO}", municipio)
+            conteudo = conteudo.replace("{DIA}", dia)
+            conteudo = conteudo.replace("{MES}", mes)
+            conteudo = conteudo.replace("{ANO}", ano)
+            conteudo = conteudo.replace("{DATA}", data)
+
+            nome_pdf = str(linha[df.columns[0]]) + ".pdf"
+
+            caminho_pdf = "temp/" + nome_pdf
 
             c = canvas.Canvas(caminho_pdf, pagesize=landscape(A4))
 
-            largura, altura = landscape(A4)
+            c.drawImage(fundo_path,0,0,width=largura,height=altura)
 
-            c.drawImage(caminho_fundo, 0, 0, width=largura, height=altura)
+            y = altura/2
 
-            c.setFont("Helvetica", 20)
+            largura_texto = largura - 6*cm
 
-            c.drawCentredString(largura/2, altura/2, texto)
+            linhas = []
+
+            palavras = conteudo.split()
+
+            linha_atual = ""
+
+            for palavra in palavras:
+
+                teste = linha_atual + " " + palavra
+
+                if c.stringWidth(teste,"Helvetica",tamanho) < largura_texto:
+                    linha_atual = teste
+                else:
+                    linhas.append(linha_atual)
+                    linha_atual = palavra
+
+            linhas.append(linha_atual)
+
+            for linha_texto in linhas:
+
+                if alinhamento == "centro":
+                    c.drawCentredString(largura/2,y,linha_texto)
+
+                elif alinhamento == "esquerda":
+                    c.drawString(3*cm,y,linha_texto)
+
+                elif alinhamento == "direita":
+                    c.drawRightString(largura-3*cm,y,linha_texto)
+
+                y -= tamanho + 5
 
             c.save()
 
-            # liberar memoria
-            del c
-            gc.collect()
+            arquivos_pdf.append(caminho_pdf)
 
-            contador += 1
+        zip_path = "certificados.zip"
 
-        print("NOVA GERAÇÃO REALIZADA:", contador)
+        with zipfile.ZipFile(zip_path,"w") as zipf:
 
-        return f"{contador} certificados gerados com sucesso!"
+            for pdf in arquivos_pdf:
+                zipf.write(pdf, os.path.basename(pdf))
+
+        contador_certificados += len(arquivos_pdf)
+
+        return send_file(zip_path, as_attachment=True)
 
     return render_template("certificados.html")
+
+
+@app.route("/contador")
+def contador():
+    global contador_certificados
+    return f"Certificados gerados: {contador_certificados}"
+
+
+@app.route("/guia")
+def guia():
+    return render_template("guia.html")
 
 
 if __name__ == "__main__":
