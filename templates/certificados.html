@@ -8,26 +8,76 @@
 
 body{
 font-family:Arial;
-margin:40px;
+margin:0;
+background:#f4f6fb;
+}
+
+.topbar{
+background:white;
+padding:15px 40px;
+box-shadow:0 2px 8px rgba(0,0,0,0.05);
 }
 
 .logo{
-width:160px;
-margin-bottom:20px;
+height:40px;
 }
 
-input,textarea{
+.container{
+display:flex;
+height:calc(100vh - 80px);
+}
+
+.left{
+width:40%;
+background:white;
+padding:30px;
+overflow:auto;
+}
+
+.right{
+width:60%;
+display:flex;
+align-items:center;
+justify-content:center;
+background:#e9edf7;
+}
+
+.preview-box{
+width:90%;
+height:85%;
+background:white;
+box-shadow:0 8px 25px rgba(0,0,0,0.15);
+display:flex;
+align-items:center;
+justify-content:center;
+}
+
+.preview-box iframe{
+width:100%;
+height:100%;
+border:none;
+}
+
+input, textarea{
 width:100%;
 padding:10px;
-margin:8px 0;
+margin-top:8px;
+margin-bottom:16px;
+border:1px solid #ccc;
+border-radius:4px;
 }
 
 button{
-padding:12px 20px;
 background:#1f3c88;
 color:white;
 border:none;
-margin-top:10px;
+padding:12px 18px;
+border-radius:5px;
+cursor:pointer;
+}
+
+button:hover{
+background:#162c63;
 }
 
 </style>
@@ -36,64 +86,107 @@ margin-top:10px;
 
 <body>
 
+<div class="topbar">
 <img src="/static/logo.png" class="logo">
+</div>
+
+<div class="container">
+
+<div class="left">
 
 <h2>Gerador de Certificados</h2>
 
-<form method="POST" action="/preview" enctype="multipart/form-data" target="_blank">
-
-<label>Fundo do certificado</label>
-<input type="file" name="fundo" required>
-
-<label>Texto do certificado</label>
-
-<textarea name="texto" rows="4">
-Certificamos que {NOME} participou do curso {CURSO} com carga horária de {CARGA} horas.
-</textarea>
-
-<h3>Data</h3>
-
-<input name="municipio" placeholder="Município">
-
-<input name="dia" placeholder="Dia">
-
-<input name="mes" placeholder="Mês por extenso">
-
-<input name="ano" placeholder="Ano">
-
-<button type="submit">Preview</button>
-
-</form>
-
-<hr>
-
-<form method="POST" enctype="multipart/form-data">
+<form id="formCert" method="POST" enctype="multipart/form-data">
 
 <label>Planilha Excel</label>
-<input type="file" name="planilha" required>
+<input type="file" name="planilha">
 
 <label>Fundo do certificado</label>
-<input type="file" name="fundo" required>
+<input type="file" name="fundo" id="fundo">
 
 <label>Texto do certificado</label>
 
-<textarea name="texto" rows="4">
+<textarea name="texto" id="texto" rows="4">
 Certificamos que {NOME} participou do curso {CURSO} com carga horária de {CARGA} horas.
 </textarea>
 
 <h3>Data</h3>
 
-<input name="municipio">
+<input name="municipio" id="municipio" placeholder="Município">
 
-<input name="dia">
+<input name="dia" id="dia" placeholder="Dia">
 
-<input name="mes">
+<input name="mes" id="mes" placeholder="Mês por extenso">
 
-<input name="ano">
+<input name="ano" id="ano" placeholder="Ano">
 
-<button type="submit">Gerar certificados</button>
+<button formaction="/certificados" type="submit">Gerar certificados</button>
 
 </form>
+
+</div>
+
+<div class="right">
+
+<div class="preview-box">
+
+<iframe id="previewFrame"></iframe>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+const form = document.getElementById("formCert");
+const preview = document.getElementById("previewFrame");
+
+const campos = ["texto","municipio","dia","mes","ano","fundo"];
+
+campos.forEach(id => {
+
+document.getElementById(id).addEventListener("change", atualizarPreview);
+
+});
+
+function atualizarPreview(){
+
+let formData = new FormData();
+
+formData.append("texto",document.getElementById("texto").value);
+
+formData.append("municipio",document.getElementById("municipio").value);
+
+formData.append("dia",document.getElementById("dia").value);
+
+formData.append("mes",document.getElementById("mes").value);
+
+formData.append("ano",document.getElementById("ano").value);
+
+let fundo = document.getElementById("fundo").files[0];
+
+if(fundo){
+formData.append("fundo",fundo);
+}
+
+fetch("/preview",{
+method:"POST",
+body:formData
+})
+.then(res => res.blob())
+.then(blob => {
+
+let url = URL.createObjectURL(blob);
+
+preview.src = url;
+
+});
+
+}
+
+</script>
 
 </body>
 </html>
