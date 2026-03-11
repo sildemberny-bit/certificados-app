@@ -14,13 +14,18 @@ USUARIO = "admin"
 SENHA = "123"
 
 
-def quebrar_texto(texto, largura=90):
+def substituir_variaveis(texto, linha):
+    for coluna in linha.index:
+        chave = "{" + coluna.upper() + "}"
+        texto = texto.replace(chave, str(linha[coluna]))
+    return texto
+
+
+def quebrar_texto(texto, largura=85):
     return textwrap.wrap(texto, largura)
 
 
-def gerar_pdf(nome, curso, carga, texto, fundo_file,
-              municipio, dia, mes, ano,
-              fonte, alinhamento, posicao):
+def gerar_pdf(linha, texto, fundo_file, fonte, alinhamento, posicao, municipio, dia, mes, ano):
 
     buffer = io.BytesIO()
 
@@ -29,44 +34,39 @@ def gerar_pdf(nome, curso, carga, texto, fundo_file,
     fundo = ImageReader(fundo_file)
     c.drawImage(fundo, 0, 0, width=842, height=595)
 
-    texto_certificado = texto \
-        .replace("{NOME}", str(nome)) \
-        .replace("{CURSO}", str(curso)) \
-        .replace("{CARGA}", str(carga))
-
-    linhas = quebrar_texto(texto_certificado)
+    texto = substituir_variaveis(texto, linha)
+    linhas = quebrar_texto(texto)
 
     if posicao == "acima":
         y = 360
     elif posicao == "abaixo":
-        y = 260
+        y = 250
     else:
         y = 310
 
     c.setFont("Helvetica", int(fonte))
 
-    for linha in linhas:
+    for linha_texto in linhas:
 
         if alinhamento == "esquerda":
-            c.drawString(120, y, linha)
+            c.drawString(120, y, linha_texto)
 
         elif alinhamento == "direita":
-            c.drawRightString(720, y, linha)
+            c.drawRightString(720, y, linha_texto)
 
         else:
-            c.drawCentredString(420, y, linha)
+            c.drawCentredString(420, y, linha_texto)
 
         y -= 28
 
-    if municipio and dia and mes and ano:
-        data_final = f"{municipio}, {dia} de {mes} de {ano}"
+    if municipio:
+        data = f"{municipio}, {dia} de {mes} de {ano}"
         c.setFont("Helvetica", 14)
-        c.drawCentredString(420, 120, data_final)
+        c.drawCentredString(420, 120, data)
 
     c.save()
 
     buffer.seek(0)
-
     return buffer
 
 
@@ -85,6 +85,12 @@ def login():
     return render_template("login.html")
 
 
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect("/")
+
+
 @app.route("/certificados", methods=["GET", "POST"])
 def certificados():
 
@@ -95,22 +101,19 @@ def certificados():
 
         try:
 
-            planilha = request.files.get("planilha")
-            fundo = request.files.get("fundo")
+            planilha = request.files["planilha"]
+            fundo = request.files["fundo"]
 
-            if not planilha or not fundo:
-                return "Envie a planilha e o fundo do certificado."
+            texto = request.form.get("texto")
 
-            texto = request.form.get("texto", "")
+            fonte = request.form.get("fonte")
+            alinhamento = request.form.get("alinhamento")
+            posicao = request.form.get("posicao")
 
-            municipio = request.form.get("municipio", "")
-            dia = request.form.get("dia", "")
-            mes = request.form.get("mes", "")
-            ano = request.form.get("ano", "")
-
-            fonte = request.form.get("fonte", "16")
-            alinhamento = request.form.get("alinhamento", "centro")
-            posicao = request.form.get("posicao", "centro")
+            municipio = request.form.get("municipio")
+            dia = request.form.get("dia")
+            mes = request.form.get("mes")
+            ano = request.form.get("ano")
 
             df = pd.read_excel(planilha)
 
@@ -118,30 +121,26 @@ def certificados():
 
             with zipfile.ZipFile(memoria_zip, "w") as z:
 
-                for _, row in df.iterrows():
-
-                    nome = row["NOME"]
-                    curso = row["CURSO"]
-                    carga = row["CARGA"]
+                for _, linha in df.iterrows():
 
                     fundo.seek(0)
 
-                    pdf_buffer = gerar_pdf(
-                        nome,
-                        curso,
-                        carga,
+                    pdf = gerar_pdf(
+                        linha,
                         texto,
                         fundo,
+                        fonte,
+                        alinhamento,
+                        posicao,
                         municipio,
                         dia,
                         mes,
-                        ano,
-                        fonte,
-                        alinhamento,
-                        posicao
+                        ano
                     )
 
-                    z.writestr(f"{nome}.pdf", pdf_buffer.read())
+                    nome = str(linha.iloc[0]).replace(" ", "_")
+
+                    z.writestr(f"{nome}.pdf", pdf.read())
 
             memoria_zip.seek(0)
 
@@ -163,45 +162,41 @@ def preview():
 
     try:
 
-        fundo = request.files.get("fundo")
+        fundo = request.files["fundo"]
 
-        if not fundo:
-            return "Envie o fundo para gerar preview."
+        texto = request.form.get("texto")
 
-        texto = request.form.get("texto", "")
+        fonte = request.form.get("fonte")
+        alinhamento = request.form.get("alinhamento")
+        posicao = request.form.get("posicao")
 
-        municipio = request.form.get("municipio", "")
-        dia = request.form.get("dia", "")
-        mes = request.form.get("mes", "")
-        ano = request.form.get("ano", "")
+        municipio = request.form.get("municipio")
+        dia = request.form.get("dia")
+        mes = request.form.get("mes")
+        ano = request.form.get("ano")
 
-        fonte = request.form.get("fonte", "16")
-        alinhamento = request.form.get("alinhamento", "centro")
-        posicao = request.form.get("posicao", "centro")
+        exemplo = pd.Series({
+            "NOME": "Nome Exemplo",
+            "PROJETO": "Projeto de Demonstração"
+        })
 
-        pdf_buffer = gerar_pdf(
-            "NOME EXEMPLO",
-            "CURSO EXEMPLO",
-            "40",
+        pdf = gerar_pdf(
+            exemplo,
             texto,
             fundo,
+            fonte,
+            alinhamento,
+            posicao,
             municipio,
             dia,
             mes,
-            ano,
-            fonte,
-            alinhamento,
-            posicao
+            ano
         )
 
-        return send_file(
-            pdf_buffer,
-            download_name="preview.pdf"
-        )
+        return send_file(pdf, download_name="preview.pdf")
 
     except Exception as e:
-
-        return f"Erro no preview: {str(e)}"
+        return f"Erro preview: {str(e)}"
 
 
 if __name__ == "__main__":
