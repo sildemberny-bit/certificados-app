@@ -1,180 +1,114 @@
-from flask import Flask, render_template, request, send_file, redirect, session
+from flask import Flask, render_template, request, redirect, session, send_file
 import pandas as pd
+import os
+import gc
+
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4, landscape
-from reportlab.lib.utils import ImageReader
-import os
-import zipfile
-import textwrap
-import re
-from datetime import datetime
 
 app = Flask(__name__)
-app.secret_key = "emitte_super_secreta"
+app.secret_key = "emitte_secret"
 
 UPLOAD_FOLDER = "uploads"
 OUTPUT_FOLDER = "certificados"
-METRICS_FILE = "metrics.txt"
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(OUTPUT_FOLDER, exist_ok=True)
 
-USUARIO_LOGIN = "admin"
-USUARIO_SENHA = "123"
 
-# ===== FUNÇÃO PARA REGISTRAR MÉTRICAS =====
-def registrar_metricas(qtd_certificados):
-    agora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-    if not os.path.exists(METRICS_FILE):
-        with open(METRICS_FILE, "w") as f:
-            f.write("TOTAL_LOTES=0\n")
-            f.write("TOTAL_CERTIFICADOS=0\n")
-
-    with open(METRICS_FILE, "r") as f:
-        linhas = f.readlines()
-
-    total_lotes = int(linhas[0].split("=")[1])
-    total_certificados = int(linhas[1].split("=")[1])
-
-    total_lotes += 1
-    total_certificados += qtd_certificados
-
-    with open(METRICS_FILE, "w") as f:
-        f.write(f"TOTAL_LOTES={total_lotes}\n")
-        f.write(f"TOTAL_CERTIFICADOS={total_certificados}\n")
-
-    print("===== NOVA GERAÇÃO REALIZADA =====")
-    print(f"Data/Hora: {agora}")
-    print(f"Lote atual: {total_lotes}")
-    print(f"Certificados neste lote: {qtd_certificados}")
-    print(f"Total acumulado certificados: {total_certificados}")
-    print("===================================")
-
-
-# ===== LANDING =====
-@app.route("/")
-def landing():
-    return render_template("landing.html")
-
-
-# ===== GUIA =====
-@app.route("/guia")
-def guia():
-    return render_template("guia.html")
-
-
-# ===== LOGIN =====
-@app.route("/login", methods=["GET", "POST"])
+# LOGIN
+@app.route("/", methods=["GET","POST"])
 def login():
-    if request.method == "POST":
-        login = request.form["email"]
-        senha = request.form["password"]
 
-        if login == USUARIO_LOGIN and senha == USUARIO_SENHA:
-            session["usuario"] = login
+    if request.method == "POST":
+
+        email = request.form.get("email")
+        password = request.form.get("password")
+
+        if email == "admin" and password == "123":
+            session["logado"] = True
             return redirect("/certificados")
 
     return render_template("login.html")
 
 
-# ===== LOGOUT =====
+# LOGOUT
 @app.route("/logout")
 def logout():
-    session.pop("usuario", None)
+
+    session.clear()
     return redirect("/")
 
 
-# ===== CERTIFICADOS =====
-@app.route("/certificados", methods=["GET", "POST"])
+# GUIA
+@app.route("/guia")
+def guia():
+
+    return render_template("guia.html")
+
+
+# PAGINA CERTIFICADOS
+@app.route("/certificados", methods=["GET","POST"])
 def certificados():
 
-    if "usuario" not in session:
-        return redirect("/login")
+    if not session.get("logado"):
+        return redirect("/")
 
     if request.method == "POST":
+
+        excel = request.files["excel"]
         fundo = request.files["fundo"]
-        planilha = request.files["planilha"]
         texto_modelo = request.form["texto"]
-        tamanho_fonte = int(request.form["fonte"])
-        alinhamento = request.form["alinhamento"]
-        posicao_vertical = request.form["posicao_vertical"]
 
-        fundo_path = os.path.join(UPLOAD_FOLDER, fundo.filename)
-        planilha_path = os.path.join(UPLOAD_FOLDER, planilha.filename)
+        caminho_excel = os.path.join(UPLOAD_FOLDER, excel.filename)
+        caminho_fundo = os.path.join(UPLOAD_FOLDER, fundo.filename)
 
-        fundo.save(fundo_path)
-        planilha.save(planilha_path)
+        excel.save(caminho_excel)
+        fundo.save(caminho_fundo)
 
-        df = pd.read_excel(planilha_path)
-        df.columns = df.columns.str.strip()
+        df = pd.read_excel(caminho_excel)
 
-        arquivos_gerados = []
+        contador = 0
 
         for index, row in df.iterrows():
 
-            texto_final = texto_modelo
-            campos = re.findall(r"\{(.*?)\}", texto_modelo)
+            nome = str(row["NOME"])
 
-            for campo in campos:
-                for coluna in df.columns:
-                    if campo.strip().lower() == coluna.strip().lower():
-                        valor = str(row[coluna])
-                        texto_final = re.sub(
-                            r"\{" + campo + r"\}",
-                            valor,
-                            texto_final,
-                            flags=re.IGNORECASE
-                        )
+            curso = str(row["CURSO"]) if "CURSO" in row else ""
+            carga = str(row["CARGA"]) if "CARGA" in row else ""
 
-            nome_arquivo = f"certificado_{index}.pdf"
+            texto = texto_modelo.replace("{NOME}", nome)
+            texto = texto.replace("{CURSO}", curso)
+            texto = texto.replace("{CARGA}", carga)
+
+            nome_arquivo = nome.replace(" ","_") + ".pdf"
+
             caminho_pdf = os.path.join(OUTPUT_FOLDER, nome_arquivo)
 
+            c = canvas.Canvas(caminho_pdf, pagesize=landscape(A4))
+
             largura, altura = landscape(A4)
-            c = canvas.Canvas(caminho_pdf, pagesize=(largura, altura))
 
-            fundo_img = ImageReader(fundo_path)
-            c.drawImage(fundo_img, 0, 0, width=largura, height=altura)
+            c.drawImage(caminho_fundo, 0, 0, width=largura, height=altura)
 
-            c.setFont("Helvetica", tamanho_fonte)
+            c.setFont("Helvetica", 20)
 
-            linhas = textwrap.wrap(texto_final, width=80)
-
-            if posicao_vertical == "superior":
-                y_inicial = altura * 0.65
-            elif posicao_vertical == "inferior":
-                y_inicial = altura * 0.35
-            else:
-                y_inicial = altura * 0.50
-
-            espacamento = tamanho_fonte + 8
-
-            for i, linha in enumerate(linhas):
-                y = y_inicial - (i * espacamento)
-
-                if alinhamento == "centro":
-                    c.drawCentredString(largura / 2, y, linha)
-                elif alinhamento == "esquerda":
-                    c.drawString(100, y, linha)
-                elif alinhamento == "direita":
-                    c.drawRightString(largura - 100, y, linha)
+            c.drawCentredString(largura/2, altura/2, texto)
 
             c.save()
-            arquivos_gerados.append(caminho_pdf)
 
-        zip_path = os.path.join(OUTPUT_FOLDER, "certificados.zip")
+            # liberar memoria
+            del c
+            gc.collect()
 
-        with zipfile.ZipFile(zip_path, 'w') as zipf:
-            for arquivo in arquivos_gerados:
-                zipf.write(arquivo, os.path.basename(arquivo))
+            contador += 1
 
-        # 🔥 REGISTRA MÉTRICAS
-        registrar_metricas(len(arquivos_gerados))
+        print("NOVA GERAÇÃO REALIZADA:", contador)
 
-        return send_file(zip_path, as_attachment=True)
+        return f"{contador} certificados gerados com sucesso!"
 
     return render_template("certificados.html")
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run()
