@@ -1,83 +1,54 @@
 <!DOCTYPE html>
 <html>
+
 <head>
 
-<title>Emitte</title>
+<title>Gerar Certificados</title>
 
 <style>
 
 body{
-font-family:Arial;
 margin:0;
-background:#f4f6fb;
-}
-
-.topbar{
-background:white;
-padding:15px 40px;
-box-shadow:0 2px 8px rgba(0,0,0,0.05);
-}
-
-.logo{
-height:40px;
-}
-
-.container{
+font-family:Arial;
 display:flex;
-height:calc(100vh - 80px);
+height:100vh;
 }
 
-.left{
+.menu{
 width:40%;
-background:white;
 padding:30px;
 overflow:auto;
 }
 
-.right{
+.preview{
 width:60%;
+background:#f5f5f5;
 display:flex;
-align-items:center;
 justify-content:center;
-background:#e9edf7;
+align-items:center;
 }
 
-.preview-box{
+iframe{
 width:90%;
-height:85%;
-background:white;
-box-shadow:0 8px 25px rgba(0,0,0,0.15);
-display:flex;
-align-items:center;
-justify-content:center;
-}
-
-.preview-box iframe{
-width:100%;
-height:100%;
+height:90%;
 border:none;
 }
 
-input, textarea{
+input,select,textarea{
 width:100%;
-padding:10px;
-margin-top:8px;
-margin-bottom:16px;
-border:1px solid #ccc;
-border-radius:4px;
+margin-bottom:10px;
+padding:8px;
 }
 
 button{
-background:#1f3c88;
-color:white;
-border:none;
-padding:12px 18px;
-border-radius:5px;
-cursor:pointer;
+padding:10px;
+margin-top:5px;
 }
 
-button:hover{
-background:#162c63;
+.topo{
+position:fixed;
+right:20px;
+top:20px;
 }
 
 </style>
@@ -86,103 +57,90 @@ background:#162c63;
 
 <body>
 
-<div class="topbar">
-<img src="/static/logo.png" class="logo">
+<div class="topo">
+<a href="/logout">SAIR</a>
 </div>
 
-<div class="container">
+<div class="menu">
 
-<div class="left">
-
-<h2>Gerador de Certificados</h2>
-
-<form id="formCert" method="POST" enctype="multipart/form-data">
+<form id="form" method="POST" enctype="multipart/form-data">
 
 <label>Planilha Excel</label>
 <input type="file" name="planilha">
 
-<label>Fundo do certificado</label>
+<label>Fundo JPG</label>
 <input type="file" name="fundo" id="fundo">
 
-<label>Texto do certificado</label>
+<label>Texto</label>
+<textarea name="texto" rows="8"></textarea>
 
-<textarea name="texto" id="texto" rows="4">
-Certificamos que {NOME} participou do curso {CURSO} com carga horária de {CARGA} horas.
-</textarea>
+<label>Tamanho da fonte</label>
+<select name="fonte">
+<option>10</option>
+<option>12</option>
+<option>14</option>
+<option>16</option>
+<option>18</option>
+<option>20</option>
+</select>
 
-<h3>Data</h3>
+<label>Alinhamento</label>
+<select name="alinhamento">
+<option value="esquerda">Esquerda</option>
+<option value="centro">Centro</option>
+<option value="direita">Direita</option>
+</select>
 
-<input name="municipio" id="municipio" placeholder="Município">
+<label>Posição</label>
+<select name="posicao">
+<option value="acima">Acima</option>
+<option value="centro">Centro</option>
+<option value="abaixo">Abaixo</option>
+</select>
 
-<input name="dia" id="dia" placeholder="Dia">
+<label>Município</label>
+<input name="municipio">
 
-<input name="mes" id="mes" placeholder="Mês por extenso">
+<label>Dia</label>
+<input name="dia">
 
-<input name="ano" id="ano" placeholder="Ano">
+<label>Mês</label>
+<input name="mes">
 
-<button formaction="/certificados" type="submit">Gerar certificados</button>
+<label>Ano</label>
+<input name="ano">
+
+<button type="button" onclick="preview()">Atualizar Preview</button>
+
+<button type="submit">Gerar Certificados</button>
 
 </form>
 
 </div>
 
-<div class="right">
-
-<div class="preview-box">
+<div class="preview">
 
 <iframe id="previewFrame"></iframe>
 
 </div>
 
-</div>
-
-</div>
-
 <script>
 
-const form = document.getElementById("formCert");
-const preview = document.getElementById("previewFrame");
+function preview(){
 
-const campos = ["texto","municipio","dia","mes","ano","fundo"];
+let form=document.getElementById("form")
 
-campos.forEach(id => {
+let data=new FormData(form)
 
-document.getElementById(id).addEventListener("change", atualizarPreview);
+fetch("/preview",{method:"POST",body:data})
+.then(r=>r.blob())
+.then(blob=>{
 
-});
+let url=URL.createObjectURL(blob)
 
-function atualizarPreview(){
+document.getElementById("previewFrame").src=url
 
-let formData = new FormData();
-
-formData.append("texto",document.getElementById("texto").value);
-
-formData.append("municipio",document.getElementById("municipio").value);
-
-formData.append("dia",document.getElementById("dia").value);
-
-formData.append("mes",document.getElementById("mes").value);
-
-formData.append("ano",document.getElementById("ano").value);
-
-let fundo = document.getElementById("fundo").files[0];
-
-if(fundo){
-formData.append("fundo",fundo);
-}
-
-fetch("/preview",{
-method:"POST",
-body:formData
 })
-.then(res => res.blob())
-.then(blob => {
-
-let url = URL.createObjectURL(blob);
-
-preview.src = url;
-
-});
 
 }
 
