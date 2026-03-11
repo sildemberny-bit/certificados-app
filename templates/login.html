@@ -2,7 +2,9 @@
 <html>
 <head>
     <title>Emitte - Login</title>
+
     <style>
+
         body {
             margin: 0;
             font-family: Arial, sans-serif;
@@ -52,19 +54,25 @@
         button:hover {
             background-color: #162d66;
         }
+
     </style>
+
 </head>
+
 <body>
 
 <div class="login-box">
 
-    <!-- LOGO -->
     <img src="{{ url_for('static', filename='logo.png') }}" class="logo">
 
     <form method="POST">
-        <input name="email" placeholder="Usuário" required>
-        <input name="password" type="password" placeholder="Senha" required>
+
+        <input name="usuario" placeholder="Usuário" required>
+
+        <input name="senha" type="password" placeholder="Senha" required>
+
         <button type="submit">Entrar</button>
+
     </form>
 
 </div>
