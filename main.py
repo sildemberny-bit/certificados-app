@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, send_file, redirect, session
+from flask import Flask, render_template, request, redirect, session, send_file
 import pandas as pd
 from PIL import Image, ImageDraw, ImageFont
 import io
@@ -11,11 +11,13 @@ USER = "admin"
 PASSWORD = "123"
 
 
+# LANDING
 @app.route("/")
-def home():
+def index():
     return render_template("index.html")
 
 
+# LOGIN
 @app.route("/login", methods=["GET","POST"])
 def login():
 
@@ -31,13 +33,14 @@ def login():
     return render_template("login.html")
 
 
+# LOGOUT
 @app.route("/logout")
 def logout():
-
     session.clear()
     return redirect("/")
 
 
+# TELA PRINCIPAL
 @app.route("/certificados")
 def certificados():
 
@@ -47,6 +50,31 @@ def certificados():
     return render_template("certificados.html")
 
 
+# FUNÇÃO DE QUEBRA DE LINHA
+def quebrar_linhas(texto, draw, font, largura_max):
+
+    palavras = texto.split()
+    linhas = []
+    linha = ""
+
+    for palavra in palavras:
+
+        teste = linha + " " + palavra
+
+        w,h = draw.textsize(teste,font=font)
+
+        if w <= largura_max:
+            linha = teste
+        else:
+            linhas.append(linha)
+            linha = palavra
+
+    linhas.append(linha)
+
+    return linhas
+
+
+# PREVIEW
 @app.route("/preview", methods=["POST"])
 def preview():
 
@@ -69,47 +97,23 @@ def preview():
         except:
             font = ImageFont.load_default()
 
-        largura_texto = int(largura * 0.8)
+        largura_texto = int(largura * 0.75)
 
-        linhas = []
-
-        palavras = texto.split()
-
-        linha = ""
-
-        for palavra in palavras:
-
-            teste = linha + " " + palavra
-
-            w, h = draw.textsize(teste, font=font)
-
-            if w <= largura_texto:
-
-                linha = teste
-
-            else:
-
-                linhas.append(linha)
-
-                linha = palavra
-
-        linhas.append(linha)
-
-        altura_bloco = len(linhas) * (fonte_size + 5)
+        linhas = quebrar_linhas(texto, draw, font, largura_texto)
 
         if posicao == "acima":
-            y = int(altura * 0.35)
+            y = altura * 0.35
         elif posicao == "abaixo":
-            y = int(altura * 0.65)
+            y = altura * 0.65
         else:
-            y = int(altura * 0.5)
+            y = altura * 0.5
 
         for linha in linhas:
 
-            w, h = draw.textsize(linha, font=font)
+            w,h = draw.textsize(linha,font=font)
 
             if alinhamento == "centro":
-                x = (largura - w) / 2
+                x = (largura - w)/2
             elif alinhamento == "direita":
                 x = largura - w - 100
             else:
@@ -117,23 +121,19 @@ def preview():
 
             draw.text((x,y), linha, fill="black", font=font)
 
-            y += fonte_size + 5
-
+            y += fonte_size + 6
 
         buffer = io.BytesIO()
-
         img.save(buffer, format="PNG")
-
         buffer.seek(0)
 
         return send_file(buffer, mimetype="image/png")
 
     except Exception as e:
-
-        return str(e), 500
-
+        return str(e),500
 
 
+# GERAR CERTIFICADOS
 @app.route("/gerar", methods=["POST"])
 def gerar():
 
@@ -154,7 +154,6 @@ def gerar():
         largura, altura = img_base.size
 
         zip_buffer = io.BytesIO()
-
         zip_file = zipfile.ZipFile(zip_buffer,"w")
 
         try:
@@ -162,11 +161,9 @@ def gerar():
         except:
             font = ImageFont.load_default()
 
-
-        for _, row in df.iterrows():
+        for _,row in df.iterrows():
 
             img = img_base.copy()
-
             draw = ImageDraw.Draw(img)
 
             texto_final = texto
@@ -174,34 +171,16 @@ def gerar():
             for col in df.columns:
                 texto_final = texto_final.replace("{"+col+"}", str(row[col]))
 
-            largura_texto = int(largura * 0.8)
+            largura_texto = int(largura * 0.75)
 
-            palavras = texto_final.split()
-
-            linhas = []
-
-            linha = ""
-
-            for palavra in palavras:
-
-                teste = linha + " " + palavra
-
-                w,h = draw.textsize(teste,font=font)
-
-                if w <= largura_texto:
-                    linha = teste
-                else:
-                    linhas.append(linha)
-                    linha = palavra
-
-            linhas.append(linha)
+            linhas = quebrar_linhas(texto_final, draw, font, largura_texto)
 
             if posicao == "acima":
-                y = int(altura * 0.35)
+                y = altura * 0.35
             elif posicao == "abaixo":
-                y = int(altura * 0.65)
+                y = altura * 0.65
             else:
-                y = int(altura * 0.5)
+                y = altura * 0.5
 
             for linha in linhas:
 
@@ -216,20 +195,16 @@ def gerar():
 
                 draw.text((x,y), linha, fill="black", font=font)
 
-                y += fonte_size + 5
+                y += fonte_size + 6
 
-
-            buffer = io.BytesIO()
-
-            img.save(buffer, format="PDF")
+            pdf_buffer = io.BytesIO()
+            img.save(pdf_buffer, format="PDF")
 
             nome = str(row[df.columns[0]])
 
-            zip_file.writestr(nome + ".pdf", buffer.getvalue())
-
+            zip_file.writestr(nome + ".pdf", pdf_buffer.getvalue())
 
         zip_file.close()
-
         zip_buffer.seek(0)
 
         return send_file(zip_buffer,
@@ -237,7 +212,6 @@ def gerar():
                          as_attachment=True)
 
     except Exception as e:
-
         return "Erro interno: " + str(e)
 
 
