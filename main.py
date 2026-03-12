@@ -30,7 +30,6 @@ def login():
         senha = request.form["password"]
 
         if email == USER and senha == PASSWORD:
-
             session["user"] = email
             return redirect("/certificados")
 
@@ -142,7 +141,6 @@ def gerar():
     largura, altura = img_base.size
 
     zip_buffer = io.BytesIO()
-
     zip_file = zipfile.ZipFile(zip_buffer,"w")
 
     try:
@@ -153,7 +151,6 @@ def gerar():
     for _,row in df.iterrows():
 
         img = img_base.copy()
-
         draw = ImageDraw.Draw(img)
 
         texto_final = texto
