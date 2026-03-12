@@ -1,59 +1,73 @@
 <!DOCTYPE html>
 <html>
-
 <head>
-<title>Login</title>
+    <title>Emitte - Login</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #1f3c88, #4a69bd);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
 
-<style>
+        .login-box {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            width: 350px;
+            text-align: center;
+            box-shadow: 0px 10px 30px rgba(0,0,0,0.2);
+        }
 
-body{
-font-family:Arial;
-background:#f4f6f9;
-display:flex;
-justify-content:center;
-align-items:center;
-height:100vh;
-}
+        .logo {
+            width: 140px;
+            margin-bottom: 25px;
+        }
 
-form{
-background:white;
-padding:40px;
-border-radius:8px;
-box-shadow:0 0 10px rgba(0,0,0,0.1);
-}
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+        }
 
-input{
-display:block;
-margin-bottom:15px;
-padding:10px;
-width:250px;
-}
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #1f3c88;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 15px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: 0.3s;
+        }
 
-button{
-padding:10px;
-width:100%;
-background:#1f3c88;
-color:white;
-border:none;
-}
-
-</style>
-
+        button:hover {
+            background-color: #162d66;
+        }
+    </style>
 </head>
-
 <body>
 
-<form method="POST">
+<div class="login-box">
 
-<h2>Login</h2>
+    <!-- LOGO -->
+    <img src="{{ url_for('static', filename='logo.png') }}" class="logo">
 
-<input name="email" placeholder="Email">
+    <form method="POST">
+        <input name="email" placeholder="Usuário" required>
+        <input name="password" type="password" placeholder="Senha" required>
+        <button type="submit">Entrar</button>
+    </form>
 
-<input name="password" type="password" placeholder="Senha">
-
-<button>Entrar</button>
-
-</form>
+</div>
 
 </body>
 </html>
