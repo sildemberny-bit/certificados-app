@@ -13,7 +13,6 @@ import io
 app = Flask(__name__)
 app.secret_key = "emitte_secret"
 
-
 USUARIO = "admin"
 SENHA = "123"
 
@@ -124,14 +123,20 @@ def certificados():
 
                 p = Paragraph(texto_certificado, style)
 
-                if posicao_vertical == "superior":
-                    y = altura_pagina * 0.65
-                elif posicao_vertical == "centro":
-                    y = altura_pagina * 0.50
-                else:
-                    y = altura_pagina * 0.35
+                # calcular tamanho real do bloco
+                w, h = p.wrap(largura_texto, altura_pagina)
 
-                p.wrapOn(c, largura_texto, 500)
+                # área segura (evita invadir logos)
+                topo_seguro = altura_pagina * 0.75
+
+                if posicao_vertical == "superior":
+                    y = topo_seguro - h
+
+                elif posicao_vertical == "centro":
+                    y = (altura_pagina / 2) - (h / 2)
+
+                else:
+                    y = altura_pagina * 0.30
 
                 p.drawOn(
                     c,
