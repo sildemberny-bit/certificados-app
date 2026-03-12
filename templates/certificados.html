@@ -1,89 +1,94 @@
 <!DOCTYPE html>
 <html>
-
 <head>
 
-<title>Gerar Certificados</title>
+<title>Emitte - Gerar Certificados</title>
 
 <style>
 
 body{
 margin:0;
 font-family:Arial;
-display:flex;
-height:100vh;
-background:#f4f6fb;
+background:#f4f6f9;
 }
 
-.sidebar{
-width:35%;
-padding:30px;
-overflow:auto;
-background:white;
-box-shadow:2px 0 8px rgba(0,0,0,0.05);
-}
-
-.preview{
-width:65%;
+header{
+background:#1f3c88;
+color:white;
+padding:15px 40px;
 display:flex;
-justify-content:center;
+justify-content:space-between;
 align-items:center;
 }
 
-.preview img{
-max-width:95%;
-max-height:95%;
-box-shadow:0 10px 30px rgba(0,0,0,0.15);
+header img{
+height:40px;
 }
 
-input,select,textarea{
+.container{
+display:flex;
+height:calc(100vh - 70px);
+}
+
+.form-area{
+width:420px;
+background:white;
+padding:30px;
+overflow:auto;
+box-shadow:2px 0px 10px rgba(0,0,0,0.05);
+}
+
+.preview-area{
+flex:1;
+display:flex;
+justify-content:center;
+align-items:center;
+background:#e9edf4;
+}
+
+.preview-area iframe{
+width:90%;
+height:90%;
+border:none;
+box-shadow:0 4px 20px rgba(0,0,0,0.2);
+}
+
+label{
+display:block;
+margin-top:15px;
+font-weight:bold;
+}
+
+input, select, textarea{
 width:100%;
-padding:10px;
-margin-bottom:12px;
-border-radius:6px;
+padding:8px;
+margin-top:5px;
+border-radius:4px;
 border:1px solid #ccc;
 }
 
 textarea{
-resize:vertical;
+height:120px;
 }
 
 button{
+margin-top:20px;
 padding:12px;
-border:none;
-border-radius:6px;
-cursor:pointer;
-font-size:14px;
-}
-
-.gerar{
+width:100%;
 background:#1f3c88;
 color:white;
-width:100%;
-}
-
-.previewBtn{
-background:#4a69bd;
-color:white;
-width:100%;
-margin-bottom:10px;
+border:none;
+border-radius:6px;
+font-size:15px;
+cursor:pointer;
 }
 
 .logout{
-position:absolute;
-top:20px;
-right:20px;
-background:#e74c3c;
+background:#999;
+padding:8px 14px;
+border-radius:4px;
 color:white;
-padding:10px 16px;
-border-radius:6px;
 text-decoration:none;
-font-size:14px;
-}
-
-.logo{
-width:130px;
-margin-bottom:20px;
 }
 
 </style>
@@ -92,25 +97,34 @@ margin-bottom:20px;
 
 <body>
 
-<a href="/logout" class="logout">Sair</a>
+<header>
 
-<div class="sidebar">
+<img src="/static/logo.png">
 
-<img src="/static/logo.png" class="logo">
+<a class="logout" href="/logout">Sair</a>
 
-<form id="form" method="POST" enctype="multipart/form-data">
+</header>
+
+
+<div class="container">
+
+
+<div class="form-area">
+
+<form id="certForm" method="POST" enctype="multipart/form-data">
 
 <label>Planilha Excel</label>
-<input type="file" name="planilha">
+<input type="file" name="planilha" required>
 
-<label>Fundo do certificado</label>
-<input type="file" name="fundo" id="fundo">
+<label>Imagem de Fundo</label>
+<input type="file" name="fundo" id="fundoInput" required>
 
-<label>Texto do certificado</label>
-<textarea name="texto" rows="7"></textarea>
+<label>Texto do Certificado</label>
+<textarea name="texto" id="textoInput"></textarea>
 
-<label>Tamanho da fonte</label>
-<select name="fonte">
+
+<label>Tamanho da Fonte</label>
+<select name="fonte" id="fonteInput">
 <option>10</option>
 <option>12</option>
 <option>14</option>
@@ -119,71 +133,96 @@ margin-bottom:20px;
 <option>20</option>
 </select>
 
+
 <label>Alinhamento</label>
-<select name="alinhamento">
-<option value="esquerda">Esquerda</option>
+<select name="alinhamento" id="alinhamentoInput">
 <option value="centro">Centro</option>
+<option value="esquerda">Esquerda</option>
 <option value="direita">Direita</option>
 </select>
 
-<label>Posição vertical</label>
-<select name="posicao">
+
+<label>Posição Vertical</label>
+<select name="posicao" id="posicaoInput">
 <option value="acima">Acima</option>
 <option value="centro">Centro</option>
 <option value="abaixo">Abaixo</option>
 </select>
 
+
 <label>Município</label>
-<input name="municipio">
+<input type="text" name="municipio" id="municipioInput">
 
 <label>Dia</label>
-<input name="dia">
+<input type="text" name="dia" id="diaInput">
 
 <label>Mês</label>
-<input name="mes">
+<input type="text" name="mes" id="mesInput">
 
 <label>Ano</label>
-<input name="ano">
+<input type="text" name="ano" id="anoInput">
 
-<button type="button" class="previewBtn" onclick="preview()">Atualizar Preview</button>
 
-<button type="submit" class="gerar">Gerar Certificados</button>
+<button type="submit">
+Gerar Certificados
+</button>
 
 </form>
 
 </div>
 
-<div class="preview">
 
-<img id="previewImg">
+
+<div class="preview-area">
+
+<iframe id="previewFrame"></iframe>
 
 </div>
 
+
+</div>
+
+
 <script>
 
-function preview(){
+const form = document.getElementById("certForm")
+const previewFrame = document.getElementById("previewFrame")
 
-let form=document.getElementById("form")
+const inputs = document.querySelectorAll("#certForm input, #certForm select, #certForm textarea")
 
-let data=new FormData(form)
+inputs.forEach(input => {
 
-fetch("/preview",{method:"POST",body:data})
-.then(r=>r.blob())
-.then(blob=>{
+input.addEventListener("change", atualizarPreview)
+input.addEventListener("keyup", atualizarPreview)
 
-let url=URL.createObjectURL(blob)
+})
 
-document.getElementById("previewImg").src=url
+
+function atualizarPreview(){
+
+const fundo = document.getElementById("fundoInput").files[0]
+
+if(!fundo) return
+
+const formData = new FormData(form)
+
+fetch("/preview",{
+method:"POST",
+body:formData
+})
+.then(res => res.blob())
+.then(blob => {
+
+const url = URL.createObjectURL(blob)
+
+previewFrame.src = url
 
 })
 
 }
 
-document.querySelectorAll("input, textarea, select").forEach(el=>{
-el.addEventListener("change", preview)
-})
-
 </script>
+
 
 </body>
 </html>
