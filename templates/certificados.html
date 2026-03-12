@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html>
 <head>
-
 <title>Emitte - Gerador</title>
 
 <style>
@@ -40,12 +39,39 @@ background:white;
 padding:20px;
 border-radius:10px;
 box-shadow:0px 4px 15px rgba(0,0,0,0.1);
+text-align:center;
 }
 
-iframe{
+.preview-wrapper{
+position:relative;
 width:100%;
-height:600px;
-border:none;
+}
+
+#preview-img{
+width:100%;
+display:none;
+}
+
+#preview-text{
+
+position:absolute;
+
+width:85%;
+left:7.5%;
+
+top:50%;
+transform:translateY(-50%);
+
+text-align:center;
+
+font-size:16px;
+
+white-space:pre-wrap;
+
+line-height:1.3;
+
+word-wrap:break-word;
+
 }
 
 input,select,textarea{
@@ -67,7 +93,6 @@ cursor:pointer;
 }
 
 </style>
-
 </head>
 
 <body>
@@ -84,7 +109,7 @@ cursor:pointer;
 
 <div class="form-box">
 
-<form id="form-certificado" method="POST" enctype="multipart/form-data">
+<form method="POST" enctype="multipart/form-data">
 
 <label>Imagem de Fundo</label>
 <input type="file" name="fundo" id="fundo" accept=".jpg,.jpeg" required>
@@ -93,87 +118,143 @@ cursor:pointer;
 <input type="file" name="planilha" accept=".xlsx" required>
 
 <label>Texto do Certificado</label>
-<textarea name="texto" id="texto" rows="5" required></textarea>
+
+<textarea
+name="texto"
+id="texto"
+rows="5"
+placeholder="Ex: Certificamos que {NOME} participou..."
+required></textarea>
 
 <label>Tamanho da Fonte</label>
+
 <select name="fonte" id="fonte">
+
 <option value="10">10</option>
 <option value="12">12</option>
 <option value="14">14</option>
 <option value="16">16</option>
 <option value="18">18</option>
 <option value="20">20</option>
+
 </select>
 
 <label>Alinhamento</label>
+
 <select name="alinhamento" id="alinhamento">
+
 <option value="centro">Centro</option>
 <option value="esquerda">Esquerda</option>
 <option value="direita">Direita</option>
+
 </select>
 
 <label>Posição Vertical</label>
-<select name="posicao_vertical" id="posicao_vertical">
+
+<select name="posicao_vertical" id="posicao">
+
 <option value="superior">Superior</option>
-<option value="centro">Centro</option>
+<option value="centro" selected>Centro</option>
 <option value="inferior">Inferior</option>
+
 </select>
 
-<button type="button" onclick="gerarPreview()">
-Atualizar Preview
-</button>
-
-<br><br>
-
 <button type="submit">
+
 Gerar Certificados
+
 </button>
 
 </form>
 
 </div>
 
+
 <div class="preview-box">
 
 <h3>Preview</h3>
 
-<iframe id="preview-frame"></iframe>
+<div class="preview-wrapper">
+
+<img id="preview-img">
+
+<div id="preview-text"></div>
 
 </div>
 
 </div>
+
+</div>
+
 
 <script>
 
-function gerarPreview(){
+const fundoInput = document.getElementById("fundo");
+const previewImg = document.getElementById("preview-img");
 
-let fundo = document.getElementById("fundo").files[0]
+const textoInput = document.getElementById("texto");
+const previewText = document.getElementById("preview-text");
 
-if(!fundo){
-alert("Selecione a imagem de fundo primeiro")
-return
+const fonteInput = document.getElementById("fonte");
+const alinhamentoInput = document.getElementById("alinhamento");
+const posicaoInput = document.getElementById("posicao");
+
+
+fundoInput.addEventListener("change", function(event){
+
+const file = event.target.files[0];
+
+if(file){
+
+previewImg.src = URL.createObjectURL(file);
+previewImg.style.display = "block";
+
+atualizarPreview();
+
 }
 
-let data = new FormData()
+});
 
-data.append("fundo", fundo)
-data.append("texto",document.getElementById("texto").value)
-data.append("fonte",document.getElementById("fonte").value)
-data.append("alinhamento",document.getElementById("alinhamento").value)
-data.append("posicao_vertical",document.getElementById("posicao_vertical").value)
 
-fetch("/preview",{
-method:"POST",
-body:data
-})
-.then(res => res.blob())
-.then(blob => {
+textoInput.addEventListener("input", atualizarPreview);
+fonteInput.addEventListener("change", atualizarPreview);
+alinhamentoInput.addEventListener("change", atualizarPreview);
+posicaoInput.addEventListener("change", atualizarPreview);
 
-let url = URL.createObjectURL(blob)
 
-document.getElementById("preview-frame").src = url
+function atualizarPreview(){
 
-})
+previewText.innerText = textoInput.value;
+
+previewText.style.fontSize = fonteInput.value + "px";
+
+previewText.style.lineHeight = "1.3";
+
+
+if(alinhamentoInput.value === "centro"){
+previewText.style.textAlign = "center";
+}
+
+if(alinhamentoInput.value === "esquerda"){
+previewText.style.textAlign = "left";
+}
+
+if(alinhamentoInput.value === "direita"){
+previewText.style.textAlign = "right";
+}
+
+
+if(posicaoInput.value === "superior"){
+previewText.style.top = "30%";
+}
+
+if(posicaoInput.value === "centro"){
+previewText.style.top = "50%";
+}
+
+if(posicaoInput.value === "inferior"){
+previewText.style.top = "70%";
+}
 
 }
 
