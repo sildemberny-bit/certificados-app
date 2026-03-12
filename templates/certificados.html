@@ -2,7 +2,7 @@
 <html>
 <head>
 
-<title>Emitte - Gerar Certificados</title>
+<title>Emitte - Certificados</title>
 
 <style>
 
@@ -47,9 +47,8 @@ max-height:90%;
 box-shadow:0 4px 20px rgba(0,0,0,0.2);
 }
 
-input, select, textarea{
+input,select,textarea{
 width:100%;
-margin-top:8px;
 margin-bottom:12px;
 padding:8px;
 }
@@ -98,9 +97,9 @@ text-decoration:none;
 <input type="file" name="fundo" id="fundo">
 
 <label>Texto</label>
-<textarea name="texto" id="texto"></textarea>
+<textarea name="texto" id="texto" rows="6"></textarea>
 
-<label>Fonte</label>
+<label>Tamanho da fonte</label>
 <select name="fonte" id="fonte">
 <option>10</option>
 <option>12</option>
@@ -117,7 +116,7 @@ text-decoration:none;
 <option value="direita">Direita</option>
 </select>
 
-<label>Posição</label>
+<label>Posição Vertical</label>
 <select name="posicao" id="posicao">
 <option value="acima">Acima</option>
 <option value="centro">Centro</option>
@@ -140,12 +139,14 @@ text-decoration:none;
 
 <script>
 
-const inputs = document.querySelectorAll("input,textarea,select")
+const form = document.getElementById("certForm")
 
-inputs.forEach(el => {
+const campos = document.querySelectorAll("input, textarea, select")
 
-el.addEventListener("change", atualizarPreview)
-el.addEventListener("keyup", atualizarPreview)
+campos.forEach(c => {
+
+c.addEventListener("change", atualizarPreview)
+c.addEventListener("keyup", atualizarPreview)
 
 })
 
@@ -155,9 +156,13 @@ const fundo = document.getElementById("fundo").files[0]
 
 if(!fundo) return
 
-const form = document.getElementById("certForm")
+const data = new FormData()
 
-const data = new FormData(form)
+data.append("fundo", fundo)
+data.append("texto", document.getElementById("texto").value)
+data.append("fonte", document.getElementById("fonte").value)
+data.append("alinhamento", document.getElementById("alinhamento").value)
+data.append("posicao", document.getElementById("posicao").value)
 
 fetch("/preview",{
 method:"POST",
