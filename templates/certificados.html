@@ -66,16 +66,24 @@
 
         #preview-text {
             position: absolute;
-            width: 90%;
-            left: 5%;
+
+            width: 96%;
+            left: 2%;
+
             top: 50%;
             transform: translateY(-50%);
+
             text-align: center;
+
             font-size: 16px;
-            white-space: pre-wrap;
-            line-height: 1.6;
-            word-wrap: break-word;
-            padding: 0 40px;
+
+            white-space: normal;
+            word-break: normal;
+            overflow-wrap: normal;
+
+            line-height: 1.3;
+
+            padding: 0 10px;
         }
 
         input, select, textarea {
@@ -240,7 +248,7 @@ function atualizarPreview(){
 
     previewText.style.fontSize = fonteInput.value + "px";
 
-    previewText.style.lineHeight = "1.6";
+    previewText.style.lineHeight = "1.3";
 
     if(alinhamentoInput.value === "centro"){
         previewText.style.textAlign = "center";
@@ -271,3 +279,4 @@ function atualizarPreview(){
 </script>
 
 </body>
+</html>
