@@ -87,10 +87,10 @@ cursor:pointer;
 <form id="form-certificado" method="POST" enctype="multipart/form-data">
 
 <label>Imagem de Fundo</label>
-<input type="file" name="fundo" id="fundo" required>
+<input type="file" name="fundo" id="fundo" accept=".jpg,.jpeg" required>
 
 <label>Planilha Excel</label>
-<input type="file" name="planilha" required>
+<input type="file" name="planilha" accept=".xlsx" required>
 
 <label>Texto do Certificado</label>
 <textarea name="texto" id="texto" rows="5" required></textarea>
@@ -133,10 +133,9 @@ Gerar Certificados
 
 </div>
 
-
 <div class="preview-box">
 
-<h3>Preview Real do Certificado</h3>
+<h3>Preview</h3>
 
 <iframe id="preview-frame"></iframe>
 
@@ -148,11 +147,16 @@ Gerar Certificados
 
 function gerarPreview(){
 
-let form = document.getElementById("form-certificado")
+let fundo = document.getElementById("fundo").files[0]
+
+if(!fundo){
+alert("Selecione a imagem de fundo primeiro")
+return
+}
 
 let data = new FormData()
 
-data.append("fundo",document.getElementById("fundo").files[0])
+data.append("fundo", fundo)
 data.append("texto",document.getElementById("texto").value)
 data.append("fonte",document.getElementById("fonte").value)
 data.append("alinhamento",document.getElementById("alinhamento").value)
