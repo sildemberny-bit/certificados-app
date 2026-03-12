@@ -1,11 +1,11 @@
-from flask import Flask, render_template, request, redirect, send_file, session, jsonify
+from flask import Flask, render_template, request, redirect, send_file, session
 import pandas as pd
 from PIL import Image
 from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import A4, landscape
+from reportlab.lib.pagesizes import landscape, A4
 from reportlab.lib.utils import ImageReader
-from reportlab.lib.styles import ParagraphStyle
 from reportlab.platypus import Paragraph
+from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
 import zipfile
 import io
@@ -31,7 +31,6 @@ def login():
         senha = request.form.get("password")
 
         if usuario == USUARIO and senha == SENHA:
-
             session["user"] = usuario
             return redirect("/certificados")
 
@@ -86,16 +85,15 @@ def gerar_pdf(fundo, texto, fonte, alinhamento, posicao_vertical):
         alignment=alinh
     )
 
-    texto = texto.replace("\n","<br/><br/>")
+    # corrigido aqui
+    texto = texto.replace("\n","<br/>")
 
     p = Paragraph(texto, style)
 
     w, h = p.wrap(largura_texto, altura_pagina)
 
-    topo_seguro = altura_pagina * 0.75
-
     if posicao_vertical == "superior":
-        y = topo_seguro - h
+        y = altura_pagina * 0.75
     elif posicao_vertical == "centro":
         y = (altura_pagina / 2) - (h / 2)
     else:
