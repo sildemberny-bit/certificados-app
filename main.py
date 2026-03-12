@@ -23,8 +23,8 @@ def login():
 
     if request.method == "POST":
 
-        email = request.form["email"]
-        senha = request.form["password"]
+        email = request.form.get("email")
+        senha = request.form.get("password")
 
         if email == USER and senha == PASSWORD:
             session["user"] = email
@@ -50,7 +50,7 @@ def certificados():
     return render_template("certificados.html")
 
 
-# FUNÇÃO DE QUEBRA DE LINHA
+# QUEBRA DE LINHAS
 def quebrar_linhas(texto, draw, font, largura_max):
 
     palavras = texto.split()
@@ -59,17 +59,17 @@ def quebrar_linhas(texto, draw, font, largura_max):
 
     for palavra in palavras:
 
-        teste = linha + " " + palavra
+        teste = linha + " " + palavra if linha else palavra
+        largura, _ = draw.textbbox((0,0), teste, font=font)[2:]
 
-        w,h = draw.textsize(teste,font=font)
-
-        if w <= largura_max:
+        if largura <= largura_max:
             linha = teste
         else:
             linhas.append(linha)
             linha = palavra
 
-    linhas.append(linha)
+    if linha:
+        linhas.append(linha)
 
     return linhas
 
@@ -80,11 +80,14 @@ def preview():
 
     try:
 
-        fundo = request.files["fundo"]
+        fundo = request.files.get("fundo")
         texto = request.form.get("texto","")
         fonte_size = int(request.form.get("fonte",12))
         alinhamento = request.form.get("alinhamento","centro")
         posicao = request.form.get("posicao","centro")
+
+        if not fundo:
+            return "sem fundo",400
 
         img = Image.open(fundo).convert("RGB")
 
@@ -102,18 +105,18 @@ def preview():
         linhas = quebrar_linhas(texto, draw, font, largura_texto)
 
         if posicao == "acima":
-            y = altura * 0.35
+            y = int(altura * 0.35)
         elif posicao == "abaixo":
-            y = altura * 0.65
+            y = int(altura * 0.65)
         else:
-            y = altura * 0.5
+            y = int(altura * 0.5)
 
         for linha in linhas:
 
-            w,h = draw.textsize(linha,font=font)
+            w = draw.textbbox((0,0), linha, font=font)[2]
 
             if alinhamento == "centro":
-                x = (largura - w)/2
+                x = (largura - w)//2
             elif alinhamento == "direita":
                 x = largura - w - 100
             else:
@@ -121,7 +124,7 @@ def preview():
 
             draw.text((x,y), linha, fill="black", font=font)
 
-            y += fonte_size + 6
+            y += fonte_size + 8
 
         buffer = io.BytesIO()
         img.save(buffer, format="PNG")
@@ -139,8 +142,8 @@ def gerar():
 
     try:
 
-        planilha = request.files["planilha"]
-        fundo = request.files["fundo"]
+        planilha = request.files.get("planilha")
+        fundo = request.files.get("fundo")
 
         texto = request.form.get("texto","")
         fonte_size = int(request.form.get("fonte",12))
@@ -176,18 +179,18 @@ def gerar():
             linhas = quebrar_linhas(texto_final, draw, font, largura_texto)
 
             if posicao == "acima":
-                y = altura * 0.35
+                y = int(altura * 0.35)
             elif posicao == "abaixo":
-                y = altura * 0.65
+                y = int(altura * 0.65)
             else:
-                y = altura * 0.5
+                y = int(altura * 0.5)
 
             for linha in linhas:
 
-                w,h = draw.textsize(linha,font=font)
+                w = draw.textbbox((0,0), linha, font=font)[2]
 
                 if alinhamento == "centro":
-                    x = (largura - w)/2
+                    x = (largura - w)//2
                 elif alinhamento == "direita":
                     x = largura - w - 100
                 else:
@@ -195,7 +198,7 @@ def gerar():
 
                 draw.text((x,y), linha, fill="black", font=font)
 
-                y += fonte_size + 6
+                y += fonte_size + 8
 
             pdf_buffer = io.BytesIO()
             img.save(pdf_buffer, format="PDF")
@@ -207,9 +210,11 @@ def gerar():
         zip_file.close()
         zip_buffer.seek(0)
 
-        return send_file(zip_buffer,
-                         download_name="certificados.zip",
-                         as_attachment=True)
+        return send_file(
+            zip_buffer,
+            download_name="certificados.zip",
+            as_attachment=True
+        )
 
     except Exception as e:
         return "Erro interno: " + str(e)
