@@ -7,7 +7,6 @@ from reportlab.lib.utils import ImageReader
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.platypus import Paragraph
 from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
-from reportlab.lib.units import cm
 import zipfile
 import os
 import io
@@ -15,13 +14,14 @@ import io
 app = Flask(__name__)
 app.secret_key = "emitte_secret"
 
-EMAIL = "admin@emitte.com"
-SENHA = "123456"
+
+USUARIO = "admin"
+SENHA = "123"
 
 
 @app.route("/")
-def home():
-    return redirect("/login")
+def landing():
+    return render_template("landing.html")
 
 
 @app.route("/login", methods=["GET","POST"])
@@ -29,11 +29,12 @@ def login():
 
     if request.method == "POST":
 
-        email = request.form.get("email")
+        usuario = request.form.get("email")
         senha = request.form.get("password")
 
-        if email == EMAIL and senha == SENHA:
-            session["user"] = email
+        if usuario == USUARIO and senha == SENHA:
+
+            session["user"] = usuario
             return redirect("/certificados")
 
     return render_template("login.html")
@@ -43,7 +44,7 @@ def login():
 def logout():
 
     session.pop("user",None)
-    return redirect("/login")
+    return redirect("/")
 
 
 @app.route("/certificados", methods=["GET","POST"])
@@ -65,7 +66,6 @@ def certificados():
         df = pd.read_excel(planilha)
 
         imagem = Image.open(fundo)
-        largura, altura = imagem.size
 
         buffer_zip = io.BytesIO()
 
@@ -78,6 +78,7 @@ def certificados():
                 for coluna in df.columns:
 
                     valor = str(linha[coluna])
+
                     texto_certificado = texto_certificado.replace(
                         "{" + coluna.upper() + "}",
                         f"<b>{valor}</b>"
@@ -103,11 +104,9 @@ def certificados():
 
                 if alinhamento == "centro":
                     alinh = TA_CENTER
-
                 elif alinhamento == "esquerda":
                     alinh = TA_LEFT
-
-                elif alinhamento == "direita":
+                else:
                     alinh = TA_RIGHT
 
                 style = ParagraphStyle(
@@ -122,11 +121,9 @@ def certificados():
 
                 if posicao_vertical == "superior":
                     y = A4[1] * 0.65
-
                 elif posicao_vertical == "centro":
                     y = A4[1] * 0.50
-
-                elif posicao_vertical == "inferior":
+                else:
                     y = A4[1] * 0.35
 
                 p.wrapOn(c, largura_texto, 500)
@@ -141,10 +138,8 @@ def certificados():
 
                 buffer_pdf.seek(0)
 
-                nome_arquivo = f"certificado_{i+1}.pdf"
-
                 zipf.writestr(
-                    nome_arquivo,
+                    f"certificado_{i+1}.pdf",
                     buffer_pdf.read()
                 )
 
