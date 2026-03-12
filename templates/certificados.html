@@ -46,11 +46,11 @@ align-items:center;
 background:#e9edf4;
 }
 
-.preview-area iframe{
-width:90%;
-height:90%;
-border:none;
+.preview-area img{
+max-width:95%;
+max-height:90%;
 box-shadow:0 4px 20px rgba(0,0,0,0.2);
+border-radius:4px;
 }
 
 label{
@@ -114,7 +114,7 @@ text-decoration:none;
 <form id="certForm" method="POST" enctype="multipart/form-data">
 
 <label>Planilha Excel</label>
-<input type="file" name="planilha" required>
+<input type="file" name="planilha">
 
 <label>Imagem de Fundo</label>
 <input type="file" name="fundo" id="fundoInput" required>
@@ -175,7 +175,7 @@ Gerar Certificados
 
 <div class="preview-area">
 
-<iframe id="previewFrame"></iframe>
+<img id="previewImage">
 
 </div>
 
@@ -186,7 +186,7 @@ Gerar Certificados
 <script>
 
 const form = document.getElementById("certForm")
-const previewFrame = document.getElementById("previewFrame")
+const previewImage = document.getElementById("previewImage")
 
 const inputs = document.querySelectorAll("#certForm input, #certForm select, #certForm textarea")
 
@@ -215,7 +215,7 @@ body:formData
 
 const url = URL.createObjectURL(blob)
 
-previewFrame.src = url
+previewImage.src = url
 
 })
 
