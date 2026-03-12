@@ -5,9 +5,9 @@ from reportlab.lib.pagesizes import A4, landscape
 from reportlab.lib.utils import ImageReader
 import os
 import zipfile
-import textwrap
 import re
 from datetime import datetime
+from reportlab.pdfbase.pdfmetrics import stringWidth
 
 app = Flask(__name__)
 app.secret_key = "emitte_super_secreta"
@@ -22,8 +22,11 @@ os.makedirs(OUTPUT_FOLDER, exist_ok=True)
 USUARIO_LOGIN = "admin"
 USUARIO_SENHA = "123"
 
-# ===== FUNÇÃO PARA REGISTRAR MÉTRICAS =====
+
+# ===== MÉTRICAS =====
+
 def registrar_metricas(qtd_certificados):
+
     agora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     if not os.path.exists(METRICS_FILE):
@@ -53,21 +56,26 @@ def registrar_metricas(qtd_certificados):
 
 
 # ===== LANDING =====
+
 @app.route("/")
 def landing():
     return render_template("landing.html")
 
 
 # ===== GUIA =====
+
 @app.route("/guia")
 def guia():
     return render_template("guia.html")
 
 
 # ===== LOGIN =====
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
+
     if request.method == "POST":
+
         login = request.form["email"]
         senha = request.form["password"]
 
@@ -79,13 +87,42 @@ def login():
 
 
 # ===== LOGOUT =====
+
 @app.route("/logout")
 def logout():
+
     session.pop("usuario", None)
     return redirect("/")
 
 
+# ===== FUNÇÃO DE QUEBRA DE TEXTO INTELIGENTE =====
+
+def quebrar_linhas(texto, largura_max, fonte_nome, fonte_tamanho):
+
+    palavras = texto.split()
+    linhas = []
+    linha_atual = ""
+
+    for palavra in palavras:
+
+        teste = linha_atual + " " + palavra if linha_atual else palavra
+
+        largura = stringWidth(teste, fonte_nome, fonte_tamanho)
+
+        if largura <= largura_max:
+            linha_atual = teste
+        else:
+            linhas.append(linha_atual)
+            linha_atual = palavra
+
+    if linha_atual:
+        linhas.append(linha_atual)
+
+    return linhas
+
+
 # ===== CERTIFICADOS =====
+
 @app.route("/certificados", methods=["GET", "POST"])
 def certificados():
 
@@ -93,8 +130,10 @@ def certificados():
         return redirect("/login")
 
     if request.method == "POST":
+
         fundo = request.files["fundo"]
         planilha = request.files["planilha"]
+
         texto_modelo = request.form["texto"]
         tamanho_fonte = int(request.form["fonte"])
         alinhamento = request.form["alinhamento"]
@@ -114,6 +153,7 @@ def certificados():
         for index, row in df.iterrows():
 
             texto_final = texto_modelo
+
             campos = re.findall(r"\{(.*?)\}", texto_modelo)
 
             for campo in campos:
@@ -127,39 +167,95 @@ def certificados():
                             flags=re.IGNORECASE
                         )
 
+            texto_final = re.sub(r"\.\s+([a-z])", lambda m: ". " + m.group(1).upper(), texto_final)
+
             nome_arquivo = f"certificado_{index}.pdf"
             caminho_pdf = os.path.join(OUTPUT_FOLDER, nome_arquivo)
 
             largura, altura = landscape(A4)
+
             c = canvas.Canvas(caminho_pdf, pagesize=(largura, altura))
 
             fundo_img = ImageReader(fundo_path)
             c.drawImage(fundo_img, 0, 0, width=largura, height=altura)
 
-            c.setFont("Helvetica", tamanho_fonte)
+            fonte_nome = "Helvetica"
 
-            linhas = textwrap.wrap(texto_final, width=80)
+            c.setFont(fonte_nome, tamanho_fonte)
+
+            margem = largura * 0.125
+            largura_texto = largura - (margem * 2)
+
+            paragrafos = texto_final.split("\n\n")
+
+            linhas = []
+
+            for p in paragrafos:
+
+                linhas_paragrafo = quebrar_linhas(p, largura_texto, fonte_nome, tamanho_fonte)
+
+                linhas.extend(linhas_paragrafo)
+                linhas.append("")
+
+            espacamento = tamanho_fonte * 1.35
 
             if posicao_vertical == "superior":
                 y_inicial = altura * 0.65
             elif posicao_vertical == "inferior":
                 y_inicial = altura * 0.35
             else:
-                y_inicial = altura * 0.50
+                y_inicial = altura * 0.55
 
-            espacamento = tamanho_fonte + 8
+            y = y_inicial
 
-            for i, linha in enumerate(linhas):
-                y = y_inicial - (i * espacamento)
+            for linha in linhas:
+
+                if linha == "":
+                    y -= espacamento
+                    continue
 
                 if alinhamento == "centro":
+
                     c.drawCentredString(largura / 2, y, linha)
+
                 elif alinhamento == "esquerda":
-                    c.drawString(100, y, linha)
+
+                    c.drawString(margem, y, linha)
+
                 elif alinhamento == "direita":
-                    c.drawRightString(largura - 100, y, linha)
+
+                    c.drawRightString(largura - margem, y, linha)
+
+                elif alinhamento == "justificado":
+
+                    palavras = linha.split()
+
+                    if len(palavras) == 1:
+                        c.drawString(margem, y, linha)
+
+                    else:
+
+                        largura_palavras = sum(
+                            stringWidth(p, fonte_nome, tamanho_fonte)
+                            for p in palavras
+                        )
+
+                        espacos = len(palavras) - 1
+
+                        espaco_extra = (largura_texto - largura_palavras) / espacos
+
+                        x = margem
+
+                        for palavra in palavras:
+
+                            c.drawString(x, y, palavra)
+
+                            x += stringWidth(palavra, fonte_nome, tamanho_fonte) + espaco_extra
+
+                y -= espacamento
 
             c.save()
+
             arquivos_gerados.append(caminho_pdf)
 
         zip_path = os.path.join(OUTPUT_FOLDER, "certificados.zip")
@@ -168,7 +264,6 @@ def certificados():
             for arquivo in arquivos_gerados:
                 zipf.write(arquivo, os.path.basename(arquivo))
 
-        # 🔥 REGISTRA MÉTRICAS
         registrar_metricas(len(arquivos_gerados))
 
         return send_file(zip_path, as_attachment=True)
