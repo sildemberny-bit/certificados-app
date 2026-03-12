@@ -14,9 +14,9 @@ USUARIO = "admin"
 SENHA = "123"
 
 
-# =============================
-# LANDING PAGE
-# =============================
+# =========================
+# LANDING
+# =========================
 
 @app.route("/")
 def landing():
@@ -28,9 +28,9 @@ def guia():
     return render_template("guia.html")
 
 
-# =============================
+# =========================
 # LOGIN
-# =============================
+# =========================
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -53,9 +53,9 @@ def logout():
     return redirect("/")
 
 
-# =============================
-# CERTIFICADOS
-# =============================
+# =========================
+# FUNÇÕES AUXILIARES
+# =========================
 
 def substituir_variaveis(texto, linha):
 
@@ -66,17 +66,22 @@ def substituir_variaveis(texto, linha):
     return texto
 
 
-def quebrar_texto(texto, largura=85):
+def quebrar_texto(texto, largura=90):
     return textwrap.wrap(texto, largura)
 
 
-def gerar_pdf(linha, texto, fundo_file, fonte, alinhamento, posicao, municipio, dia, mes, ano):
+# =========================
+# GERAR PDF
+# =========================
+
+def gerar_pdf(linha, texto, fundo_bytes, fonte, alinhamento, posicao, municipio, dia, mes, ano):
 
     buffer = io.BytesIO()
 
     c = canvas.Canvas(buffer, pagesize=landscape(A4))
 
-    fundo = ImageReader(fundo_file)
+    fundo = ImageReader(io.BytesIO(fundo_bytes))
+
     c.drawImage(fundo, 0, 0, width=842, height=595)
 
     texto = substituir_variaveis(texto, linha)
@@ -117,6 +122,10 @@ def gerar_pdf(linha, texto, fundo_file, fonte, alinhamento, posicao, municipio, 
     return buffer
 
 
+# =========================
+# GERAR CERTIFICADOS
+# =========================
+
 @app.route("/certificados", methods=["GET", "POST"])
 def certificados():
 
@@ -143,18 +152,19 @@ def certificados():
 
             df = pd.read_excel(planilha)
 
+            # carrega imagem na memória
+            fundo_bytes = fundo.read()
+
             memoria_zip = io.BytesIO()
 
             with zipfile.ZipFile(memoria_zip, "w") as z:
 
                 for _, linha in df.iterrows():
 
-                    fundo.seek(0)
-
                     pdf = gerar_pdf(
                         linha,
                         texto,
-                        fundo,
+                        fundo_bytes,
                         fonte,
                         alinhamento,
                         posicao,
@@ -183,16 +193,21 @@ def certificados():
     return render_template("certificados.html")
 
 
-# =============================
+# =========================
 # PREVIEW
-# =============================
+# =========================
 
 @app.route("/preview", methods=["POST"])
 def preview():
 
     try:
 
-        fundo = request.files["fundo"]
+        fundo = request.files.get("fundo")
+
+        if not fundo:
+            return ""
+
+        fundo_bytes = fundo.read()
 
         texto = request.form.get("texto")
 
@@ -213,7 +228,7 @@ def preview():
         pdf = gerar_pdf(
             exemplo,
             texto,
-            fundo,
+            fundo_bytes,
             fonte,
             alinhamento,
             posicao,
@@ -229,6 +244,10 @@ def preview():
 
         return f"Erro preview: {str(e)}"
 
+
+# =========================
+# RUN
+# =========================
 
 if __name__ == "__main__":
     app.run()
