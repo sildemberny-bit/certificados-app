@@ -1,211 +1,213 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Emitte - Gerador</title>
-    <style>
+<title>Emitte - Gerador</title>
 
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background-color: #f4f6f9;
-        }
+<style>
 
-        header {
-            background: #1f3c88;
-            color: white;
-            padding: 15px 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+body{
+margin:0;
+font-family:Arial;
+background-color:#f4f6f9;
+}
 
-        header h2 {
-            margin: 0;
-            font-weight: normal;
-        }
+header{
+background:#1f3c88;
+color:white;
+padding:15px 40px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
 
-        header a {
-            color: white;
-            text-decoration: none;
-            font-size: 14px;
-        }
+header h2{
+margin:0;
+font-weight:normal;
+}
 
-        .container {
-            display: flex;
-            gap: 40px;
-            padding: 40px;
-        }
+header a{
+color:white;
+text-decoration:none;
+font-size:14px;
+}
 
-        .form-box {
-            width: 35%;
-            background: white;
-            padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0px 4px 15px rgba(0,0,0,0.1);
-        }
+.container{
+display:flex;
+gap:40px;
+padding:40px;
+}
 
-        .preview-box {
-            width: 65%;
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0px 4px 15px rgba(0,0,0,0.1);
-            position: relative;
-            text-align: center;
-        }
+.form-box{
+width:35%;
+background:white;
+padding:25px;
+border-radius:10px;
+box-shadow:0px 4px 15px rgba(0,0,0,0.1);
+}
 
-        .preview-wrapper {
-            position: relative;
-            width: 100%;
-        }
+.preview-box{
+width:65%;
+background:white;
+padding:20px;
+border-radius:10px;
+box-shadow:0px 4px 15px rgba(0,0,0,0.1);
+position:relative;
+text-align:center;
+}
 
-        #preview-img {
-            width: 100%;
-            display: none;
-        }
+.preview-wrapper{
+position:relative;
+width:100%;
+}
 
-        #preview-text {
-            position: absolute;
+#preview-img{
+width:100%;
+display:none;
+}
 
-            width: 96%;
-            left: 2%;
+#preview-text{
 
-            top: 50%;
-            transform: translateY(-50%);
+position:absolute;
 
-            text-align: center;
+width:98%;
+left:1%;
 
-            font-size: 16px;
+top:50%;
+transform:translateY(-50%);
 
-            white-space: normal;
-            word-break: normal;
-            overflow-wrap: normal;
+font-size:16px;
 
-            line-height: 1.3;
+white-space:normal;
+word-break:normal;
+overflow-wrap:normal;
 
-            padding: 0 10px;
-        }
+line-height:1.3;
 
-        input, select, textarea {
-            width: 100%;
-            padding: 10px;
-            margin: 8px 0 15px 0;
-            border-radius: 6px;
-            border: 1px solid #ccc;
-            font-size: 14px;
-        }
+padding:0 5px;
 
-        label {
-            font-size: 13px;
-            color: #555;
-        }
+text-align:center;
 
-        button {
-            width: 100%;
-            padding: 12px;
-            background-color: #1f3c88;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 15px;
-            cursor: pointer;
-        }
+}
 
-        button:hover {
-            background-color: #162d66;
-        }
+input, select, textarea{
+width:100%;
+padding:10px;
+margin:8px 0 15px 0;
+border-radius:6px;
+border:1px solid #ccc;
+font-size:14px;
+}
 
-        h3 {
-            margin-top: 0;
-        }
+label{
+font-size:13px;
+color:#555;
+}
 
-    </style>
+button{
+width:100%;
+padding:12px;
+background-color:#1f3c88;
+color:white;
+border:none;
+border-radius:6px;
+font-size:15px;
+cursor:pointer;
+}
+
+button:hover{
+background-color:#162d66;
+}
+
+h3{
+margin-top:0;
+}
+
+</style>
 </head>
+
 <body>
 
 <header>
-    <h2>Emitte - Gerador de Certificados</h2>
-    <a href="/logout">Sair</a>
+<h2>Emitte - Gerador de Certificados</h2>
+<a href="/logout">Sair</a>
 </header>
 
 <div class="container">
 
-    <div class="form-box">
+<div class="form-box">
 
-        <h3>Configuração</h3>
+<h3>Configuração</h3>
 
-        <form method="POST" enctype="multipart/form-data">
+<form method="POST" enctype="multipart/form-data">
 
-            <label>Imagem de Fundo</label>
-            <input type="file" name="fundo" id="fundo" accept="image/*" required>
+<label>Imagem de Fundo</label>
+<input type="file" name="fundo" id="fundo" accept="image/*" required>
 
-            <label>Planilha Excel (.xlsx)</label>
-            <input type="file" name="planilha" accept=".xlsx" required>
+<label>Planilha Excel (.xlsx)</label>
+<input type="file" name="planilha" accept=".xlsx" required>
 
-            <label>Texto do Certificado</label>
+<label>Texto do Certificado</label>
 
-            <textarea 
-            name="texto" 
-            id="texto"
-            rows="4"
-            placeholder="Ex: Certificamos que {nome} participou do curso {curso}..."
-            required></textarea>
+<textarea
+name="texto"
+id="texto"
+rows="6"
+placeholder="Ex: Certificamos que {NOME} apresentou o projeto {PROJETO}..."
+required></textarea>
 
-            <label>Tamanho da Fonte</label>
+<label>Tamanho da Fonte</label>
 
-            <select name="fonte" id="fonte">
+<select name="fonte" id="fonte">
 
-                {% for i in range(10,21) %}
-                <option value="{{i}}">{{i}}</option>
-                {% endfor %}
+{% for i in range(10,21) %}
+<option value="{{i}}">{{i}}</option>
+{% endfor %}
 
-            </select>
+</select>
 
-            <label>Alinhamento</label>
+<label>Alinhamento</label>
 
-            <select name="alinhamento" id="alinhamento">
+<select name="alinhamento" id="alinhamento">
 
-                <option value="centro">Centro</option>
-                <option value="esquerda">Esquerda</option>
-                <option value="direita">Direita</option>
+<option value="centro">Centro</option>
+<option value="esquerda">Esquerda</option>
+<option value="direita">Direita</option>
 
-            </select>
+</select>
 
-            <label>Posição Vertical</label>
+<label>Posição Vertical</label>
 
-            <select name="posicao_vertical" id="posicao">
+<select name="posicao_vertical" id="posicao">
 
-                <option value="superior">Superior</option>
-                <option value="centro" selected>Centro</option>
-                <option value="inferior">Inferior</option>
+<option value="superior">Superior</option>
+<option value="centro" selected>Centro</option>
+<option value="inferior">Inferior</option>
 
-            </select>
+</select>
 
-            <button type="submit">
-                Gerar Certificados
-            </button>
+<button type="submit">
+Gerar Certificados
+</button>
 
-        </form>
-
-    </div>
-
-
-    <div class="preview-box">
-
-        <h3>Preview</h3>
-
-        <div class="preview-wrapper">
-
-            <img id="preview-img">
-
-            <div id="preview-text"></div>
-
-        </div>
-
-    </div>
+</form>
 
 </div>
 
+<div class="preview-box">
+
+<h3>Preview</h3>
+
+<div class="preview-wrapper">
+
+<img id="preview-img">
+
+<div id="preview-text"></div>
+
+</div>
+
+</div>
+
+</div>
 
 <script>
 
@@ -222,16 +224,16 @@ const posicaoInput = document.getElementById("posicao");
 
 fundoInput.addEventListener("change", function(event){
 
-    const file = event.target.files[0];
+const file = event.target.files[0];
 
-    if(file){
+if(file){
 
-        previewImg.src = URL.createObjectURL(file);
-        previewImg.style.display = "block";
+previewImg.src = URL.createObjectURL(file);
+previewImg.style.display = "block";
 
-        atualizarPreview();
+atualizarPreview();
 
-    }
+}
 
 });
 
@@ -242,37 +244,50 @@ alinhamentoInput.addEventListener("change", atualizarPreview);
 posicaoInput.addEventListener("change", atualizarPreview);
 
 
+function aplicarNegritoCampos(texto){
+
+return texto.replace(/\{(.*?)\}/g,"<b>$1</b>");
+
+}
+
+
 function atualizarPreview(){
 
-    previewText.innerText = textoInput.value;
+let texto = textoInput.value;
 
-    previewText.style.fontSize = fonteInput.value + "px";
+texto = texto.replace(/\n/g,"<br><br>");
 
-    previewText.style.lineHeight = "1.3";
+texto = aplicarNegritoCampos(texto);
 
-    if(alinhamentoInput.value === "centro"){
-        previewText.style.textAlign = "center";
-    }
+previewText.innerHTML = texto;
 
-    if(alinhamentoInput.value === "esquerda"){
-        previewText.style.textAlign = "left";
-    }
+previewText.style.fontSize = fonteInput.value + "px";
 
-    if(alinhamentoInput.value === "direita"){
-        previewText.style.textAlign = "right";
-    }
+previewText.style.lineHeight = "1.3";
 
-    if(posicaoInput.value === "superior"){
-        previewText.style.top = "30%";
-    }
+if(alinhamentoInput.value === "centro"){
+previewText.style.textAlign="center";
+}
 
-    if(posicaoInput.value === "centro"){
-        previewText.style.top = "50%";
-    }
+if(alinhamentoInput.value === "esquerda"){
+previewText.style.textAlign="left";
+}
 
-    if(posicaoInput.value === "inferior"){
-        previewText.style.top = "70%";
-    }
+if(alinhamentoInput.value === "direita"){
+previewText.style.textAlign="right";
+}
+
+if(posicaoInput.value === "superior"){
+previewText.style.top="30%";
+}
+
+if(posicaoInput.value === "centro"){
+previewText.style.top="50%";
+}
+
+if(posicaoInput.value === "inferior"){
+previewText.style.top="70%";
+}
 
 }
 
