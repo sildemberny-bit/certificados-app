@@ -11,36 +11,39 @@ USER = "admin"
 PASSWORD = "123"
 
 
-# LANDING
 @app.route("/")
 def index():
     return render_template("index.html")
 
 
-# LOGIN
+@app.route("/guia")
+def guia():
+    return render_template("guia.html")
+
+
 @app.route("/login", methods=["GET","POST"])
 def login():
 
     if request.method == "POST":
 
-        email = request.form.get("email")
-        senha = request.form.get("password")
+        email = request.form["email"]
+        senha = request.form["password"]
 
         if email == USER and senha == PASSWORD:
+
             session["user"] = email
             return redirect("/certificados")
 
     return render_template("login.html")
 
 
-# LOGOUT
 @app.route("/logout")
 def logout():
+
     session.clear()
     return redirect("/")
 
 
-# TELA PRINCIPAL
 @app.route("/certificados")
 def certificados():
 
@@ -50,7 +53,6 @@ def certificados():
     return render_template("certificados.html")
 
 
-# QUEBRA DE LINHAS
 def quebrar_linhas(texto, draw, font, largura_max):
 
     palavras = texto.split()
@@ -60,7 +62,7 @@ def quebrar_linhas(texto, draw, font, largura_max):
     for palavra in palavras:
 
         teste = linha + " " + palavra if linha else palavra
-        largura, _ = draw.textbbox((0,0), teste, font=font)[2:]
+        largura = draw.textlength(teste, font=font)
 
         if largura <= largura_max:
             linha = teste
@@ -74,49 +76,103 @@ def quebrar_linhas(texto, draw, font, largura_max):
     return linhas
 
 
-# PREVIEW
 @app.route("/preview", methods=["POST"])
 def preview():
 
+    fundo = request.files["fundo"]
+    texto = request.form["texto"]
+    fonte_size = int(request.form["fonte"])
+    alinhamento = request.form["alinhamento"]
+
+    img = Image.open(fundo)
+
+    largura, altura = img.size
+
+    draw = ImageDraw.Draw(img)
+
     try:
+        font = ImageFont.truetype("arial.ttf", fonte_size)
+    except:
+        font = ImageFont.load_default()
 
-        fundo = request.files.get("fundo")
-        texto = request.form.get("texto","")
-        fonte_size = int(request.form.get("fonte",12))
-        alinhamento = request.form.get("alinhamento","centro")
-        posicao = request.form.get("posicao","centro")
+    largura_texto = largura * 0.7
 
-        if not fundo:
-            return "sem fundo",400
+    linhas = quebrar_linhas(texto, draw, font, largura_texto)
 
-        img = Image.open(fundo).convert("RGB")
+    y = altura * 0.45
 
-        largura, altura = img.size
+    for linha in linhas:
+
+        w = draw.textlength(linha, font=font)
+
+        if alinhamento == "centro":
+            x = (largura - w)/2
+        elif alinhamento == "direita":
+            x = largura - w - 100
+        else:
+            x = 100
+
+        draw.text((x,y), linha, fill="black", font=font)
+
+        y += fonte_size + 8
+
+    buffer = io.BytesIO()
+
+    img.save(buffer, format="PNG")
+
+    buffer.seek(0)
+
+    return send_file(buffer, mimetype="image/png")
+
+
+@app.route("/gerar", methods=["POST"])
+def gerar():
+
+    planilha = request.files["planilha"]
+    fundo = request.files["fundo"]
+
+    texto = request.form["texto"]
+    fonte_size = int(request.form["fonte"])
+    alinhamento = request.form["alinhamento"]
+
+    df = pd.read_excel(planilha)
+
+    img_base = Image.open(fundo)
+
+    largura, altura = img_base.size
+
+    zip_buffer = io.BytesIO()
+
+    zip_file = zipfile.ZipFile(zip_buffer,"w")
+
+    try:
+        font = ImageFont.truetype("arial.ttf", fonte_size)
+    except:
+        font = ImageFont.load_default()
+
+    for _,row in df.iterrows():
+
+        img = img_base.copy()
 
         draw = ImageDraw.Draw(img)
 
-        try:
-            font = ImageFont.truetype("arial.ttf", fonte_size)
-        except:
-            font = ImageFont.load_default()
+        texto_final = texto
 
-        largura_texto = int(largura * 0.75)
+        for col in df.columns:
+            texto_final = texto_final.replace("{"+col+"}", str(row[col]))
 
-        linhas = quebrar_linhas(texto, draw, font, largura_texto)
+        largura_texto = largura * 0.7
 
-        if posicao == "acima":
-            y = int(altura * 0.35)
-        elif posicao == "abaixo":
-            y = int(altura * 0.65)
-        else:
-            y = int(altura * 0.5)
+        linhas = quebrar_linhas(texto_final, draw, font, largura_texto)
+
+        y = altura * 0.45
 
         for linha in linhas:
 
-            w = draw.textbbox((0,0), linha, font=font)[2]
+            w = draw.textlength(linha, font=font)
 
             if alinhamento == "centro":
-                x = (largura - w)//2
+                x = (largura - w)/2
             elif alinhamento == "direita":
                 x = largura - w - 100
             else:
@@ -126,98 +182,23 @@ def preview():
 
             y += fonte_size + 8
 
-        buffer = io.BytesIO()
-        img.save(buffer, format="PNG")
-        buffer.seek(0)
+        pdf_buffer = io.BytesIO()
 
-        return send_file(buffer, mimetype="image/png")
+        img.save(pdf_buffer, format="PDF")
 
-    except Exception as e:
-        return str(e),500
+        nome = str(row[df.columns[0]])
 
+        zip_file.writestr(nome + ".pdf", pdf_buffer.getvalue())
 
-# GERAR CERTIFICADOS
-@app.route("/gerar", methods=["POST"])
-def gerar():
+    zip_file.close()
 
-    try:
+    zip_buffer.seek(0)
 
-        planilha = request.files.get("planilha")
-        fundo = request.files.get("fundo")
-
-        texto = request.form.get("texto","")
-        fonte_size = int(request.form.get("fonte",12))
-        alinhamento = request.form.get("alinhamento","centro")
-        posicao = request.form.get("posicao","centro")
-
-        df = pd.read_excel(planilha)
-
-        img_base = Image.open(fundo).convert("RGB")
-
-        largura, altura = img_base.size
-
-        zip_buffer = io.BytesIO()
-        zip_file = zipfile.ZipFile(zip_buffer,"w")
-
-        try:
-            font = ImageFont.truetype("arial.ttf", fonte_size)
-        except:
-            font = ImageFont.load_default()
-
-        for _,row in df.iterrows():
-
-            img = img_base.copy()
-            draw = ImageDraw.Draw(img)
-
-            texto_final = texto
-
-            for col in df.columns:
-                texto_final = texto_final.replace("{"+col+"}", str(row[col]))
-
-            largura_texto = int(largura * 0.75)
-
-            linhas = quebrar_linhas(texto_final, draw, font, largura_texto)
-
-            if posicao == "acima":
-                y = int(altura * 0.35)
-            elif posicao == "abaixo":
-                y = int(altura * 0.65)
-            else:
-                y = int(altura * 0.5)
-
-            for linha in linhas:
-
-                w = draw.textbbox((0,0), linha, font=font)[2]
-
-                if alinhamento == "centro":
-                    x = (largura - w)//2
-                elif alinhamento == "direita":
-                    x = largura - w - 100
-                else:
-                    x = 100
-
-                draw.text((x,y), linha, fill="black", font=font)
-
-                y += fonte_size + 8
-
-            pdf_buffer = io.BytesIO()
-            img.save(pdf_buffer, format="PDF")
-
-            nome = str(row[df.columns[0]])
-
-            zip_file.writestr(nome + ".pdf", pdf_buffer.getvalue())
-
-        zip_file.close()
-        zip_buffer.seek(0)
-
-        return send_file(
-            zip_buffer,
-            download_name="certificados.zip",
-            as_attachment=True
-        )
-
-    except Exception as e:
-        return "Erro interno: " + str(e)
+    return send_file(
+        zip_buffer,
+        download_name="certificados.zip",
+        as_attachment=True
+    )
 
 
 if __name__ == "__main__":
