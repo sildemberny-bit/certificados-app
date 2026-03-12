@@ -21,10 +21,6 @@ justify-content:space-between;
 align-items:center;
 }
 
-header img{
-height:40px;
-}
-
 .container{
 display:flex;
 height:calc(100vh - 70px);
@@ -35,7 +31,6 @@ width:420px;
 background:white;
 padding:30px;
 overflow:auto;
-box-shadow:2px 0px 10px rgba(0,0,0,0.05);
 }
 
 .preview-area{
@@ -47,40 +42,25 @@ background:#e9edf4;
 }
 
 .preview-area img{
-max-width:95%;
+max-width:90%;
 max-height:90%;
 box-shadow:0 4px 20px rgba(0,0,0,0.2);
-border-radius:4px;
-}
-
-label{
-display:block;
-margin-top:15px;
-font-weight:bold;
 }
 
 input, select, textarea{
 width:100%;
+margin-top:8px;
+margin-bottom:12px;
 padding:8px;
-margin-top:5px;
-border-radius:4px;
-border:1px solid #ccc;
-}
-
-textarea{
-height:120px;
 }
 
 button{
-margin-top:20px;
 padding:12px;
 width:100%;
 background:#1f3c88;
 color:white;
 border:none;
 border-radius:6px;
-font-size:15px;
-cursor:pointer;
 }
 
 .logout{
@@ -99,32 +79,29 @@ text-decoration:none;
 
 <header>
 
-<img src="/static/logo.png">
+<img src="/static/logo.png" height="40">
 
 <a class="logout" href="/logout">Sair</a>
 
 </header>
 
-
 <div class="container">
-
 
 <div class="form-area">
 
-<form id="certForm" method="POST" enctype="multipart/form-data">
+<form id="certForm" method="POST" action="/gerar" enctype="multipart/form-data">
 
 <label>Planilha Excel</label>
 <input type="file" name="planilha">
 
-<label>Imagem de Fundo</label>
-<input type="file" name="fundo" id="fundoInput" required>
+<label>Imagem Fundo</label>
+<input type="file" name="fundo" id="fundo">
 
-<label>Texto do Certificado</label>
-<textarea name="texto" id="textoInput"></textarea>
+<label>Texto</label>
+<textarea name="texto" id="texto"></textarea>
 
-
-<label>Tamanho da Fonte</label>
-<select name="fonte" id="fonteInput">
+<label>Fonte</label>
+<select name="fonte" id="fonte">
 <option>10</option>
 <option>12</option>
 <option>14</option>
@@ -133,96 +110,70 @@ text-decoration:none;
 <option>20</option>
 </select>
 
-
 <label>Alinhamento</label>
-<select name="alinhamento" id="alinhamentoInput">
+<select name="alinhamento" id="alinhamento">
 <option value="centro">Centro</option>
 <option value="esquerda">Esquerda</option>
 <option value="direita">Direita</option>
 </select>
 
-
-<label>Posição Vertical</label>
-<select name="posicao" id="posicaoInput">
+<label>Posição</label>
+<select name="posicao" id="posicao">
 <option value="acima">Acima</option>
 <option value="centro">Centro</option>
 <option value="abaixo">Abaixo</option>
 </select>
 
-
-<label>Município</label>
-<input type="text" name="municipio" id="municipioInput">
-
-<label>Dia</label>
-<input type="text" name="dia" id="diaInput">
-
-<label>Mês</label>
-<input type="text" name="mes" id="mesInput">
-
-<label>Ano</label>
-<input type="text" name="ano" id="anoInput">
-
-
-<button type="submit">
-Gerar Certificados
-</button>
+<button type="submit">Gerar Certificados</button>
 
 </form>
 
 </div>
 
-
-
 <div class="preview-area">
 
-<img id="previewImage">
+<img id="preview">
 
 </div>
 
-
 </div>
-
 
 <script>
 
-const form = document.getElementById("certForm")
-const previewImage = document.getElementById("previewImage")
+const inputs = document.querySelectorAll("input,textarea,select")
 
-const inputs = document.querySelectorAll("#certForm input, #certForm select, #certForm textarea")
+inputs.forEach(el => {
 
-inputs.forEach(input => {
-
-input.addEventListener("change", atualizarPreview)
-input.addEventListener("keyup", atualizarPreview)
+el.addEventListener("change", atualizarPreview)
+el.addEventListener("keyup", atualizarPreview)
 
 })
-
 
 function atualizarPreview(){
 
-const fundo = document.getElementById("fundoInput").files[0]
+const fundo = document.getElementById("fundo").files[0]
 
 if(!fundo) return
 
-const formData = new FormData(form)
+const form = document.getElementById("certForm")
+
+const data = new FormData(form)
 
 fetch("/preview",{
 method:"POST",
-body:formData
+body:data
 })
-.then(res => res.blob())
-.then(blob => {
+.then(res=>res.blob())
+.then(blob=>{
 
-const url = URL.createObjectURL(blob)
-
-previewImage.src = url
+document.getElementById("preview").src =
+URL.createObjectURL(blob)
 
 })
 
 }
 
 </script>
-
 
 </body>
 </html>
