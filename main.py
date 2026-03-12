@@ -2,13 +2,12 @@ from flask import Flask, render_template, request, redirect, send_file, session
 import pandas as pd
 from PIL import Image
 from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import A4
+from reportlab.lib.pagesizes import A4, landscape
 from reportlab.lib.utils import ImageReader
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.platypus import Paragraph
 from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
 import zipfile
-import os
 import io
 
 app = Flask(__name__)
@@ -66,6 +65,7 @@ def certificados():
         df = pd.read_excel(planilha)
 
         imagem = Image.open(fundo)
+        imagem = imagem.convert("RGB")
 
         buffer_zip = io.BytesIO()
 
@@ -88,7 +88,12 @@ def certificados():
 
                 buffer_pdf = io.BytesIO()
 
-                c = canvas.Canvas(buffer_pdf,pagesize=A4)
+                largura_pagina, altura_pagina = landscape(A4)
+
+                c = canvas.Canvas(
+                    buffer_pdf,
+                    pagesize=(largura_pagina, altura_pagina)
+                )
 
                 fundo_reader = ImageReader(imagem)
 
@@ -96,11 +101,11 @@ def certificados():
                     fundo_reader,
                     0,
                     0,
-                    width=A4[0],
-                    height=A4[1]
+                    width=largura_pagina,
+                    height=altura_pagina
                 )
 
-                largura_texto = A4[0] * 0.85
+                largura_texto = largura_pagina * 0.85
 
                 if alinhamento == "centro":
                     alinh = TA_CENTER
@@ -117,20 +122,20 @@ def certificados():
                     alignment=alinh
                 )
 
-                p = Paragraph(texto_certificado,style)
+                p = Paragraph(texto_certificado, style)
 
                 if posicao_vertical == "superior":
-                    y = A4[1] * 0.65
+                    y = altura_pagina * 0.65
                 elif posicao_vertical == "centro":
-                    y = A4[1] * 0.50
+                    y = altura_pagina * 0.50
                 else:
-                    y = A4[1] * 0.35
+                    y = altura_pagina * 0.35
 
                 p.wrapOn(c, largura_texto, 500)
 
                 p.drawOn(
                     c,
-                    (A4[0] - largura_texto) / 2,
+                    (largura_pagina - largura_texto) / 2,
                     y
                 )
 
