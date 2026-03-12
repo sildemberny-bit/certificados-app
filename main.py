@@ -66,8 +66,9 @@ def substituir_variaveis(texto, linha):
     return texto
 
 
-def quebrar_texto(texto, largura=90):
-    return textwrap.wrap(texto, largura)
+# quebra texto usando largura maior
+def quebrar_texto(texto):
+    return textwrap.wrap(texto, 140)
 
 
 # =========================
@@ -108,7 +109,7 @@ def gerar_pdf(linha, texto, fundo_bytes, fonte, alinhamento, posicao, municipio,
         else:
             c.drawCentredString(420, y, linha_texto)
 
-        y -= 28
+        y -= 30
 
     if municipio:
         data = f"{municipio}, {dia} de {mes} de {ano}"
@@ -152,7 +153,6 @@ def certificados():
 
             df = pd.read_excel(planilha)
 
-            # carrega imagem na memória
             fundo_bytes = fundo.read()
 
             memoria_zip = io.BytesIO()
@@ -238,7 +238,7 @@ def preview():
             ano
         )
 
-        return send_file(pdf, download_name="preview.pdf")
+        return send_file(pdf, mimetype="application/pdf")
 
     except Exception as e:
 
