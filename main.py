@@ -89,10 +89,7 @@ def preview():
 
     draw = ImageDraw.Draw(img)
 
-    try:
-        font = ImageFont.truetype("arial.ttf", fonte_size)
-    except:
-        font = ImageFont.load_default()
+    font = ImageFont.load_default()
 
     largura_texto = largura * 0.7
 
@@ -141,16 +138,15 @@ def gerar():
     largura, altura = img_base.size
 
     zip_buffer = io.BytesIO()
+
     zip_file = zipfile.ZipFile(zip_buffer,"w")
 
-    try:
-        font = ImageFont.truetype("arial.ttf", fonte_size)
-    except:
-        font = ImageFont.load_default()
+    font = ImageFont.load_default()
 
     for _,row in df.iterrows():
 
         img = img_base.copy()
+
         draw = ImageDraw.Draw(img)
 
         texto_final = texto
