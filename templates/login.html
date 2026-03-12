@@ -1,46 +1,40 @@
 <!DOCTYPE html>
 <html>
-<head>
 
-<title>Login - Emitte</title>
+<head>
+<title>Login</title>
 
 <style>
 
 body{
-margin:0;
 font-family:Arial;
-background:linear-gradient(135deg,#1f3c88,#4a69bd);
+background:#f4f6f9;
 display:flex;
 justify-content:center;
 align-items:center;
 height:100vh;
 }
 
-.box{
+form{
 background:white;
 padding:40px;
-border-radius:10px;
-width:320px;
-text-align:center;
+border-radius:8px;
+box-shadow:0 0 10px rgba(0,0,0,0.1);
 }
 
 input{
-width:100%;
-padding:12px;
-margin:10px 0;
+display:block;
+margin-bottom:15px;
+padding:10px;
+width:250px;
 }
 
 button{
+padding:10px;
 width:100%;
-padding:12px;
 background:#1f3c88;
 color:white;
 border:none;
-}
-
-.logo{
-width:140px;
-margin-bottom:20px;
 }
 
 </style>
@@ -49,21 +43,17 @@ margin-bottom:20px;
 
 <body>
 
-<div class="box">
-
-<img src="/static/logo.png" class="logo">
-
 <form method="POST">
 
-<input name="usuario" placeholder="Usuário">
+<h2>Login</h2>
 
-<input type="password" name="senha" placeholder="Senha">
+<input name="email" placeholder="Email">
+
+<input name="password" type="password" placeholder="Senha">
 
 <button>Entrar</button>
 
 </form>
-
-</div>
 
 </body>
 </html>
