@@ -1,92 +1,46 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Emitte - Emissão Inteligente</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+
+<title>Emitte</title>
+
+<style>
+
+body{
+font-family:Arial;
+text-align:center;
+background:#f4f6f9;
+padding-top:100px;
+}
+
+h1{
+color:#1f3c88;
+}
+
+button{
+padding:15px 30px;
+margin:10px;
+font-size:16px;
+border:none;
+background:#1f3c88;
+color:white;
+border-radius:6px;
+cursor:pointer;
+}
+
+</style>
+
 </head>
 
-<body class="bg-[#F4F7FA] text-gray-800">
+<body>
 
-<!-- NAVBAR -->
-<nav class="bg-white shadow-md">
-    <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-        <div class="flex items-center space-x-3">
-            <img src="{{ url_for('static', filename='logo.png') }}" class="h-10">
-            <div>
-                <h1 class="text-2xl font-bold text-[#0D3B66]">Emitte</h1>
-                <p class="text-xs text-gray-500">Emissão inteligente de certificados</p>
-            </div>
-        </div>
-        <div class="text-sm text-gray-600">
-            Painel Administrativo
-        </div>
-    </div>
-</nav>
+<img src="/static/logo.png" width="200">
 
-<div class="max-w-6xl mx-auto mt-10 px-6">
+<h1>Plataforma inteligente para geração automatizada de certificados em segundos</h1>
 
-    <!-- DASHBOARD -->
-    <div class="grid grid-cols-3 gap-6 mb-10">
-        
-        <div class="bg-white p-6 rounded-xl shadow">
-            <h3 class="text-gray-500 text-sm">Total Gerado</h3>
-            <p class="text-3xl font-bold text-[#0D3B66] mt-2">{{ total_gerado }}</p>
-            <p class="text-sm text-gray-400">certificados</p>
-        </div>
+<a href="/login"><button>Acessar Plataforma</button></a>
 
-        <div class="bg-white p-6 rounded-xl shadow">
-            <h3 class="text-gray-500 text-sm">Última Geração</h3>
-            <p class="text-lg font-semibold mt-2">{{ ultima_geracao }}</p>
-        </div>
-
-        <div class="bg-white p-6 rounded-xl shadow">
-            <h3 class="text-gray-500 text-sm">Status</h3>
-            <p class="text-green-600 font-semibold mt-2">Sistema Online</p>
-        </div>
-
-    </div>
-
-    <!-- GERADOR -->
-    <div class="bg-white p-8 rounded-xl shadow">
-
-        <h2 class="text-xl font-bold text-[#0D3B66] mb-6">Gerar Certificados</h2>
-
-        <form method="POST" enctype="multipart/form-data">
-
-            <div class="mb-6">
-                <label class="block mb-2 font-semibold">Imagem de Fundo</label>
-                <input type="file" name="background" required class="w-full border p-3 rounded-lg">
-            </div>
-
-            <div class="mb-6">
-                <label class="block mb-2 font-semibold">Planilha Excel</label>
-                <input type="file" name="excel" required class="w-full border p-3 rounded-lg">
-            </div>
-
-            <div class="mb-6">
-                <label class="block mb-2 font-semibold">Texto do Certificado</label>
-                <textarea name="texto" rows="4" required 
-                class="w-full border p-3 rounded-lg"
-                placeholder='Ex: Certificamos que {nome} participou do evento {evento}...'></textarea>
-            </div>
-
-            <div class="grid grid-cols-3 gap-4 mb-8">
-                <input type="number" name="pos_x" placeholder="Posição X" required class="border p-3 rounded-lg">
-                <input type="number" name="pos_y" placeholder="Posição Y" required class="border p-3 rounded-lg">
-                <input type="number" name="fonte" placeholder="Tamanho Fonte" required class="border p-3 rounded-lg">
-            </div>
-
-            <button type="submit"
-            class="w-full bg-[#0D3B66] hover:bg-[#092a4a] text-white font-semibold py-4 rounded-xl transition">
-                Gerar Certificados
-            </button>
-
-        </form>
-
-    </div>
-
-</div>
+<a href="/guia"><button>Como Funciona</button></a>
 
 </body>
 </html>
