@@ -2,54 +2,49 @@
 <html>
 <head>
 
-<title>Emitte - Certificados</title>
+<title>Gerar Certificados</title>
 
 <style>
 
 body{
-margin:0;
 font-family:Arial;
-background:#f4f6f9;
+margin:0;
 }
 
 header{
 background:#1f3c88;
 color:white;
-padding:15px 40px;
+padding:15px;
 display:flex;
 justify-content:space-between;
-align-items:center;
 }
 
 .container{
 display:flex;
-height:calc(100vh - 70px);
+height:90vh;
 }
 
-.form-area{
-width:420px;
-background:white;
-padding:30px;
-overflow:auto;
+.form{
+width:400px;
+padding:20px;
 }
 
-.preview-area{
+.preview{
 flex:1;
 display:flex;
-justify-content:center;
 align-items:center;
-background:#e9edf4;
+justify-content:center;
+background:#eee;
 }
 
-.preview-area img{
+.preview img{
 max-width:90%;
 max-height:90%;
-box-shadow:0 4px 20px rgba(0,0,0,0.2);
 }
 
 input,select,textarea{
 width:100%;
-margin-bottom:12px;
+margin-bottom:10px;
 padding:8px;
 }
 
@@ -59,15 +54,6 @@ width:100%;
 background:#1f3c88;
 color:white;
 border:none;
-border-radius:6px;
-}
-
-.logout{
-background:#999;
-padding:8px 14px;
-border-radius:4px;
-color:white;
-text-decoration:none;
 }
 
 </style>
@@ -78,28 +64,24 @@ text-decoration:none;
 
 <header>
 
-<img src="/static/logo.png" height="40">
+<div>Emitte</div>
 
-<a class="logout" href="/logout">Sair</a>
+<a href="/logout" style="color:white">Sair</a>
 
 </header>
 
 <div class="container">
 
-<div class="form-area">
+<div class="form">
 
-<form id="certForm" method="POST" action="/gerar" enctype="multipart/form-data">
+<form method="POST" action="/gerar" enctype="multipart/form-data" id="form">
 
-<label>Planilha Excel</label>
 <input type="file" name="planilha">
 
-<label>Imagem Fundo</label>
 <input type="file" name="fundo" id="fundo">
 
-<label>Texto</label>
-<textarea name="texto" id="texto" rows="6"></textarea>
+<textarea name="texto" id="texto" rows="5"></textarea>
 
-<label>Tamanho da fonte</label>
 <select name="fonte" id="fonte">
 <option>10</option>
 <option>12</option>
@@ -109,18 +91,10 @@ text-decoration:none;
 <option>20</option>
 </select>
 
-<label>Alinhamento</label>
 <select name="alinhamento" id="alinhamento">
 <option value="centro">Centro</option>
 <option value="esquerda">Esquerda</option>
 <option value="direita">Direita</option>
-</select>
-
-<label>Posição Vertical</label>
-<select name="posicao" id="posicao">
-<option value="acima">Acima</option>
-<option value="centro">Centro</option>
-<option value="abaixo">Abaixo</option>
 </select>
 
 <button type="submit">Gerar Certificados</button>
@@ -129,7 +103,7 @@ text-decoration:none;
 
 </div>
 
-<div class="preview-area">
+<div class="preview">
 
 <img id="preview">
 
@@ -139,17 +113,6 @@ text-decoration:none;
 
 <script>
 
-const form = document.getElementById("certForm")
-
-const campos = document.querySelectorAll("input, textarea, select")
-
-campos.forEach(c => {
-
-c.addEventListener("change", atualizarPreview)
-c.addEventListener("keyup", atualizarPreview)
-
-})
-
 function atualizarPreview(){
 
 const fundo = document.getElementById("fundo").files[0]
@@ -158,25 +121,27 @@ if(!fundo) return
 
 const data = new FormData()
 
-data.append("fundo", fundo)
-data.append("texto", document.getElementById("texto").value)
-data.append("fonte", document.getElementById("fonte").value)
-data.append("alinhamento", document.getElementById("alinhamento").value)
-data.append("posicao", document.getElementById("posicao").value)
+data.append("fundo",fundo)
+data.append("texto",document.getElementById("texto").value)
+data.append("fonte",document.getElementById("fonte").value)
+data.append("alinhamento",document.getElementById("alinhamento").value)
 
-fetch("/preview",{
-method:"POST",
-body:data
-})
-.then(res=>res.blob())
-.then(blob=>{
+fetch("/preview",{method:"POST",body:data})
+.then(r=>r.blob())
+.then(img=>{
 
-document.getElementById("preview").src =
-URL.createObjectURL(blob)
+document.getElementById("preview").src = URL.createObjectURL(img)
 
 })
 
 }
+
+document.querySelectorAll("input,textarea,select").forEach(e=>{
+
+e.addEventListener("change",atualizarPreview)
+e.addEventListener("keyup",atualizarPreview)
+
+})
 
 </script>
 
