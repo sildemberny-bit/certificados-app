@@ -13,6 +13,7 @@ import os
 import unicodedata
 import re
 import tempfile
+import uuid
 from pypdf import PdfReader, PdfWriter
 
 app = Flask(__name__)
@@ -20,6 +21,10 @@ app.secret_key = "emitte_secret"
 
 USUARIO = "admin"
 SENHA = "123"
+
+PASTA_DOWNLOAD = "downloads"
+
+os.makedirs(PASTA_DOWNLOAD, exist_ok=True)
 
 
 @app.route("/")
@@ -176,6 +181,17 @@ def dividir_pdf(caminho_pdf, df, pasta_saida):
     return arquivos
 
 
+@app.route("/download/<arquivo>")
+def baixar(arquivo):
+
+    caminho = os.path.join(PASTA_DOWNLOAD, arquivo)
+
+    return send_file(
+        caminho,
+        as_attachment=True
+    )
+
+
 @app.route("/certificados", methods=["GET","POST"])
 def certificados():
 
@@ -217,7 +233,11 @@ def certificados():
             pasta_temp
         )
 
-        caminho_zip = os.path.join(pasta_temp, "certificados.zip")
+        id_download = str(uuid.uuid4())
+
+        nome_zip = f"certificados_{id_download}.zip"
+
+        caminho_zip = os.path.join(PASTA_DOWNLOAD, nome_zip)
 
         with zipfile.ZipFile(caminho_zip,"w") as zipf:
 
@@ -228,17 +248,9 @@ def certificados():
                     os.path.basename(arquivo)
                 )
 
-        # ler o zip em memória antes de enviar
-        with open(caminho_zip, "rb") as f:
-            zip_data = io.BytesIO(f.read())
-
-        zip_data.seek(0)
-
-        return send_file(
-            zip_data,
-            as_attachment=True,
-            download_name="certificados.zip",
-            mimetype="application/zip"
+        return render_template(
+            "download.html",
+            arquivo=nome_zip
         )
 
     return render_template("certificados.html")
