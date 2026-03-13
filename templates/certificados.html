@@ -15,19 +15,43 @@ margin:0;
 padding:0;
 }
 
-.container{
-max-width:1000px;
+.logo{
+text-align:center;
+margin-top:30px;
+}
+
+.logo img{
+height:60px;
+}
+
+.wrapper{
+display:flex;
+gap:40px;
+max-width:1200px;
 margin:auto;
-background:white;
-padding:40px;
 margin-top:40px;
+align-items:flex-start;
+}
+
+.form-box{
+flex:1;
+background:white;
+padding:30px;
 border-radius:10px;
 box-shadow:0 4px 10px rgba(0,0,0,0.1);
 }
 
-h1{
+.preview-box{
+flex:1;
+background:white;
+padding:30px;
+border-radius:10px;
+box-shadow:0 4px 10px rgba(0,0,0,0.1);
 text-align:center;
-margin-bottom:30px;
+}
+
+h1{
+margin-top:0;
 }
 
 label{
@@ -66,23 +90,9 @@ button:hover{
 background:#218838;
 }
 
-.logo{
-text-align:center;
-margin-bottom:20px;
-}
-
-.logo img{
-height:60px;
-}
-
-.preview{
-margin-top:40px;
-text-align:center;
-}
-
-.preview img{
+.preview-box img{
 max-width:100%;
-border-radius:8px;
+border-radius:6px;
 border:1px solid #ddd;
 }
 
@@ -92,17 +102,19 @@ border:1px solid #ddd;
 
 <body>
 
-<div class="container">
-
 <div class="logo">
 <img src="/static/logo.png">
 </div>
+
+<div class="wrapper">
+
+<div class="form-box">
 
 <h1>Gerar Certificados</h1>
 
 <form action="/certificados" method="post" enctype="multipart/form-data">
 
-<label>Imagem do certificado (PNG ou JPG)</label>
+<label>Imagem do certificado</label>
 <input type="file" name="fundo" id="fundo" required>
 
 <label>Planilha Excel (.xlsx)</label>
@@ -114,7 +126,7 @@ border:1px solid #ddd;
 <label>Tamanho da fonte</label>
 <input type="number" name="fonte" value="18">
 
-<label>Alinhamento do texto</label>
+<label>Alinhamento</label>
 <select name="alinhamento">
 
 <option value="centro">Centro</option>
@@ -123,7 +135,7 @@ border:1px solid #ddd;
 
 </select>
 
-<label>Posição vertical do bloco</label>
+<label>Posição vertical</label>
 <select name="posicao_vertical">
 
 <option value="superior">Superior</option>
@@ -144,9 +156,11 @@ Gerar certificados
 
 </form>
 
-<div class="preview">
+</div>
 
-<h2>Preview do certificado</h2>
+<div class="preview-box">
+
+<h2>Preview</h2>
 
 <img id="previewImg">
 
