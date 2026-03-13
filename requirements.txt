@@ -3,4 +3,5 @@ pandas
 openpyxl
 reportlab
 Pillow
-gunicorn
+Gunicorn
+pypdf
