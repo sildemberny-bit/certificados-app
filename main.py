@@ -8,12 +8,11 @@ from reportlab.platypus import Paragraph
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
 import zipfile
-import io
 import os
 import unicodedata
 import re
 import tempfile
-import uuid
+import datetime
 from pypdf import PdfReader, PdfWriter
 
 app = Flask(__name__)
@@ -22,7 +21,8 @@ app.secret_key = "emitte_secret"
 USUARIO = "admin"
 SENHA = "123"
 
-PASTA_DOWNLOAD = "downloads"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+PASTA_DOWNLOAD = os.path.join(BASE_DIR, "downloads")
 
 os.makedirs(PASTA_DOWNLOAD, exist_ok=True)
 
@@ -233,9 +233,11 @@ def certificados():
             pasta_temp
         )
 
-        id_download = str(uuid.uuid4())
+        quantidade = len(df)
 
-        nome_zip = f"certificados_{id_download}.zip"
+        data = datetime.date.today().strftime("%Y-%m-%d")
+
+        nome_zip = f"certificados_emitte_{quantidade}_{data}.zip"
 
         caminho_zip = os.path.join(PASTA_DOWNLOAD, nome_zip)
 
