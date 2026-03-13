@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html>
+
 <head>
+
 <title>Emitte - Gerador</title>
 
 <style>
@@ -14,41 +16,53 @@ background:#f4f6f9;
 header{
 background:#1f3c88;
 color:white;
-padding:15px 40px;
+padding:10px 30px;
 display:flex;
 justify-content:space-between;
+align-items:center;
+}
+
+header h2{
+margin:0;
+font-size:20px;
 }
 
 .container{
 display:flex;
-gap:40px;
-padding:40px;
+gap:25px;
+padding:20px 30px;
 }
 
 .form-box{
 width:35%;
 background:white;
-padding:25px;
-border-radius:10px;
-box-shadow:0px 4px 15px rgba(0,0,0,0.1);
+padding:18px;
+border-radius:8px;
+box-shadow:0px 3px 10px rgba(0,0,0,0.1);
 }
 
 .preview-box{
 width:65%;
 background:white;
-padding:20px;
-border-radius:10px;
-box-shadow:0px 4px 15px rgba(0,0,0,0.1);
-text-align:center;
+padding:15px;
+border-radius:8px;
+box-shadow:0px 3px 10px rgba(0,0,0,0.1);
+display:flex;
+justify-content:center;
+align-items:center;
 }
 
 .preview-wrapper{
 position:relative;
 width:100%;
+max-height:580px;
+overflow:hidden;
 }
 
 #preview-img{
 width:100%;
+max-height:580px;
+object-fit:contain;
 display:none;
 }
 
@@ -75,24 +89,56 @@ word-wrap:break-word;
 }
 
 input,select,textarea{
+
 width:100%;
-padding:10px;
-margin:8px 0 15px 0;
-border-radius:6px;
+
+padding:8px;
+
+margin:6px 0 10px 0;
+
+border-radius:5px;
+
 border:1px solid #ccc;
+
+font-size:14px;
+
+}
+
+label{
+
+font-size:13px;
+color:#555;
+
 }
 
 button{
+
 width:100%;
-padding:12px;
+
+padding:10px;
+
 background:#1f3c88;
+
 color:white;
+
 border:none;
+
 border-radius:6px;
+
 cursor:pointer;
+
+font-size:14px;
+
+}
+
+button:hover{
+
+background:#162d66;
+
 }
 
 </style>
+
 </head>
 
 <body>
@@ -101,7 +147,7 @@ cursor:pointer;
 
 <h2>Emitte - Gerador de Certificados</h2>
 
-<a href="/logout" style="color:white;">Sair</a>
+<a href="/logout" style="color:white;text-decoration:none;">Sair</a>
 
 </header>
 
@@ -112,9 +158,11 @@ cursor:pointer;
 <form method="POST" enctype="multipart/form-data">
 
 <label>Imagem de Fundo</label>
+
 <input type="file" name="fundo" id="fundo" accept=".jpg,.jpeg" required>
 
 <label>Planilha Excel</label>
+
 <input type="file" name="planilha" accept=".xlsx" required>
 
 <label>Texto do Certificado</label>
@@ -171,8 +219,6 @@ Gerar Certificados
 
 
 <div class="preview-box">
-
-<h3>Preview</h3>
 
 <div class="preview-wrapper">
 
@@ -261,4 +307,5 @@ previewText.style.top = "70%";
 </script>
 
 </body>
+
 </html>
