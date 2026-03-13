@@ -80,8 +80,6 @@ text-align:center;
 
 font-size:16px;
 
-white-space:pre-wrap;
-
 line-height:1.3;
 
 word-wrap:break-word;
@@ -270,7 +268,9 @@ posicaoInput.addEventListener("change", atualizarPreview);
 
 function atualizarPreview(){
 
-previewText.innerText = textoInput.value;
+let textoFormatado = textoInput.value.replace(/\n/g,"<br>");
+
+previewText.innerHTML = textoFormatado;
 
 previewText.style.fontSize = fonteInput.value + "px";
 
