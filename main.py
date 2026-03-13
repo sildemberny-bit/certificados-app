@@ -13,7 +13,6 @@ import os
 import unicodedata
 import re
 import tempfile
-import shutil
 
 app = Flask(__name__)
 app.secret_key = "emitte_secret"
@@ -44,7 +43,6 @@ def login():
 
 @app.route("/logout")
 def logout():
-
     session.pop("user",None)
     return redirect("/")
 
@@ -63,10 +61,7 @@ def limpar_nome_arquivo(nome):
     return nome
 
 
-def gerar_pdf(fundo, texto, fonte, alinhamento, posicao_vertical, caminho_pdf):
-
-    imagem = Image.open(fundo)
-    imagem = imagem.convert("RGB")
+def gerar_pdf(fundo_reader, texto, fonte, alinhamento, posicao_vertical, caminho_pdf):
 
     largura_pagina, altura_pagina = landscape(A4)
 
@@ -74,8 +69,6 @@ def gerar_pdf(fundo, texto, fonte, alinhamento, posicao_vertical, caminho_pdf):
         caminho_pdf,
         pagesize=(largura_pagina, altura_pagina)
     )
-
-    fundo_reader = ImageReader(imagem)
 
     c.drawImage(
         fundo_reader,
@@ -133,16 +126,19 @@ def preview():
     alinhamento = request.form["alinhamento"]
     posicao_vertical = request.form["posicao_vertical"]
 
-    buffer_pdf = io.BytesIO()
-
     imagem = Image.open(fundo)
     imagem = imagem.convert("RGB")
 
+    fundo_reader = ImageReader(imagem)
+
     largura_pagina, altura_pagina = landscape(A4)
 
-    c = canvas.Canvas(buffer_pdf, pagesize=(largura_pagina, altura_pagina))
+    buffer_pdf = io.BytesIO()
 
-    fundo_reader = ImageReader(imagem)
+    c = canvas.Canvas(
+        buffer_pdf,
+        pagesize=(largura_pagina, altura_pagina)
+    )
 
     c.drawImage(
         fundo_reader,
@@ -162,9 +158,9 @@ def preview():
 
     texto = texto.replace("\n","<br/>")
 
-    p = Paragraph(texto, style)
-
     largura_texto = largura_pagina * 0.85
+
+    p = Paragraph(texto, style)
 
     w, h = p.wrap(largura_texto, altura_pagina)
 
@@ -180,7 +176,10 @@ def preview():
 
     buffer_pdf.seek(0)
 
-    return send_file(buffer_pdf, mimetype="application/pdf")
+    return send_file(
+        buffer_pdf,
+        mimetype="application/pdf"
+    )
 
 
 @app.route("/certificados", methods=["GET","POST"])
@@ -201,6 +200,11 @@ def certificados():
 
         df = pd.read_excel(planilha)
 
+        imagem = Image.open(fundo)
+        imagem = imagem.convert("RGB")
+
+        fundo_reader = ImageReader(imagem)
+
         pasta_temp = tempfile.mkdtemp()
 
         lista_pdfs = []
@@ -219,12 +223,13 @@ def certificados():
                 )
 
             nome_base = str(linha[df.columns[0]])
+
             nome_arquivo = limpar_nome_arquivo(nome_base) + ".pdf"
 
             caminho_pdf = os.path.join(pasta_temp, nome_arquivo)
 
             gerar_pdf(
-                fundo,
+                fundo_reader,
                 texto_certificado,
                 fonte,
                 alinhamento,
@@ -236,7 +241,7 @@ def certificados():
 
         caminho_zip = os.path.join(pasta_temp, "certificados.zip")
 
-        with zipfile.ZipFile(caminho_zip, "w") as zipf:
+        with zipfile.ZipFile(caminho_zip,"w") as zipf:
 
             for pdf in lista_pdfs:
                 zipf.write(pdf, os.path.basename(pdf))
