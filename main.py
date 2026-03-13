@@ -13,7 +13,6 @@ import os
 import unicodedata
 import re
 import tempfile
-from concurrent.futures import ThreadPoolExecutor
 
 app = Flask(__name__)
 app.secret_key = "emitte_secret"
@@ -44,7 +43,6 @@ def login():
 
 @app.route("/logout")
 def logout():
-
     session.pop("user",None)
     return redirect("/")
 
@@ -63,21 +61,18 @@ def limpar_nome_arquivo(nome):
     return nome
 
 
-def gerar_pdf_worker(args):
-
-    fundo_path, texto, fonte, alinhamento, posicao_vertical, caminho_pdf = args
-
-    imagem = Image.open(fundo_path)
-    imagem = imagem.convert("RGB")
-
-    fundo_reader = ImageReader(imagem)
+def gerar_pdf(imagem, texto, fonte, alinhamento, posicao_vertical):
 
     largura_pagina, altura_pagina = landscape(A4)
 
+    buffer = io.BytesIO()
+
     c = canvas.Canvas(
-        caminho_pdf,
+        buffer,
         pagesize=(largura_pagina, altura_pagina)
     )
+
+    fundo_reader = ImageReader(imagem)
 
     c.drawImage(
         fundo_reader,
@@ -125,6 +120,10 @@ def gerar_pdf_worker(args):
 
     c.save()
 
+    buffer.seek(0)
+
+    return buffer.read()
+
 
 @app.route("/preview", methods=["POST"])
 def preview():
@@ -138,55 +137,10 @@ def preview():
     imagem = Image.open(fundo)
     imagem = imagem.convert("RGB")
 
-    fundo_reader = ImageReader(imagem)
-
-    largura_pagina, altura_pagina = landscape(A4)
-
-    buffer_pdf = io.BytesIO()
-
-    c = canvas.Canvas(
-        buffer_pdf,
-        pagesize=(largura_pagina, altura_pagina)
-    )
-
-    c.drawImage(
-        fundo_reader,
-        0,
-        0,
-        width=largura_pagina,
-        height=altura_pagina
-    )
-
-    style = ParagraphStyle(
-        name="Preview",
-        fontName="Helvetica",
-        fontSize=fonte + 6,
-        leading=(fonte + 6) * 1.3,
-        alignment=TA_CENTER
-    )
-
-    texto = texto.replace("\n","<br/>")
-
-    largura_texto = largura_pagina * 0.85
-
-    p = Paragraph(texto, style)
-
-    w, h = p.wrap(largura_texto, altura_pagina)
-
-    y = (altura_pagina / 2) - (h / 2)
-
-    p.drawOn(
-        c,
-        (largura_pagina - largura_texto) / 2,
-        y
-    )
-
-    c.save()
-
-    buffer_pdf.seek(0)
+    pdf = gerar_pdf(imagem, texto, fonte, alinhamento, posicao_vertical)
 
     return send_file(
-        buffer_pdf,
+        io.BytesIO(pdf),
         mimetype="application/pdf"
     )
 
@@ -209,54 +163,40 @@ def certificados():
 
         df = pd.read_excel(planilha)
 
+        imagem = Image.open(fundo)
+        imagem = imagem.convert("RGB")
+
         pasta_temp = tempfile.mkdtemp()
-
-        fundo_path = os.path.join(pasta_temp, "fundo.jpg")
-        fundo.save(fundo_path)
-
-        tarefas = []
-        lista_pdfs = []
-
-        for i, linha in df.iterrows():
-
-            texto_certificado = texto
-
-            for coluna in df.columns:
-
-                valor = str(linha[coluna])
-
-                texto_certificado = texto_certificado.replace(
-                    "{" + coluna.upper() + "}",
-                    f"<b>{valor}</b>"
-                )
-
-            nome_base = str(linha[df.columns[0]])
-            nome_arquivo = limpar_nome_arquivo(nome_base) + ".pdf"
-
-            caminho_pdf = os.path.join(pasta_temp, nome_arquivo)
-
-            tarefas.append(
-                (
-                    fundo_path,
-                    texto_certificado,
-                    fonte,
-                    alinhamento,
-                    posicao_vertical,
-                    caminho_pdf
-                )
-            )
-
-            lista_pdfs.append(caminho_pdf)
-
-        with ThreadPoolExecutor(max_workers=4) as executor:
-            executor.map(gerar_pdf_worker, tarefas)
 
         caminho_zip = os.path.join(pasta_temp, "certificados.zip")
 
         with zipfile.ZipFile(caminho_zip,"w") as zipf:
 
-            for pdf in lista_pdfs:
-                zipf.write(pdf, os.path.basename(pdf))
+            for i, linha in df.iterrows():
+
+                texto_certificado = texto
+
+                for coluna in df.columns:
+
+                    valor = str(linha[coluna])
+
+                    texto_certificado = texto_certificado.replace(
+                        "{" + coluna.upper() + "}",
+                        f"<b>{valor}</b>"
+                    )
+
+                nome_base = str(linha[df.columns[0]])
+                nome_arquivo = limpar_nome_arquivo(nome_base) + ".pdf"
+
+                pdf_bytes = gerar_pdf(
+                    imagem,
+                    texto_certificado,
+                    fonte,
+                    alinhamento,
+                    posicao_vertical
+                )
+
+                zipf.writestr(nome_arquivo, pdf_bytes)
 
         return send_file(
             caminho_zip,
