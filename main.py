@@ -13,7 +13,7 @@ import os
 import unicodedata
 import re
 import tempfile
-from concurrent.futures import ProcessPoolExecutor
+from concurrent.futures import ThreadPoolExecutor
 
 app = Flask(__name__)
 app.secret_key = "emitte_secret"
@@ -248,7 +248,7 @@ def certificados():
 
             lista_pdfs.append(caminho_pdf)
 
-        with ProcessPoolExecutor(max_workers=2) as executor:
+        with ThreadPoolExecutor(max_workers=4) as executor:
             executor.map(gerar_pdf_worker, tarefas)
 
         caminho_zip = os.path.join(pasta_temp, "certificados.zip")
