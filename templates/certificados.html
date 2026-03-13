@@ -1,138 +1,78 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-br">
 
 <head>
 
-<title>Emitte - Gerador</title>
+<meta charset="UTF-8">
+<title>Gerar Certificados</title>
 
 <style>
 
 body{
+font-family: Arial, Helvetica, sans-serif;
+background:#f4f6f8;
 margin:0;
-font-family:Arial;
-background:#f4f6f9;
-}
-
-header{
-background:#1f3c88;
-color:white;
-padding:10px 30px;
-display:flex;
-justify-content:space-between;
-align-items:center;
-}
-
-header h2{
-margin:0;
-font-size:20px;
+padding:0;
 }
 
 .container{
-display:flex;
-gap:25px;
-padding:20px 30px;
-}
-
-.form-box{
-width:35%;
+max-width:900px;
+margin:auto;
 background:white;
-padding:18px;
-border-radius:8px;
-box-shadow:0px 3px 10px rgba(0,0,0,0.1);
+padding:40px;
+margin-top:40px;
+border-radius:10px;
+box-shadow:0 4px 10px rgba(0,0,0,0.1);
 }
 
-.preview-box{
-width:65%;
-background:white;
-padding:15px;
-border-radius:8px;
-box-shadow:0px 3px 10px rgba(0,0,0,0.1);
-display:flex;
-justify-content:center;
-align-items:center;
-}
-
-.preview-wrapper{
-position:relative;
-width:100%;
-max-height:580px;
-overflow:hidden;
-}
-
-#preview-img{
-width:100%;
-max-height:580px;
-object-fit:contain;
-display:none;
-}
-
-#preview-text{
-
-position:absolute;
-
-width:85%;
-left:7.5%;
-
-top:50%;
-transform:translateY(-50%);
-
+h1{
 text-align:center;
-
-font-size:16px;
-
-line-height:1.3;
-
-word-wrap:break-word;
-
-}
-
-input,select,textarea{
-
-width:100%;
-
-padding:8px;
-
-margin:6px 0 10px 0;
-
-border-radius:5px;
-
-border:1px solid #ccc;
-
-font-size:14px;
-
+margin-bottom:30px;
 }
 
 label{
+font-weight:bold;
+display:block;
+margin-top:15px;
+}
 
-font-size:13px;
-color:#555;
+input, select, textarea{
+width:100%;
+padding:10px;
+margin-top:5px;
+border-radius:6px;
+border:1px solid #ccc;
+box-sizing:border-box;
+}
 
+textarea{
+height:150px;
+resize:vertical;
 }
 
 button{
-
+margin-top:25px;
+padding:15px;
 width:100%;
-
-padding:10px;
-
-background:#1f3c88;
-
-color:white;
-
 border:none;
-
-border-radius:6px;
-
+border-radius:8px;
+background:#28a745;
+color:white;
+font-size:16px;
 cursor:pointer;
-
-font-size:14px;
-
 }
 
 button:hover{
+background:#218838;
+}
 
-background:#162d66;
+.logo{
+text-align:center;
+margin-bottom:20px;
+}
 
+.logo img{
+height:60px;
 }
 
 </style>
@@ -141,53 +81,30 @@ background:#162d66;
 
 <body>
 
-<header>
-
-<h2>Emitte - Gerador de Certificados</h2>
-
-<a href="/logout" style="color:white;text-decoration:none;">Sair</a>
-
-</header>
-
 <div class="container">
 
-<div class="form-box">
+<div class="logo">
+<img src="/static/logo.png">
+</div>
 
-<form method="POST" enctype="multipart/form-data">
+<h1>Gerar Certificados</h1>
 
-<label>Imagem de Fundo</label>
+<form action="/certificados" method="post" enctype="multipart/form-data">
 
-<input type="file" name="fundo" id="fundo" accept=".jpg,.jpeg" required>
+<label>Imagem do certificado (PNG ou JPG)</label>
+<input type="file" name="fundo" required>
 
-<label>Planilha Excel</label>
+<label>Planilha Excel (.xlsx)</label>
+<input type="file" name="planilha" required>
 
-<input type="file" name="planilha" accept=".xlsx" required>
+<label>Texto do certificado</label>
+<textarea name="texto" required></textarea>
 
-<label>Texto do Certificado</label>
+<label>Tamanho da fonte</label>
+<input type="number" name="fonte" value="18">
 
-<textarea
-name="texto"
-id="texto"
-rows="5"
-placeholder="Ex: Certificamos que {NOME} participou..."
-required></textarea>
-
-<label>Tamanho da Fonte</label>
-
-<select name="fonte" id="fonte">
-
-<option value="10">10</option>
-<option value="12">12</option>
-<option value="14">14</option>
-<option value="16">16</option>
-<option value="18">18</option>
-<option value="20">20</option>
-
-</select>
-
-<label>Alinhamento</label>
-
-<select name="alinhamento" id="alinhamento">
+<label>Alinhamento do texto</label>
+<select name="alinhamento">
 
 <option value="centro">Centro</option>
 <option value="esquerda">Esquerda</option>
@@ -195,117 +112,28 @@ required></textarea>
 
 </select>
 
-<label>Posição Vertical</label>
-
-<select name="posicao_vertical" id="posicao">
+<label>Posição vertical do bloco</label>
+<select name="posicao_vertical">
 
 <option value="superior">Superior</option>
-<option value="centro" selected>Centro</option>
+<option value="centro">Centro</option>
 <option value="inferior">Inferior</option>
 
 </select>
 
+<label>Ajuste fino vertical (px)</label>
+<input type="number" name="ajuste_vertical" value="0">
+
+<label>Largura do bloco de texto (%)</label>
+<input type="number" name="largura_texto" value="70">
+
 <button type="submit">
-
-Gerar Certificados
-
+Gerar certificados
 </button>
 
 </form>
 
 </div>
 
-
-<div class="preview-box">
-
-<div class="preview-wrapper">
-
-<img id="preview-img">
-
-<div id="preview-text"></div>
-
-</div>
-
-</div>
-
-</div>
-
-
-<script>
-
-const fundoInput = document.getElementById("fundo");
-const previewImg = document.getElementById("preview-img");
-
-const textoInput = document.getElementById("texto");
-const previewText = document.getElementById("preview-text");
-
-const fonteInput = document.getElementById("fonte");
-const alinhamentoInput = document.getElementById("alinhamento");
-const posicaoInput = document.getElementById("posicao");
-
-
-fundoInput.addEventListener("change", function(event){
-
-const file = event.target.files[0];
-
-if(file){
-
-previewImg.src = URL.createObjectURL(file);
-previewImg.style.display = "block";
-
-atualizarPreview();
-
-}
-
-});
-
-
-textoInput.addEventListener("input", atualizarPreview);
-fonteInput.addEventListener("change", atualizarPreview);
-alinhamentoInput.addEventListener("change", atualizarPreview);
-posicaoInput.addEventListener("change", atualizarPreview);
-
-
-function atualizarPreview(){
-
-let textoFormatado = textoInput.value.replace(/\n/g,"<br>");
-
-previewText.innerHTML = textoFormatado;
-
-previewText.style.fontSize = fonteInput.value + "px";
-
-previewText.style.lineHeight = "1.3";
-
-
-if(alinhamentoInput.value === "centro"){
-previewText.style.textAlign = "center";
-}
-
-if(alinhamentoInput.value === "esquerda"){
-previewText.style.textAlign = "left";
-}
-
-if(alinhamentoInput.value === "direita"){
-previewText.style.textAlign = "right";
-}
-
-
-if(posicaoInput.value === "superior"){
-previewText.style.top = "30%";
-}
-
-if(posicaoInput.value === "centro"){
-previewText.style.top = "50%";
-}
-
-if(posicaoInput.value === "inferior"){
-previewText.style.top = "70%";
-}
-
-}
-
-</script>
-
 </body>
-
 </html>
