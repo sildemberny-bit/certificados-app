@@ -126,7 +126,6 @@ def gerar_pdf(imagem, texto, fonte, alinhamento, posicao_vertical):
     return buffer.read()
 
 
-# NOVA FUNÇÃO — gera um único PDF com várias páginas
 def gerar_pdf_lote(imagem, df, texto, fonte, alinhamento, posicao_vertical, caminho_pdf):
 
     largura_pagina, altura_pagina = landscape(A4)
@@ -200,19 +199,34 @@ def gerar_pdf_lote(imagem, df, texto, fonte, alinhamento, posicao_vertical, cami
     c.save()
 
 
-# NOVA FUNÇÃO — divide o PDF grande
+def detectar_coluna_nome(df):
+
+    for col in df.columns:
+
+        col_norm = unicodedata.normalize("NFD", col)
+        col_norm = col_norm.encode("ascii","ignore").decode("utf-8")
+        col_norm = col_norm.lower()
+
+        if "nome" in col_norm:
+            return col
+
+    return df.columns[0]
+
+
 def dividir_pdf(caminho_pdf, df, pasta_saida):
 
     reader = PdfReader(caminho_pdf)
 
     arquivos = []
 
+    coluna_nome = detectar_coluna_nome(df)
+
     for i, page in enumerate(reader.pages):
 
         writer = PdfWriter()
         writer.add_page(page)
 
-        nome = str(df.iloc[i]["NOME"])
+        nome = str(df.iloc[i][coluna_nome])
 
         nome_limpo = limpar_nome_arquivo(nome)
 
