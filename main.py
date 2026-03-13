@@ -12,6 +12,8 @@ import io
 import os
 import unicodedata
 import re
+import tempfile
+import shutil
 
 app = Flask(__name__)
 app.secret_key = "emitte_secret"
@@ -61,17 +63,15 @@ def limpar_nome_arquivo(nome):
     return nome
 
 
-def gerar_pdf(fundo, texto, fonte, alinhamento, posicao_vertical):
+def gerar_pdf(fundo, texto, fonte, alinhamento, posicao_vertical, caminho_pdf):
 
     imagem = Image.open(fundo)
     imagem = imagem.convert("RGB")
 
     largura_pagina, altura_pagina = landscape(A4)
 
-    buffer_pdf = io.BytesIO()
-
     c = canvas.Canvas(
-        buffer_pdf,
+        caminho_pdf,
         pagesize=(largura_pagina, altura_pagina)
     )
 
@@ -123,10 +123,6 @@ def gerar_pdf(fundo, texto, fonte, alinhamento, posicao_vertical):
 
     c.save()
 
-    buffer_pdf.seek(0)
-
-    return buffer_pdf
-
 
 @app.route("/preview", methods=["POST"])
 def preview():
@@ -137,18 +133,54 @@ def preview():
     alinhamento = request.form["alinhamento"]
     posicao_vertical = request.form["posicao_vertical"]
 
-    pdf = gerar_pdf(
-        fundo,
-        texto,
-        fonte,
-        alinhamento,
-        posicao_vertical
+    buffer_pdf = io.BytesIO()
+
+    imagem = Image.open(fundo)
+    imagem = imagem.convert("RGB")
+
+    largura_pagina, altura_pagina = landscape(A4)
+
+    c = canvas.Canvas(buffer_pdf, pagesize=(largura_pagina, altura_pagina))
+
+    fundo_reader = ImageReader(imagem)
+
+    c.drawImage(
+        fundo_reader,
+        0,
+        0,
+        width=largura_pagina,
+        height=altura_pagina
     )
 
-    return send_file(
-        pdf,
-        mimetype="application/pdf"
+    style = ParagraphStyle(
+        name="Preview",
+        fontName="Helvetica",
+        fontSize=fonte + 6,
+        leading=(fonte + 6) * 1.3,
+        alignment=TA_CENTER
     )
+
+    texto = texto.replace("\n","<br/>")
+
+    p = Paragraph(texto, style)
+
+    largura_texto = largura_pagina * 0.85
+
+    w, h = p.wrap(largura_texto, altura_pagina)
+
+    y = (altura_pagina / 2) - (h / 2)
+
+    p.drawOn(
+        c,
+        (largura_pagina - largura_texto) / 2,
+        y
+    )
+
+    c.save()
+
+    buffer_pdf.seek(0)
+
+    return send_file(buffer_pdf, mimetype="application/pdf")
 
 
 @app.route("/certificados", methods=["GET","POST"])
@@ -169,45 +201,48 @@ def certificados():
 
         df = pd.read_excel(planilha)
 
-        buffer_zip = io.BytesIO()
+        pasta_temp = tempfile.mkdtemp()
 
-        with zipfile.ZipFile(buffer_zip,"w") as zipf:
+        lista_pdfs = []
 
-            for i, linha in df.iterrows():
+        for i, linha in df.iterrows():
 
-                texto_certificado = texto
+            texto_certificado = texto
 
-                for coluna in df.columns:
+            for coluna in df.columns:
 
-                    valor = str(linha[coluna])
+                valor = str(linha[coluna])
 
-                    texto_certificado = texto_certificado.replace(
-                        "{" + coluna.upper() + "}",
-                        f"<b>{valor}</b>"
-                    )
-
-                pdf = gerar_pdf(
-                    fundo,
-                    texto_certificado,
-                    fonte,
-                    alinhamento,
-                    posicao_vertical
+                texto_certificado = texto_certificado.replace(
+                    "{" + coluna.upper() + "}",
+                    f"<b>{valor}</b>"
                 )
 
-                # pega o valor da primeira coluna (normalmente nome)
-                nome_base = str(linha[df.columns[0]])
+            nome_base = str(linha[df.columns[0]])
+            nome_arquivo = limpar_nome_arquivo(nome_base) + ".pdf"
 
-                nome_arquivo = limpar_nome_arquivo(nome_base) + ".pdf"
+            caminho_pdf = os.path.join(pasta_temp, nome_arquivo)
 
-                zipf.writestr(
-                    nome_arquivo,
-                    pdf.read()
-                )
+            gerar_pdf(
+                fundo,
+                texto_certificado,
+                fonte,
+                alinhamento,
+                posicao_vertical,
+                caminho_pdf
+            )
 
-        buffer_zip.seek(0)
+            lista_pdfs.append(caminho_pdf)
+
+        caminho_zip = os.path.join(pasta_temp, "certificados.zip")
+
+        with zipfile.ZipFile(caminho_zip, "w") as zipf:
+
+            for pdf in lista_pdfs:
+                zipf.write(pdf, os.path.basename(pdf))
 
         return send_file(
-            buffer_zip,
+            caminho_zip,
             as_attachment=True,
             download_name="certificados.zip",
             mimetype="application/zip"
