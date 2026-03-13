@@ -115,10 +115,21 @@ border:1px solid #ddd;
 <form action="/certificados" method="post" enctype="multipart/form-data">
 
 <label>Imagem do certificado</label>
-<input type="file" name="fundo" id="fundo" required>
+<input 
+type="file" 
+name="fundo" 
+id="fundo"
+accept=".jpg,.jpeg,.png,image/jpeg,image/png"
+required
+>
 
 <label>Planilha Excel (.xlsx)</label>
-<input type="file" name="planilha" required>
+<input 
+type="file" 
+name="planilha"
+accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+required
+>
 
 <label>Texto do certificado</label>
 <textarea name="texto" required></textarea>
