@@ -62,70 +62,6 @@ def limpar_nome_arquivo(nome):
     return nome
 
 
-def gerar_pdf(imagem, texto, fonte, alinhamento, posicao_vertical):
-
-    largura_pagina, altura_pagina = landscape(A4)
-
-    buffer = io.BytesIO()
-
-    c = canvas.Canvas(
-        buffer,
-        pagesize=(largura_pagina, altura_pagina)
-    )
-
-    fundo_reader = ImageReader(imagem)
-
-    c.drawImage(
-        fundo_reader,
-        0,
-        0,
-        width=largura_pagina,
-        height=altura_pagina
-    )
-
-    largura_texto = largura_pagina * 0.85
-
-    if alinhamento == "centro":
-        alinh = TA_CENTER
-    elif alinhamento == "esquerda":
-        alinh = TA_LEFT
-    else:
-        alinh = TA_RIGHT
-
-    style = ParagraphStyle(
-        name="Certificado",
-        fontName="Helvetica",
-        fontSize=fonte + 6,
-        leading=(fonte + 6) * 1.3,
-        alignment=alinh
-    )
-
-    texto = texto.replace("\n","<br/>")
-
-    p = Paragraph(texto, style)
-
-    w, h = p.wrap(largura_texto, altura_pagina)
-
-    if posicao_vertical == "superior":
-        y = altura_pagina * 0.75
-    elif posicao_vertical == "centro":
-        y = (altura_pagina / 2) - (h / 2)
-    else:
-        y = altura_pagina * 0.30
-
-    p.drawOn(
-        c,
-        (largura_pagina - largura_texto) / 2,
-        y
-    )
-
-    c.save()
-
-    buffer.seek(0)
-
-    return buffer.read()
-
-
 def gerar_pdf_lote(imagem, df, texto, fonte, alinhamento, posicao_vertical, caminho_pdf):
 
     largura_pagina, altura_pagina = landscape(A4)
@@ -240,26 +176,6 @@ def dividir_pdf(caminho_pdf, df, pasta_saida):
     return arquivos
 
 
-@app.route("/preview", methods=["POST"])
-def preview():
-
-    fundo = request.files["fundo"]
-    texto = request.form["texto"]
-    fonte = int(request.form["fonte"])
-    alinhamento = request.form["alinhamento"]
-    posicao_vertical = request.form["posicao_vertical"]
-
-    imagem = Image.open(fundo)
-    imagem = imagem.convert("RGB")
-
-    pdf = gerar_pdf(imagem, texto, fonte, alinhamento, posicao_vertical)
-
-    return send_file(
-        io.BytesIO(pdf),
-        mimetype="application/pdf"
-    )
-
-
 @app.route("/certificados", methods=["GET","POST"])
 def certificados():
 
@@ -312,8 +228,14 @@ def certificados():
                     os.path.basename(arquivo)
                 )
 
+        # ler o zip em memória antes de enviar
+        with open(caminho_zip, "rb") as f:
+            zip_data = io.BytesIO(f.read())
+
+        zip_data.seek(0)
+
         return send_file(
-            caminho_zip,
+            zip_data,
             as_attachment=True,
             download_name="certificados.zip",
             mimetype="application/zip"
