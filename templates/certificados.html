@@ -47,11 +47,6 @@ background:white;
 padding:30px;
 border-radius:10px;
 box-shadow:0 4px 10px rgba(0,0,0,0.1);
-text-align:center;
-}
-
-h1{
-margin-top:0;
 }
 
 label{
@@ -90,10 +85,24 @@ button:hover{
 background:#218838;
 }
 
-.preview-box img{
-max-width:100%;
+.preview-area{
+position:relative;
+width:100%;
+}
+
+.preview-area img{
+width:100%;
 border-radius:6px;
 border:1px solid #ddd;
+}
+
+.preview-text{
+position:absolute;
+left:50%;
+transform:translateX(-50%);
+width:70%;
+text-align:center;
+white-space:pre-line;
 }
 
 </style>
@@ -132,13 +141,13 @@ required
 >
 
 <label>Texto do certificado</label>
-<textarea name="texto" required></textarea>
+<textarea id="texto" name="texto" required></textarea>
 
 <label>Tamanho da fonte</label>
-<input type="number" name="fonte" value="18">
+<input type="number" id="fonte" name="fonte" value="18">
 
 <label>Alinhamento</label>
-<select name="alinhamento">
+<select id="alinhamento" name="alinhamento">
 
 <option value="centro">Centro</option>
 <option value="esquerda">Esquerda</option>
@@ -147,7 +156,7 @@ required
 </select>
 
 <label>Posição vertical</label>
-<select name="posicao_vertical">
+<select id="posicao_vertical" name="posicao_vertical">
 
 <option value="superior">Superior</option>
 <option value="centro">Centro</option>
@@ -156,10 +165,10 @@ required
 </select>
 
 <label>Ajuste fino vertical (px)</label>
-<input type="number" name="ajuste_vertical" value="0">
+<input type="number" id="ajuste_vertical" name="ajuste_vertical" value="0">
 
 <label>Largura do bloco de texto (%)</label>
-<input type="number" name="largura_texto" value="70">
+<input type="number" id="largura_texto" name="largura_texto" value="70">
 
 <button type="submit">
 Gerar certificados
@@ -171,9 +180,13 @@ Gerar certificados
 
 <div class="preview-box">
 
-<h2>Preview</h2>
+<div class="preview-area">
 
 <img id="previewImg">
+
+<div id="previewText" class="preview-text"></div>
+
+</div>
 
 </div>
 
@@ -181,7 +194,18 @@ Gerar certificados
 
 <script>
 
-document.getElementById("fundo").addEventListener("change", function(e){
+const fundo = document.getElementById("fundo")
+const texto = document.getElementById("texto")
+const fonte = document.getElementById("fonte")
+const alinhamento = document.getElementById("alinhamento")
+const posicao = document.getElementById("posicao_vertical")
+const ajuste = document.getElementById("ajuste_vertical")
+const largura = document.getElementById("largura_texto")
+
+const previewImg = document.getElementById("previewImg")
+const previewText = document.getElementById("previewText")
+
+fundo.addEventListener("change", function(e){
 
 const file = e.target.files[0]
 
@@ -190,14 +214,59 @@ if(!file) return
 const reader = new FileReader()
 
 reader.onload = function(event){
-
-document.getElementById("previewImg").src = event.target.result
-
+previewImg.src = event.target.result
 }
 
 reader.readAsDataURL(file)
 
 })
+
+function atualizarPreview(){
+
+previewText.innerText = texto.value
+
+previewText.style.fontSize = fonte.value + "px"
+
+previewText.style.width = largura.value + "%"
+
+if(alinhamento.value == "centro"){
+previewText.style.textAlign = "center"
+}
+
+if(alinhamento.value == "esquerda"){
+previewText.style.textAlign = "left"
+}
+
+if(alinhamento.value == "direita"){
+previewText.style.textAlign = "right"
+}
+
+let top = 50
+
+if(posicao.value == "superior"){
+top = 25
+}
+
+if(posicao.value == "centro"){
+top = 50
+}
+
+if(posicao.value == "inferior"){
+top = 75
+}
+
+top = top + (parseInt(ajuste.value) / 10)
+
+previewText.style.top = top + "%"
+
+}
+
+texto.addEventListener("input", atualizarPreview)
+fonte.addEventListener("input", atualizarPreview)
+alinhamento.addEventListener("change", atualizarPreview)
+posicao.addEventListener("change", atualizarPreview)
+ajuste.addEventListener("input", atualizarPreview)
+largura.addEventListener("input", atualizarPreview)
 
 </script>
 
