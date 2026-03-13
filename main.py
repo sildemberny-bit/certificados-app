@@ -9,6 +9,7 @@ from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
 import zipfile
 import io
+import os
 
 app = Flask(__name__)
 app.secret_key = "emitte_secret"
@@ -85,7 +86,6 @@ def gerar_pdf(fundo, texto, fonte, alinhamento, posicao_vertical):
         alignment=alinh
     )
 
-    # corrigido aqui
     texto = texto.replace("\n","<br/>")
 
     p = Paragraph(texto, style)
@@ -196,4 +196,10 @@ def certificados():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+
+    port = int(os.environ.get("PORT", 10000))
+
+    app.run(
+        host="0.0.0.0",
+        port=port
+    )
