@@ -16,7 +16,7 @@ padding:0;
 }
 
 .container{
-max-width:900px;
+max-width:1000px;
 margin:auto;
 background:white;
 padding:40px;
@@ -75,6 +75,17 @@ margin-bottom:20px;
 height:60px;
 }
 
+.preview{
+margin-top:40px;
+text-align:center;
+}
+
+.preview img{
+max-width:100%;
+border-radius:8px;
+border:1px solid #ddd;
+}
+
 </style>
 
 </head>
@@ -92,7 +103,7 @@ height:60px;
 <form action="/certificados" method="post" enctype="multipart/form-data">
 
 <label>Imagem do certificado (PNG ou JPG)</label>
-<input type="file" name="fundo" required>
+<input type="file" name="fundo" id="fundo" required>
 
 <label>Planilha Excel (.xlsx)</label>
 <input type="file" name="planilha" required>
@@ -133,7 +144,37 @@ Gerar certificados
 
 </form>
 
+<div class="preview">
+
+<h2>Preview do certificado</h2>
+
+<img id="previewImg">
+
 </div>
+
+</div>
+
+<script>
+
+document.getElementById("fundo").addEventListener("change", function(e){
+
+const file = e.target.files[0]
+
+if(!file) return
+
+const reader = new FileReader()
+
+reader.onload = function(event){
+
+document.getElementById("previewImg").src = event.target.result
+
+}
+
+reader.readAsDataURL(file)
+
+})
+
+</script>
 
 </body>
 </html>
