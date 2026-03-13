@@ -13,6 +13,7 @@ import os
 import unicodedata
 import re
 import tempfile
+from concurrent.futures import ProcessPoolExecutor
 
 app = Flask(__name__)
 app.secret_key = "emitte_secret"
@@ -43,6 +44,7 @@ def login():
 
 @app.route("/logout")
 def logout():
+
     session.pop("user",None)
     return redirect("/")
 
@@ -61,7 +63,14 @@ def limpar_nome_arquivo(nome):
     return nome
 
 
-def gerar_pdf(fundo_reader, texto, fonte, alinhamento, posicao_vertical, caminho_pdf):
+def gerar_pdf_worker(args):
+
+    fundo_path, texto, fonte, alinhamento, posicao_vertical, caminho_pdf = args
+
+    imagem = Image.open(fundo_path)
+    imagem = imagem.convert("RGB")
+
+    fundo_reader = ImageReader(imagem)
 
     largura_pagina, altura_pagina = landscape(A4)
 
@@ -200,13 +209,12 @@ def certificados():
 
         df = pd.read_excel(planilha)
 
-        imagem = Image.open(fundo)
-        imagem = imagem.convert("RGB")
-
-        fundo_reader = ImageReader(imagem)
-
         pasta_temp = tempfile.mkdtemp()
 
+        fundo_path = os.path.join(pasta_temp, "fundo.jpg")
+        fundo.save(fundo_path)
+
+        tarefas = []
         lista_pdfs = []
 
         for i, linha in df.iterrows():
@@ -223,21 +231,25 @@ def certificados():
                 )
 
             nome_base = str(linha[df.columns[0]])
-
             nome_arquivo = limpar_nome_arquivo(nome_base) + ".pdf"
 
             caminho_pdf = os.path.join(pasta_temp, nome_arquivo)
 
-            gerar_pdf(
-                fundo_reader,
-                texto_certificado,
-                fonte,
-                alinhamento,
-                posicao_vertical,
-                caminho_pdf
+            tarefas.append(
+                (
+                    fundo_path,
+                    texto_certificado,
+                    fonte,
+                    alinhamento,
+                    posicao_vertical,
+                    caminho_pdf
+                )
             )
 
             lista_pdfs.append(caminho_pdf)
+
+        with ProcessPoolExecutor(max_workers=2) as executor:
+            executor.map(gerar_pdf_worker, tarefas)
 
         caminho_zip = os.path.join(pasta_temp, "certificados.zip")
 
