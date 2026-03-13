@@ -5,24 +5,70 @@
 
 <meta charset="UTF-8">
 
-<title>Download pronto</title>
+<title>Certificados prontos - EMITTE</title>
 
 <style>
 
 body{
-font-family:Arial;
-text-align:center;
-margin-top:120px;
+font-family:Arial, Helvetica, sans-serif;
+background:#f5f7fb;
+margin:0;
 }
 
-button{
-padding:18px 40px;
+.topo{
+background:white;
+padding:20px;
+text-align:center;
+border-bottom:1px solid #e5e5e5;
+}
+
+.logo{
+height:50px;
+}
+
+.container{
+max-width:600px;
+margin:100px auto;
+background:white;
+padding:50px;
+border-radius:10px;
+box-shadow:0 5px 20px rgba(0,0,0,0.08);
+text-align:center;
+}
+
+h2{
+margin-top:0;
+color:#2c2c2c;
+}
+
+p{
+color:#666;
+margin-bottom:40px;
+}
+
+.botao{
+display:inline-block;
+padding:16px 40px;
 font-size:18px;
 background:#4CAF50;
 color:white;
 border:none;
 border-radius:6px;
-cursor:pointer;
+text-decoration:none;
+margin:10px;
+}
+
+.botao:hover{
+background:#43a047;
+}
+
+.botao-sec{
+background:#f1f1f1;
+color:#333;
+}
+
+.botao-sec:hover{
+background:#e5e5e5;
 }
 
 </style>
@@ -31,13 +77,32 @@ cursor:pointer;
 
 <body>
 
+<div class="topo">
+
+<img src="/static/logo.png" class="logo">
+
+</div>
+
+<div class="container">
+
 <h2>Seus certificados estão prontos</h2>
 
-<p>Clique abaixo para baixar o arquivo.</p>
+<p>
+O sistema finalizou a geração dos certificados.<br>
+Clique no botão abaixo para baixar o arquivo ZIP.
+</p>
 
-<a href="/download/{{arquivo}}">
-<button>Baixar certificados</button>
+<a href="/download/{{arquivo}}" class="botao">
+Baixar certificados
 </a>
+
+<br>
+
+<a href="/certificados" class="botao botao-sec">
+Gerar novos certificados
+</a>
+
+</div>
 
 </body>
 
