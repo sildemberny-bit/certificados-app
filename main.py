@@ -13,6 +13,7 @@ import os
 import unicodedata
 import re
 import tempfile
+from pypdf import PdfReader, PdfWriter
 
 app = Flask(__name__)
 app.secret_key = "emitte_secret"
@@ -125,6 +126,106 @@ def gerar_pdf(imagem, texto, fonte, alinhamento, posicao_vertical):
     return buffer.read()
 
 
+# NOVA FUNÇÃO — gera um único PDF com várias páginas
+def gerar_pdf_lote(imagem, df, texto, fonte, alinhamento, posicao_vertical, caminho_pdf):
+
+    largura_pagina, altura_pagina = landscape(A4)
+
+    c = canvas.Canvas(
+        caminho_pdf,
+        pagesize=(largura_pagina, altura_pagina)
+    )
+
+    fundo_reader = ImageReader(imagem)
+
+    largura_texto = largura_pagina * 0.85
+
+    if alinhamento == "centro":
+        alinh = TA_CENTER
+    elif alinhamento == "esquerda":
+        alinh = TA_LEFT
+    else:
+        alinh = TA_RIGHT
+
+    style = ParagraphStyle(
+        name="Certificado",
+        fontName="Helvetica",
+        fontSize=fonte + 6,
+        leading=(fonte + 6) * 1.3,
+        alignment=alinh
+    )
+
+    for i, linha in df.iterrows():
+
+        texto_certificado = texto
+
+        for coluna in df.columns:
+
+            valor = str(linha[coluna])
+
+            texto_certificado = texto_certificado.replace(
+                "{" + coluna.upper() + "}",
+                f"<b>{valor}</b>"
+            )
+
+        texto_certificado = texto_certificado.replace("\n","<br/>")
+
+        c.drawImage(
+            fundo_reader,
+            0,
+            0,
+            width=largura_pagina,
+            height=altura_pagina
+        )
+
+        p = Paragraph(texto_certificado, style)
+
+        w, h = p.wrap(largura_texto, altura_pagina)
+
+        if posicao_vertical == "superior":
+            y = altura_pagina * 0.75
+        elif posicao_vertical == "centro":
+            y = (altura_pagina / 2) - (h / 2)
+        else:
+            y = altura_pagina * 0.30
+
+        p.drawOn(
+            c,
+            (largura_pagina - largura_texto) / 2,
+            y
+        )
+
+        c.showPage()
+
+    c.save()
+
+
+# NOVA FUNÇÃO — divide o PDF grande
+def dividir_pdf(caminho_pdf, df, pasta_saida):
+
+    reader = PdfReader(caminho_pdf)
+
+    arquivos = []
+
+    for i, page in enumerate(reader.pages):
+
+        writer = PdfWriter()
+        writer.add_page(page)
+
+        nome = str(df.iloc[i]["NOME"])
+
+        nome_limpo = limpar_nome_arquivo(nome)
+
+        caminho = os.path.join(pasta_saida, f"{nome_limpo}.pdf")
+
+        with open(caminho, "wb") as f:
+            writer.write(f)
+
+        arquivos.append(caminho)
+
+    return arquivos
+
+
 @app.route("/preview", methods=["POST"])
 def preview():
 
@@ -168,35 +269,34 @@ def certificados():
 
         pasta_temp = tempfile.mkdtemp()
 
+        caminho_pdf_lote = os.path.join(pasta_temp, "lote_certificados.pdf")
+
+        gerar_pdf_lote(
+            imagem,
+            df,
+            texto,
+            fonte,
+            alinhamento,
+            posicao_vertical,
+            caminho_pdf_lote
+        )
+
+        arquivos = dividir_pdf(
+            caminho_pdf_lote,
+            df,
+            pasta_temp
+        )
+
         caminho_zip = os.path.join(pasta_temp, "certificados.zip")
 
         with zipfile.ZipFile(caminho_zip,"w") as zipf:
 
-            for i, linha in df.iterrows():
+            for arquivo in arquivos:
 
-                texto_certificado = texto
-
-                for coluna in df.columns:
-
-                    valor = str(linha[coluna])
-
-                    texto_certificado = texto_certificado.replace(
-                        "{" + coluna.upper() + "}",
-                        f"<b>{valor}</b>"
-                    )
-
-                nome_base = str(linha[df.columns[0]])
-                nome_arquivo = limpar_nome_arquivo(nome_base) + ".pdf"
-
-                pdf_bytes = gerar_pdf(
-                    imagem,
-                    texto_certificado,
-                    fonte,
-                    alinhamento,
-                    posicao_vertical
+                zipf.write(
+                    arquivo,
+                    os.path.basename(arquivo)
                 )
-
-                zipf.writestr(nome_arquivo, pdf_bytes)
 
         return send_file(
             caminho_zip,
