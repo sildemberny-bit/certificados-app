@@ -10,6 +10,8 @@ from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
 import zipfile
 import io
 import os
+import unicodedata
+import re
 
 app = Flask(__name__)
 app.secret_key = "emitte_secret"
@@ -43,6 +45,20 @@ def logout():
 
     session.pop("user",None)
     return redirect("/")
+
+
+def limpar_nome_arquivo(nome):
+
+    nome = nome.lower()
+
+    nome = unicodedata.normalize("NFD", nome)
+    nome = nome.encode("ascii", "ignore").decode("utf-8")
+
+    nome = re.sub(r"[^a-z0-9 ]", "", nome)
+
+    nome = nome.replace(" ", "_")
+
+    return nome
 
 
 def gerar_pdf(fundo, texto, fonte, alinhamento, posicao_vertical):
@@ -178,8 +194,13 @@ def certificados():
                     posicao_vertical
                 )
 
+                # pega o valor da primeira coluna (normalmente nome)
+                nome_base = str(linha[df.columns[0]])
+
+                nome_arquivo = limpar_nome_arquivo(nome_base) + ".pdf"
+
                 zipf.writestr(
-                    f"certificado_{i+1}.pdf",
+                    nome_arquivo,
                     pdf.read()
                 )
 
