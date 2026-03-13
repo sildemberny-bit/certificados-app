@@ -67,7 +67,24 @@ def limpar_nome_arquivo(nome):
     return nome
 
 
-def gerar_pdf_lote(imagem, df, texto, fonte, alinhamento, posicao_vertical, caminho_pdf):
+def substituir_campos(texto, linha):
+
+    resultado = texto
+
+    for coluna in linha.index:
+
+        valor = str(linha[coluna])
+
+        chave = coluna.lower()
+
+        resultado = resultado.replace("{" + chave + "}", f"<b>{valor}</b>")
+        resultado = resultado.replace("{" + chave.upper() + "}", f"<b>{valor}</b>")
+        resultado = resultado.replace("{" + coluna + "}", f"<b>{valor}</b>")
+
+    return resultado
+
+
+def gerar_pdf_lote(imagem, df, texto, fonte, alinhamento, posicao_vertical, ajuste_vertical, largura_texto_percent, caminho_pdf):
 
     largura_pagina, altura_pagina = landscape(A4)
 
@@ -78,7 +95,7 @@ def gerar_pdf_lote(imagem, df, texto, fonte, alinhamento, posicao_vertical, cami
 
     fundo_reader = ImageReader(imagem)
 
-    largura_texto = largura_pagina * 0.85
+    largura_texto = largura_pagina * (largura_texto_percent / 100)
 
     if alinhamento == "centro":
         alinh = TA_CENTER
@@ -90,23 +107,14 @@ def gerar_pdf_lote(imagem, df, texto, fonte, alinhamento, posicao_vertical, cami
     style = ParagraphStyle(
         name="Certificado",
         fontName="Helvetica",
-        fontSize=fonte + 6,
-        leading=(fonte + 6) * 1.3,
+        fontSize=fonte,
+        leading=fonte * 1.4,
         alignment=alinh
     )
 
     for i, linha in df.iterrows():
 
-        texto_certificado = texto
-
-        for coluna in df.columns:
-
-            valor = str(linha[coluna])
-
-            texto_certificado = texto_certificado.replace(
-                "{" + coluna.upper() + "}",
-                f"<b>{valor}</b>"
-            )
+        texto_certificado = substituir_campos(texto, linha)
 
         texto_certificado = texto_certificado.replace("\n","<br/>")
 
@@ -128,6 +136,8 @@ def gerar_pdf_lote(imagem, df, texto, fonte, alinhamento, posicao_vertical, cami
             y = (altura_pagina / 2) - (h / 2)
         else:
             y = altura_pagina * 0.30
+
+        y = y + ajuste_vertical
 
         p.drawOn(
             c,
@@ -208,6 +218,9 @@ def certificados():
         alinhamento = request.form["alinhamento"]
         posicao_vertical = request.form["posicao_vertical"]
 
+        ajuste_vertical = int(request.form["ajuste_vertical"])
+        largura_texto_percent = int(request.form["largura_texto"])
+
         df = pd.read_excel(planilha)
 
         imagem = Image.open(fundo)
@@ -224,6 +237,8 @@ def certificados():
             fonte,
             alinhamento,
             posicao_vertical,
+            ajuste_vertical,
+            largura_texto_percent,
             caminho_pdf_lote
         )
 
