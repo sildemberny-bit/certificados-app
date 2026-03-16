@@ -1,166 +1,35 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-
-<title>Emitte - Guia Rápido</title>
-
-<style>
-
-body{
-margin:0;
-font-family:Arial;
-background-color:#f4f6f9;
-color:#333;
-}
-
-header{
-background:#1f3c88;
-color:white;
-padding:15px 40px;
-display:flex;
-justify-content:space-between;
-align-items:center;
-}
-
-header a{
-color:white;
-text-decoration:none;
-font-size:14px;
-}
-
-.container{
-max-width:900px;
-margin:50px auto;
-background:white;
-padding:40px;
-border-radius:10px;
-box-shadow:0px 4px 15px rgba(0,0,0,0.1);
-}
-
-.logo{
-display:block;
-margin:auto;
-width:140px;
-margin-bottom:20px;
-}
-
-h2{
-text-align:center;
-margin-top:0;
-margin-bottom:40px;
-}
-
-.step{
-margin-bottom:30px;
-}
-
-.step h3{
-margin-bottom:10px;
-color:#1f3c88;
-}
-
-ul{
-margin-top:10px;
-}
-
-.botao{
-display:block;
-width:240px;
-margin:40px auto 0;
-padding:14px;
-background:#1f3c88;
-color:white;
-text-align:center;
-text-decoration:none;
-border-radius:6px;
-font-weight:bold;
-}
-
-.botao:hover{
-background:#162d66;
-}
-
-</style>
-
+<title>Guia</title>
 </head>
 
-<body>
+<body style="text-align:center;padding:80px;font-family:Arial">
 
-<header>
-<div>Guia de Uso - Emitte</div>
-<a href="/">Voltar</a>
-</header>
-
-<div class="container">
-
-<img src="/static/logo.png" class="logo">
-
-<h2>Como gerar certificados em 5 passos</h2>
-
-<div class="step">
-<h3>1️⃣ Prepare sua planilha Excel</h3>
-<p>Crie uma planilha contendo os dados dos participantes.</p>
-<p>Exemplo de colunas:</p>
-
-<ul>
-<li>NOME</li>
-<li>CURSO</li>
-<li>PROJETO</li>
-<li>CARGA</li>
-</ul>
-
-<p>Os nomes utilizados entre <b>{chaves}</b> no texto precisam existir como colunas na planilha.</p>
-</div>
-
-
-<div class="step">
-<h3>2️⃣ Faça upload da planilha</h3>
-<p>Envie o arquivo Excel na plataforma contendo todos os participantes que receberão certificados.</p>
-</div>
-
-
-<div class="step">
-<h3>3️⃣ Envie o modelo do certificado</h3>
-<p>Faça upload da imagem de fundo do certificado em formato <b>JPG ou PNG</b>.</p>
-<p>Recomendado: modelo horizontal.</p>
-</div>
-
-
-<div class="step">
-<h3>4️⃣ Escreva o texto do certificado</h3>
-
-<p>Utilize variáveis entre chaves para preencher automaticamente os dados.</p>
-
-<p><i>Exemplo:</i></p>
+<h2>Como funciona</h2>
 
 <p>
-<i>
-Certificamos que {NOME} apresentou o projeto intitulado {PROJETO} durante o evento.
-</i>
+
+1 Envie o fundo do certificado<br><br>
+
+2 Envie a planilha com coluna Nome<br><br>
+
+3 Use {nome} no texto<br><br>
+
+4 Gere todos os certificados automaticamente
+
 </p>
 
-<p>Você também pode ajustar:</p>
+<a href="/login">Ir para o sistema</a>
 
-<ul>
-<li>Tamanho da fonte</li>
-<li>Alinhamento do texto</li>
-<li>Posição vertical</li>
-</ul>
+<footer style="margin-top:80px;color:#777">
 
-<p>Use o <b>preview</b> para visualizar antes de gerar.</p>
+Versão 1.1<br>
+Desenvolvido por S3M
 
-</div>
-
-
-<div class="step">
-<h3>5️⃣ Clique em “Gerar Certificados”</h3>
-<p>Os certificados serão gerados automaticamente e baixados em um arquivo <b>ZIP</b>.</p>
-</div>
-
-
-<a class="botao" href="/login">Acessar Plataforma</a>
-
-</div>
+</footer>
 
 </body>
+
 </html>
