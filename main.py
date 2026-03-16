@@ -7,34 +7,15 @@ from PIL import Image, ImageDraw, ImageFont
 
 app = Flask(__name__)
 
-PASTA_TEMP = "temp"
+TEMP_DIR = "temp"
 
-if not os.path.exists(PASTA_TEMP):
-    os.makedirs(PASTA_TEMP)
-
-
-def encontrar_coluna_nome(df):
-
-    for col in df.columns:
-        if str(col).strip().lower() == "nome":
-            return col
-
-    raise Exception("Coluna NOME não encontrada na planilha.")
+if not os.path.exists(TEMP_DIR):
+    os.makedirs(TEMP_DIR)
 
 
 @app.route("/")
 def index():
     return render_template("index.html")
-
-
-@app.route("/login")
-def login():
-    return render_template("login.html")
-
-
-@app.route("/guia")
-def guia():
-    return render_template("guia.html")
 
 
 @app.route("/certificados")
@@ -49,12 +30,12 @@ def gerar():
     planilha = request.files["planilha"]
 
     texto = request.form["texto"]
-    tamanho = int(request.form["tamanho"])
-    posicao = int(request.form["posicao"])
+    fonte_tamanho = int(request.form["fonte"])
+    posicao_vertical = int(request.form["posicao"])
 
-    id_lote = str(uuid.uuid4())[:8]
+    lote = str(uuid.uuid4())[:8]
 
-    pasta = os.path.join(PASTA_TEMP, id_lote)
+    pasta = os.path.join(TEMP_DIR, lote)
     os.makedirs(pasta)
 
     caminho_fundo = os.path.join(pasta, fundo.filename)
@@ -65,7 +46,10 @@ def gerar():
 
     df = pd.read_excel(caminho_planilha)
 
-    coluna_nome = encontrar_coluna_nome(df)
+    if "nome" not in [c.lower() for c in df.columns]:
+        raise Exception("Planilha precisa ter coluna 'nome'")
+
+    coluna_nome = [c for c in df.columns if c.lower() == "nome"][0]
 
     imagem_base = Image.open(caminho_fundo)
 
@@ -82,11 +66,10 @@ def gerar():
         texto_final = texto.replace("{nome}", nome)
 
         img = imagem_base.copy()
-
         draw = ImageDraw.Draw(img)
 
         draw.text(
-            (largura/2, altura/2 + posicao),
+            (largura/2, altura/2 + posicao_vertical),
             texto_final,
             fill="black",
             font=fonte,
@@ -94,42 +77,39 @@ def gerar():
             align="center"
         )
 
-        nome_pdf = f"{nome}.pdf"
+        pdf_nome = f"{nome}.pdf"
 
-        caminho_pdf = os.path.join(pasta, nome_pdf)
+        caminho_pdf = os.path.join(pasta, pdf_nome)
 
         img.save(caminho_pdf, "PDF")
 
         arquivos.append(caminho_pdf)
 
-    zip_nome = f"certificados_{id_lote}.zip"
+    zip_nome = f"certificados_{lote}.zip"
 
-    caminho_zip = os.path.join(pasta, zip_nome)
+    zip_path = os.path.join(pasta, zip_nome)
 
+    # 🔹 compressão máxima do zip
     with zipfile.ZipFile(
-        caminho_zip,
+        zip_path,
         "w",
         compression=zipfile.ZIP_DEFLATED,
         compresslevel=9
     ) as zipf:
 
         for arq in arquivos:
-
-            zipf.write(
-                arq,
-                os.path.basename(arq)
-            )
+            zipf.write(arq, os.path.basename(arq))
 
     return render_template(
         "download.html",
-        arquivo=f"/download/{id_lote}/{zip_nome}"
+        arquivo=f"/download/{lote}/{zip_nome}"
     )
 
 
 @app.route("/download/<lote>/<arquivo>")
 def download(lote, arquivo):
 
-    caminho = os.path.join(PASTA_TEMP, lote, arquivo)
+    caminho = os.path.join(TEMP_DIR, lote, arquivo)
 
     return send_file(
         caminho,
