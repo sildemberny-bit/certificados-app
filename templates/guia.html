@@ -1,35 +1,106 @@
 <!DOCTYPE html>
 <html>
-
 <head>
-<title>Guia</title>
+
+<meta charset="UTF-8">
+<title>Como funciona - Emitte</title>
+
+<style>
+
+body{
+margin:0;
+font-family:Arial, Helvetica, sans-serif;
+background:linear-gradient(135deg,#1f3c88,#4a69bd);
+color:white;
+text-align:center;
+}
+
+.container{
+max-width:700px;
+margin:auto;
+padding:80px 20px;
+}
+
+.logo{
+width:160px;
+margin-bottom:30px;
+}
+
+h1{
+margin-bottom:40px;
+}
+
+.passos{
+background:white;
+color:#333;
+border-radius:12px;
+padding:40px;
+box-shadow:0 10px 30px rgba(0,0,0,0.2);
+}
+
+.passos p{
+font-size:18px;
+margin:18px 0;
+}
+
+.btn{
+display:inline-block;
+margin-top:40px;
+padding:15px 40px;
+background:white;
+color:#1f3c88;
+text-decoration:none;
+font-weight:bold;
+border-radius:8px;
+transition:0.3s;
+}
+
+.btn:hover{
+background:#f1f1f1;
+}
+
+footer{
+margin-top:80px;
+color:#ddd;
+font-size:14px;
+}
+
+</style>
+
 </head>
 
-<body style="text-align:center;padding:80px;font-family:Arial">
+<body>
 
-<h2>Como funciona</h2>
+<div class="container">
 
-<p>
+<img src="{{ url_for('static', filename='logo.png') }}" class="logo">
 
-1 Envie o fundo do certificado<br><br>
+<h1>Como funciona</h1>
 
-2 Envie a planilha com coluna Nome<br><br>
+<div class="passos">
 
-3 Use {nome} no texto<br><br>
+<p>1. Envie o fundo do certificado</p>
 
-4 Gere todos os certificados automaticamente
+<p>2. Envie a planilha Excel com a coluna <b>Nome</b></p>
 
-</p>
+<p>3. Use <b>{nome}</b> no texto do certificado</p>
 
-<a href="/login">Ir para o sistema</a>
+<p>4. Gere automaticamente todos os certificados</p>
 
-<footer style="margin-top:80px;color:#777">
+<a href="/login" class="btn">
+Ir para o sistema
+</a>
+
+</div>
+
+<footer>
 
 Versão 1.1<br>
 Desenvolvido por S3M
 
 </footer>
 
-</body>
+</div>
 
+</body>
 </html>
