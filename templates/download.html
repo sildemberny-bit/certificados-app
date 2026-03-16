@@ -1,65 +1,29 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html>
 
 <head>
-<meta charset="UTF-8">
 <title>Download</title>
-
-<style>
-
-body{
-font-family: Arial, Helvetica, sans-serif;
-background:#f4f6f8;
-margin:0;
-padding:0;
-text-align:center;
-}
-
-.container{
-margin-top:100px;
-}
-
-button{
-padding:15px 30px;
-background:#28a745;
-color:white;
-border:none;
-border-radius:8px;
-font-size:16px;
-cursor:pointer;
-}
-
-button:hover{
-background:#218838;
-}
-
-.versao{
-margin-top:60px;
-font-size:12px;
-color:#888;
-}
-
-</style>
-
 </head>
 
-<body>
+<body style="text-align:center;padding:80px;font-family:Arial">
 
-<div class="container">
+<h2>Certificados gerados com sucesso</h2>
 
-<h2>Seus certificados estão prontos</h2>
+<br>
 
-<p>Clique abaixo para baixar o arquivo.</p>
+<a href="{{arquivo}}">Baixar ZIP</a>
 
-<a href="{{arquivo}}">
-<button>Baixar certificados</button>
-</a>
+<br><br>
 
-</div>
+<a href="/certificados">Gerar novos certificados</a>
 
-<div class="versao">
-Versão 1.1 | Desenvolvido por S3M
-</div>
+<footer style="margin-top:80px;color:#777">
+
+Versão 1.1<br>
+Desenvolvido por S3M
+
+</footer>
 
 </body>
+
 </html>
