@@ -1,74 +1,42 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-br">
 
 <head>
-
 <meta charset="UTF-8">
-
-<title>Certificados prontos - EMITTE</title>
+<title>Download</title>
 
 <style>
 
 body{
-font-family:Arial, Helvetica, sans-serif;
-background:#f5f7fb;
+font-family: Arial, Helvetica, sans-serif;
+background:#f4f6f8;
 margin:0;
-}
-
-.topo{
-background:white;
-padding:20px;
+padding:0;
 text-align:center;
-border-bottom:1px solid #e5e5e5;
-}
-
-.logo{
-height:50px;
 }
 
 .container{
-max-width:600px;
-margin:100px auto;
-background:white;
-padding:50px;
-border-radius:10px;
-box-shadow:0 5px 20px rgba(0,0,0,0.08);
-text-align:center;
+margin-top:100px;
 }
 
-h2{
-margin-top:0;
-color:#2c2c2c;
-}
-
-p{
-color:#666;
-margin-bottom:40px;
-}
-
-.botao{
-display:inline-block;
-padding:16px 40px;
-font-size:18px;
-background:#4CAF50;
+button{
+padding:15px 30px;
+background:#28a745;
 color:white;
 border:none;
-border-radius:6px;
-text-decoration:none;
-margin:10px;
+border-radius:8px;
+font-size:16px;
+cursor:pointer;
 }
 
-.botao:hover{
-background:#43a047;
+button:hover{
+background:#218838;
 }
 
-.botao-sec{
-background:#f1f1f1;
-color:#333;
-}
-
-.botao-sec:hover{
-background:#e5e5e5;
+.versao{
+margin-top:60px;
+font-size:12px;
+color:#888;
 }
 
 </style>
@@ -77,33 +45,21 @@ background:#e5e5e5;
 
 <body>
 
-<div class="topo">
-
-<img src="/static/logo.png" class="logo">
-
-</div>
-
 <div class="container">
 
 <h2>Seus certificados estão prontos</h2>
 
-<p>
-O sistema finalizou a geração dos certificados.<br>
-Clique no botão abaixo para baixar o arquivo ZIP.
-</p>
+<p>Clique abaixo para baixar o arquivo.</p>
 
-<a href="/download/{{arquivo}}" class="botao">
-Baixar certificados
-</a>
-
-<br>
-
-<a href="/certificados" class="botao botao-sec">
-Gerar novos certificados
+<a href="{{arquivo}}">
+<button>Baixar certificados</button>
 </a>
 
 </div>
 
-</body>
+<div class="versao">
+Versão 1.1 | Desenvolvido por S3M
+</div>
 
+</body>
 </html>
