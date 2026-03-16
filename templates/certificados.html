@@ -1,111 +1,274 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-br">
 
 <head>
-<meta charset="utf-8">
+
+<meta charset="UTF-8">
 <title>Gerar Certificados</title>
 
 <style>
 
 body{
-font-family:Arial;
+font-family: Arial, Helvetica, sans-serif;
 background:#f4f6f8;
-margin:40px;
+margin:0;
+padding:0;
 }
 
-.container{
+.logo{
+text-align:center;
+margin-top:30px;
+}
+
+.logo img{
+height:60px;
+}
+
+.wrapper{
 display:flex;
 gap:40px;
+max-width:1200px;
+margin:auto;
+margin-top:40px;
+align-items:flex-start;
 }
 
-.form{
-width:40%;
-}
-
-.preview{
-width:60%;
-text-align:center;
-}
-
-img{
-max-width:100%;
+.form-box{
+flex:1;
+background:white;
+padding:30px;
 border-radius:10px;
+box-shadow:0 4px 10px rgba(0,0,0,0.1);
 }
 
-footer{
-margin-top:60px;
+.preview-box{
+flex:1;
+background:white;
+padding:30px;
+border-radius:10px;
+box-shadow:0 4px 10px rgba(0,0,0,0.1);
+}
+
+label{
+font-weight:bold;
+display:block;
+margin-top:15px;
+}
+
+input, select, textarea{
+width:100%;
+padding:10px;
+margin-top:5px;
+border-radius:6px;
+border:1px solid #ccc;
+box-sizing:border-box;
+}
+
+textarea{
+height:150px;
+resize:vertical;
+}
+
+button{
+margin-top:25px;
+padding:15px;
+width:100%;
+border:none;
+border-radius:8px;
+background:#28a745;
+color:white;
+font-size:16px;
+cursor:pointer;
+}
+
+button:hover{
+background:#218838;
+}
+
+.preview-area{
+position:relative;
+width:100%;
+}
+
+.preview-area img{
+width:100%;
+border-radius:6px;
+border:1px solid #ddd;
+}
+
+.preview-text{
+position:absolute;
+left:50%;
+transform:translateX(-50%);
+width:70%;
 text-align:center;
-color:#777;
+white-space:pre-line;
 }
 
 </style>
-
-<script>
-
-function previewImagem(event){
-
-const reader = new FileReader()
-
-reader.onload = function(){
-
-document.getElementById("previewImg").src = reader.result
-
-}
-
-reader.readAsDataURL(event.target.files[0])
-
-}
-
-</script>
 
 </head>
 
 <body>
 
-<h2>Gerar Certificados</h2>
+<div class="logo">
+<img src="/static/logo.png">
+</div>
 
-<div class="container">
+<div class="wrapper">
 
-<div class="form">
+<div class="form-box">
 
-<form action="/gerar" method="POST" enctype="multipart/form-data">
+<h1>Gerar Certificados</h1>
 
-<label>Imagem do certificado</label><br>
-<input type="file" name="fundo" accept=".jpg,.jpeg,.png" onchange="previewImagem(event)" required><br><br>
+<form action="/certificados" method="post" enctype="multipart/form-data">
 
-<label>Planilha Excel</label><br>
-<input type="file" name="planilha" accept=".xlsx" required><br><br>
+<label>Imagem do certificado</label>
+<input 
+type="file" 
+name="fundo" 
+id="fundo"
+accept=".jpg,.jpeg,.png,image/jpeg,image/png"
+required
+>
 
-<label>Texto</label><br>
-<textarea name="texto" rows="6" style="width:100%" required></textarea><br><br>
+<label>Planilha Excel (.xlsx)</label>
+<input 
+type="file" 
+name="planilha"
+accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+required
+>
 
-<label>Tamanho da fonte</label><br>
-<input type="number" name="fonte" value="14"><br><br>
+<label>Texto do certificado</label>
+<textarea id="texto" name="texto" required></textarea>
 
-<label>Ajuste vertical</label><br>
-<input type="number" name="posicao" value="0"><br><br>
+<label>Tamanho da fonte</label>
+<input type="number" id="fonte" name="fonte" value="18">
 
-<button type="submit">Gerar certificados</button>
+<label>Alinhamento</label>
+<select id="alinhamento" name="alinhamento">
+
+<option value="centro">Centro</option>
+<option value="esquerda">Esquerda</option>
+<option value="direita">Direita</option>
+
+</select>
+
+<label>Posição vertical</label>
+<select id="posicao_vertical" name="posicao_vertical">
+
+<option value="superior">Superior</option>
+<option value="centro">Centro</option>
+<option value="inferior">Inferior</option>
+
+</select>
+
+<label>Ajuste fino vertical (px)</label>
+<input type="number" id="ajuste_vertical" name="ajuste_vertical" value="0">
+
+<label>Largura do bloco de texto (%)</label>
+<input type="number" id="largura_texto" name="largura_texto" value="70">
+
+<button type="submit">
+Gerar certificados
+</button>
 
 </form>
 
 </div>
 
-<div class="preview">
+<div class="preview-box">
+
+<div class="preview-area">
 
 <img id="previewImg">
 
+<div id="previewText" class="preview-text"></div>
+
+</div>
+
 </div>
 
 </div>
 
-<footer>
+<script>
 
-Versão 1.1<br>
-Desenvolvido por S3M
+const fundo = document.getElementById("fundo")
+const texto = document.getElementById("texto")
+const fonte = document.getElementById("fonte")
+const alinhamento = document.getElementById("alinhamento")
+const posicao = document.getElementById("posicao_vertical")
+const ajuste = document.getElementById("ajuste_vertical")
+const largura = document.getElementById("largura_texto")
 
-</footer>
+const previewImg = document.getElementById("previewImg")
+const previewText = document.getElementById("previewText")
+
+fundo.addEventListener("change", function(e){
+
+const file = e.target.files[0]
+
+if(!file) return
+
+const reader = new FileReader()
+
+reader.onload = function(event){
+previewImg.src = event.target.result
+}
+
+reader.readAsDataURL(file)
+
+})
+
+function atualizarPreview(){
+
+previewText.innerText = texto.value
+
+previewText.style.fontSize = fonte.value + "px"
+
+previewText.style.width = largura.value + "%"
+
+if(alinhamento.value == "centro"){
+previewText.style.textAlign = "center"
+}
+
+if(alinhamento.value == "esquerda"){
+previewText.style.textAlign = "left"
+}
+
+if(alinhamento.value == "direita"){
+previewText.style.textAlign = "right"
+}
+
+let top = 50
+
+if(posicao.value == "superior"){
+top = 25
+}
+
+if(posicao.value == "centro"){
+top = 50
+}
+
+if(posicao.value == "inferior"){
+top = 75
+}
+
+top = top + (parseInt(ajuste.value) / 10)
+
+previewText.style.top = top + "%"
+
+}
+
+texto.addEventListener("input", atualizarPreview)
+fonte.addEventListener("input", atualizarPreview)
+alinhamento.addEventListener("change", atualizarPreview)
+posicao.addEventListener("change", atualizarPreview)
+ajuste.addEventListener("input", atualizarPreview)
+largura.addEventListener("input", atualizarPreview)
+
+</script>
 
 </body>
-
 </html>
