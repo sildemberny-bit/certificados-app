@@ -30,8 +30,8 @@ os.makedirs(PASTA_DOWNLOAD, exist_ok=True)
 @app.route("/")
 def landing():
     return render_template("landing.html")
-    
-    @app.route("/guia")
+
+@app.route("/guia")
 def guia():
     return render_template("guia.html")
 
@@ -260,7 +260,12 @@ def certificados():
 
         caminho_zip = os.path.join(PASTA_DOWNLOAD, nome_zip)
 
-        with zipfile.ZipFile(caminho_zip,"w") as zipf:
+        with zipfile.ZipFile(
+            caminho_zip,
+            "w",
+            compression=zipfile.ZIP_DEFLATED,
+            compresslevel=9
+        ) as zipf:
 
             for arquivo in arquivos:
 
