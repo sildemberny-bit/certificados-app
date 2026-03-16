@@ -30,6 +30,10 @@ os.makedirs(PASTA_DOWNLOAD, exist_ok=True)
 @app.route("/")
 def landing():
     return render_template("landing.html")
+    
+    @app.route("/guia")
+def guia():
+    return render_template("guia.html")
 
 
 @app.route("/login", methods=["GET","POST"])
