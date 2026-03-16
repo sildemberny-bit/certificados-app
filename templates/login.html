@@ -1,73 +1,23 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-    <title>Emitte - Login</title>
-    <style>
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #1f3c88, #4a69bd);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-
-        .login-box {
-            background: white;
-            padding: 40px;
-            border-radius: 12px;
-            width: 350px;
-            text-align: center;
-            box-shadow: 0px 10px 30px rgba(0,0,0,0.2);
-        }
-
-        .logo {
-            width: 140px;
-            margin-bottom: 25px;
-        }
-
-        input {
-            width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            border-radius: 6px;
-            border: 1px solid #ccc;
-            font-size: 14px;
-        }
-
-        button {
-            width: 100%;
-            padding: 12px;
-            background-color: #1f3c88;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 15px;
-            cursor: pointer;
-            margin-top: 10px;
-            transition: 0.3s;
-        }
-
-        button:hover {
-            background-color: #162d66;
-        }
-    </style>
+<title>Login</title>
 </head>
-<body>
 
-<div class="login-box">
+<body style="text-align:center;padding:80px;font-family:Arial">
 
-    <!-- LOGO -->
-    <img src="{{ url_for('static', filename='logo.png') }}" class="logo">
+<h2>Acessar sistema</h2>
 
-    <form method="POST">
-        <input name="email" placeholder="Usuário" required>
-        <input name="password" type="password" placeholder="Senha" required>
-        <button type="submit">Entrar</button>
-    </form>
+<a href="/certificados">Entrar</a>
 
-</div>
+<footer style="margin-top:80px;color:#777">
+
+Versão 1.1<br>
+Desenvolvido por S3M
+
+</footer>
 
 </body>
+
 </html>
