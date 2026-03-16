@@ -1,9 +1,8 @@
+from flask import Flask, render_template, request, send_file
+import pandas as pd
 import os
 import uuid
 import zipfile
-import pandas as pd
-
-from flask import Flask, render_template, request, send_file
 from PIL import Image, ImageDraw, ImageFont
 
 app = Flask(__name__)
@@ -23,73 +22,58 @@ def encontrar_coluna_nome(df):
     raise Exception("Coluna NOME não encontrada na planilha.")
 
 
-def otimizar_imagem(caminho):
-
-    img = Image.open(caminho)
-
-    novo_caminho = caminho.replace(".png", ".jpg").replace(".jpeg", ".jpg")
-
-    img = img.convert("RGB")
-
-    img.save(
-        novo_caminho,
-        "JPEG",
-        quality=70,
-        optimize=True
-    )
-
-    return novo_caminho
-
-
 @app.route("/")
 def index():
     return render_template("index.html")
 
 
+@app.route("/login")
+def login():
+    return render_template("login.html")
+
+
+@app.route("/guia")
+def guia():
+    return render_template("guia.html")
+
+
 @app.route("/certificados")
-def certificados_page():
+def certificados():
     return render_template("certificados.html")
 
 
-@app.route("/certificados", methods=["POST"])
-def gerar_certificados():
+@app.route("/gerar", methods=["POST"])
+def gerar():
 
     fundo = request.files["fundo"]
     planilha = request.files["planilha"]
 
     texto = request.form["texto"]
-    fonte_tamanho = int(request.form["fonte"])
-
-    alinhamento = request.form["alinhamento"]
-    posicao_vertical = request.form["posicao_vertical"]
-
-    ajuste_vertical = int(request.form["ajuste_vertical"])
-    largura_texto = int(request.form["largura_texto"])
+    tamanho = int(request.form["tamanho"])
+    posicao = int(request.form["posicao"])
 
     id_lote = str(uuid.uuid4())[:8]
 
-    pasta_lote = os.path.join(PASTA_TEMP, id_lote)
-    os.makedirs(pasta_lote)
+    pasta = os.path.join(PASTA_TEMP, id_lote)
+    os.makedirs(pasta)
 
-    caminho_fundo = os.path.join(pasta_lote, fundo.filename)
+    caminho_fundo = os.path.join(pasta, fundo.filename)
     fundo.save(caminho_fundo)
 
-    caminho_fundo = otimizar_imagem(caminho_fundo)
+    caminho_planilha = os.path.join(pasta, planilha.filename)
+    planilha.save(caminho_planilha)
 
-    caminho_excel = os.path.join(pasta_lote, planilha.filename)
-    planilha.save(caminho_excel)
-
-    df = pd.read_excel(caminho_excel)
+    df = pd.read_excel(caminho_planilha)
 
     coluna_nome = encontrar_coluna_nome(df)
 
-    img_base = Image.open(caminho_fundo)
+    imagem_base = Image.open(caminho_fundo)
 
-    largura_img, altura_img = img_base.size
+    largura, altura = imagem_base.size
 
-    font = ImageFont.load_default()
+    fonte = ImageFont.load_default()
 
-    lista_pdfs = []
+    arquivos = []
 
     for i, row in df.iterrows():
 
@@ -97,42 +81,30 @@ def gerar_certificados():
 
         texto_final = texto.replace("{nome}", nome)
 
-        img = img_base.copy()
+        img = imagem_base.copy()
+
         draw = ImageDraw.Draw(img)
 
-        largura_bloco = largura_img * (largura_texto / 100)
-
-        if posicao_vertical == "superior":
-            y = altura_img * 0.25
-        elif posicao_vertical == "centro":
-            y = altura_img * 0.5
-        else:
-            y = altura_img * 0.75
-
-        y += ajuste_vertical
-
-        x = largura_img / 2
-
-        draw.multiline_text(
-            (x, y),
+        draw.text(
+            (largura/2, altura/2 + posicao),
             texto_final,
             fill="black",
-            font=font,
-            align="center",
-            anchor="mm"
+            font=fonte,
+            anchor="mm",
+            align="center"
         )
 
         nome_pdf = f"{nome}.pdf"
 
-        caminho_pdf = os.path.join(pasta_lote, nome_pdf)
+        caminho_pdf = os.path.join(pasta, nome_pdf)
 
-        img.save(caminho_pdf, "PDF", resolution=100)
+        img.save(caminho_pdf, "PDF")
 
-        lista_pdfs.append(caminho_pdf)
+        arquivos.append(caminho_pdf)
 
     zip_nome = f"certificados_{id_lote}.zip"
 
-    caminho_zip = os.path.join(pasta_lote, zip_nome)
+    caminho_zip = os.path.join(pasta, zip_nome)
 
     with zipfile.ZipFile(
         caminho_zip,
@@ -141,10 +113,11 @@ def gerar_certificados():
         compresslevel=9
     ) as zipf:
 
-        for arquivo in lista_pdfs:
+        for arq in arquivos:
+
             zipf.write(
-                arquivo,
-                os.path.basename(arquivo)
+                arq,
+                os.path.basename(arq)
             )
 
     return render_template(
