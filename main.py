@@ -31,6 +31,7 @@ os.makedirs(PASTA_DOWNLOAD, exist_ok=True)
 def landing():
     return render_template("landing.html")
 
+
 @app.route("/guia")
 def guia():
     return render_template("guia.html")
@@ -54,7 +55,7 @@ def login():
 @app.route("/logout")
 def logout():
     session.pop("user",None)
-    return redirect("/")
+    return redirect("/login")
 
 
 def limpar_nome_arquivo(nome):
@@ -79,11 +80,9 @@ def substituir_campos(texto, linha):
 
         valor = str(linha[coluna])
 
-        chave = coluna.lower()
-
-        resultado = resultado.replace("{" + chave + "}", f"<b>{valor}</b>")
-        resultado = resultado.replace("{" + chave.upper() + "}", f"<b>{valor}</b>")
         resultado = resultado.replace("{" + coluna + "}", f"<b>{valor}</b>")
+        resultado = resultado.replace("{" + coluna.lower() + "}", f"<b>{valor}</b>")
+        resultado = resultado.replace("{" + coluna.upper() + "}", f"<b>{valor}</b>")
 
     return resultado
 
@@ -92,10 +91,7 @@ def gerar_pdf_lote(imagem, df, texto, fonte, alinhamento, posicao_vertical, ajus
 
     largura_pagina, altura_pagina = landscape(A4)
 
-    c = canvas.Canvas(
-        caminho_pdf,
-        pagesize=(largura_pagina, altura_pagina)
-    )
+    c = canvas.Canvas(caminho_pdf, pagesize=(largura_pagina, altura_pagina))
 
     fundo_reader = ImageReader(imagem)
 
@@ -119,7 +115,6 @@ def gerar_pdf_lote(imagem, df, texto, fonte, alinhamento, posicao_vertical, ajus
     for i, linha in df.iterrows():
 
         texto_certificado = substituir_campos(texto, linha)
-
         texto_certificado = texto_certificado.replace("\n","<br/>")
 
         c.drawImage(
@@ -182,7 +177,6 @@ def dividir_pdf(caminho_pdf, df, pasta_saida):
         writer.add_page(page)
 
         nome = str(df.iloc[i][coluna_nome])
-
         nome_limpo = limpar_nome_arquivo(nome)
 
         caminho = os.path.join(pasta_saida, f"{nome_limpo}.pdf")
@@ -253,26 +247,24 @@ def certificados():
         )
 
         quantidade = len(df)
-
         data = datetime.date.today().strftime("%Y-%m-%d")
 
         nome_zip = f"certificados_emitte_{quantidade}_{data}.zip"
-
         caminho_zip = os.path.join(PASTA_DOWNLOAD, nome_zip)
 
+        # 🔥 NOVA FORMA LEVE DE GERAR ZIP
         with zipfile.ZipFile(
             caminho_zip,
             "w",
-            compression=zipfile.ZIP_DEFLATED,
-            compresslevel=9
+            compression=zipfile.ZIP_STORED
         ) as zipf:
 
             for arquivo in arquivos:
-
-                zipf.write(
-                    arquivo,
-                    os.path.basename(arquivo)
-                )
+                with open(arquivo, "rb") as f:
+                    zipf.writestr(
+                        os.path.basename(arquivo),
+                        f.read()
+                    )
 
         return render_template(
             "download.html",
