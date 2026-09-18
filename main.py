@@ -3,6 +3,7 @@ import pandas as pd
 from PIL import Image, ImageOps
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import landscape, A4
+from reportlab.lib.utils import ImageReader
 from reportlab.platypus import Paragraph
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
@@ -14,17 +15,24 @@ import tempfile
 import datetime
 import shutil
 
+
 app = Flask(__name__)
 app.secret_key = "emitte_secret"
 
+
 USUARIO = "admin"
 SENHA = "123"
+
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PASTA_DOWNLOAD = os.path.join(BASE_DIR, "downloads")
 
 os.makedirs(PASTA_DOWNLOAD, exist_ok=True)
 
+
+# ============================================================
+# ROTAS BÁSICAS
+# ============================================================
 
 @app.route("/")
 def landing():
@@ -38,9 +46,7 @@ def guia():
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
-
     if request.method == "POST":
-
         usuario = request.form.get("email")
         senha = request.form.get("password")
 
@@ -57,40 +63,52 @@ def logout():
     return redirect("/login")
 
 
-def limpar_nome_arquivo(nome):
+# ============================================================
+# FUNÇÕES AUXILIARES
+# ============================================================
 
-    nome = nome.lower()
+def limpar_nome_arquivo(nome):
+    """
+    Converte o nome do participante em um nome seguro para arquivo.
+    """
+    nome = str(nome).lower()
 
     nome = unicodedata.normalize("NFD", nome)
     nome = nome.encode("ascii", "ignore").decode("utf-8")
 
     nome = re.sub(r"[^a-z0-9 ]", "", nome)
-
     nome = nome.replace(" ", "_")
 
     return nome
 
 
 def substituir_campos(texto, linha):
+    """
+    Substitui campos como:
+        {nome}
+        {NOME}
+        {Nome}
+
+    pelos valores existentes na planilha.
+    """
 
     resultado = texto
 
     for coluna in linha.index:
-
         valor = str(linha[coluna])
 
         resultado = resultado.replace(
-            "{" + coluna + "}",
+            "{" + str(coluna) + "}",
             f"<b>{valor}</b>"
         )
 
         resultado = resultado.replace(
-            "{" + coluna.lower() + "}",
+            "{" + str(coluna).lower() + "}",
             f"<b>{valor}</b>"
         )
 
         resultado = resultado.replace(
-            "{" + coluna.upper() + "}",
+            "{" + str(coluna).upper() + "}",
             f"<b>{valor}</b>"
         )
 
@@ -98,6 +116,9 @@ def substituir_campos(texto, linha):
 
 
 def criar_estilo(fonte, alinhamento):
+    """
+    Cria o estilo utilizado no texto do certificado.
+    """
 
     if alinhamento == "centro":
         alinh = TA_CENTER
@@ -117,34 +138,38 @@ def criar_estilo(fonte, alinhamento):
     )
 
 
-def preparar_imagem_fundo(fundo, caminho_saida):
+def preparar_imagem_fundo(fundo):
+    """
+    Abre a imagem enviada pelo usuário, corrige orientação EXIF
+    e reduz imagens excessivamente grandes.
+
+    Retorna uma imagem PIL pronta para ser usada pelo ImageReader.
+
+    A imagem é preparada UMA ÚNICA VEZ.
+    """
 
     largura_pagina, altura_pagina = landscape(A4)
 
-    # A4 paisagem em aproximadamente 150 DPI.
-    # Isso mantém qualidade adequada para certificados
-    # e evita imagens gigantes no servidor.
+    # 150 DPI.
+    # A4 paisagem fica aproximadamente em:
+    # 1754 x 1241 pixels.
+    dpi = 150
 
-    largura_alvo = int((largura_pagina / 72) * 150)
-    altura_alvo = int((altura_pagina / 72) * 150)
+    largura_alvo = int((largura_pagina / 72) * dpi)
+    altura_alvo = int((altura_pagina / 72) * dpi)
 
     imagem = Image.open(fundo)
 
-    # Corrige automaticamente a orientação de imagens
-    # que possuem informação EXIF.
+    # Corrige orientação proveniente de celulares/câmeras.
     imagem = ImageOps.exif_transpose(imagem)
 
+    # Proteção contra arquivos absurdamente grandes.
     largura_original, altura_original = imagem.size
-
-    # Proteção contra imagens exageradamente grandes.
-    # Evita que arquivos gigantes consumam toda a memória
-    # disponível no servidor.
     pixels = largura_original * altura_original
 
     limite_pixels = 40_000_000
 
     if pixels > limite_pixels:
-
         imagem.close()
 
         raise ValueError(
@@ -152,73 +177,25 @@ def preparar_imagem_fundo(fundo, caminho_saida):
             "Reduza a resolução da imagem e tente novamente."
         )
 
-    # Converte para RGBA quando houver transparência.
-    if "A" in imagem.getbands():
-
-        imagem = imagem.convert("RGBA")
-
-        fundo_final = Image.new(
-            "RGBA",
-            (largura_alvo, altura_alvo),
-            (255, 255, 255, 255)
-        )
-
-        imagem.thumbnail(
-            (largura_alvo, altura_alvo),
-            Image.Resampling.LANCZOS
-        )
-
-        x = (largura_alvo - imagem.width) // 2
-        y = (altura_alvo - imagem.height) // 2
-
-        fundo_final.alpha_composite(
-            imagem,
-            (x, y)
-        )
-
-        imagem.close()
-
-        fundo_final = fundo_final.convert("RGB")
-
-    else:
-
+    # Converte para RGB.
+    if imagem.mode != "RGB":
         imagem = imagem.convert("RGB")
 
-        imagem.thumbnail(
-            (largura_alvo, altura_alvo),
-            Image.Resampling.LANCZOS
-        )
-
-        fundo_final = Image.new(
-            "RGB",
-            (largura_alvo, altura_alvo),
-            "white"
-        )
-
-        x = (largura_alvo - imagem.width) // 2
-        y = (altura_alvo - imagem.height) // 2
-
-        fundo_final.paste(
-            imagem,
-            (x, y)
-        )
-
-        imagem.close()
-
-    # JPEG otimizado para uso interno pelo ReportLab.
-    fundo_final.save(
-        caminho_saida,
-        "JPEG",
-        quality=85,
-        optimize=True
+    # Redimensiona uma única vez.
+    #
+    # O sistema antigo esticava a imagem para ocupar toda a página.
+    # Mantemos esse comportamento para preservar a aparência esperada.
+    imagem = imagem.resize(
+        (largura_alvo, altura_alvo),
+        Image.Resampling.LANCZOS
     )
 
-    fundo_final.close()
+    return imagem
 
 
-def gerar_pdf_individual(
-    caminho_fundo,
-    linha,
+def gerar_pdf_lote(
+    imagem,
+    df,
     texto,
     fonte,
     alinhamento,
@@ -227,6 +204,15 @@ def gerar_pdf_individual(
     largura_texto_percent,
     caminho_pdf
 ):
+    """
+    Gera UM ÚNICO PDF contendo todos os certificados.
+
+    Esta é a arquitetura que já funcionou anteriormente:
+    
+        uma Canvas
+        uma imagem de fundo
+        várias páginas
+    """
 
     largura_pagina, altura_pagina = landscape(A4)
 
@@ -236,7 +222,8 @@ def gerar_pdf_individual(
     )
 
     largura_texto = (
-        largura_pagina * (largura_texto_percent / 100)
+        largura_pagina *
+        (largura_texto_percent / 100)
     )
 
     style = criar_estilo(
@@ -244,81 +231,173 @@ def gerar_pdf_individual(
         alinhamento
     )
 
-    texto_certificado = substituir_campos(
-        texto,
-        linha
-    )
+    # IMPORTANTE:
+    # O ImageReader é criado UMA ÚNICA VEZ.
+    #
+    # O mesmo objeto é reutilizado nas páginas do documento.
+    fundo_reader = ImageReader(imagem)
 
-    texto_certificado = texto_certificado.replace(
-        "\n",
-        "<br/>"
-    )
+    for _, linha in df.iterrows():
 
-    # O fundo já foi normalizado antes do processamento
-    # dos certificados.
-    c.drawImage(
-        caminho_fundo,
-        0,
-        0,
-        width=largura_pagina,
-        height=altura_pagina
-    )
+        texto_certificado = substituir_campos(
+            texto,
+            linha
+        )
 
-    p = Paragraph(
-        texto_certificado,
-        style
-    )
+        texto_certificado = texto_certificado.replace(
+            "\n",
+            "<br/>"
+        )
 
-    w, h = p.wrap(
-        largura_texto,
-        altura_pagina
-    )
+        # Fundo do certificado.
+        c.drawImage(
+            fundo_reader,
+            0,
+            0,
+            width=largura_pagina,
+            height=altura_pagina
+        )
 
-    if posicao_vertical == "superior":
+        # Texto.
+        p = Paragraph(
+            texto_certificado,
+            style
+        )
 
-        y = altura_pagina * 0.75
+        w, h = p.wrap(
+            largura_texto,
+            altura_pagina
+        )
 
-    elif posicao_vertical == "centro":
+        # Posicionamento vertical.
+        if posicao_vertical == "superior":
 
-        y = (altura_pagina / 2) - (h / 2)
+            y = altura_pagina * 0.75
 
-    else:
+        elif posicao_vertical == "centro":
 
-        y = altura_pagina * 0.30
+            y = (
+                (altura_pagina / 2)
+                - (h / 2)
+            )
 
-    y = y + ajuste_vertical
+        else:
 
-    p.drawOn(
-        c,
-        (largura_pagina - largura_texto) / 2,
-        y
-    )
+            y = altura_pagina * 0.30
 
-    c.showPage()
+        y = y + ajuste_vertical
+
+        # Centralização horizontal da caixa de texto.
+        x = (
+            largura_pagina - largura_texto
+        ) / 2
+
+        p.drawOn(
+            c,
+            x,
+            y
+        )
+
+        c.showPage()
+
     c.save()
 
 
 def detectar_coluna_nome(df):
+    """
+    Procura automaticamente a coluna que contém o nome.
+    """
 
     for col in df.columns:
 
         col_norm = unicodedata.normalize(
             "NFD",
-            col
+            str(col)
         )
 
-        col_norm = col_norm.encode(
-            "ascii",
-            "ignore"
-        ).decode("utf-8")
+        col_norm = (
+            col_norm
+            .encode("ascii", "ignore")
+            .decode("utf-8")
+        )
 
         col_norm = col_norm.lower()
 
         if "nome" in col_norm:
             return col
 
+    # Se não encontrar uma coluna com "nome",
+    # utiliza a primeira coluna da planilha.
     return df.columns[0]
 
+
+def dividir_pdf(caminho_pdf, df, pasta_saida):
+    """
+    Divide o PDF multipágina em PDFs individuais.
+
+    Retorna os caminhos dos arquivos criados.
+    """
+
+    from pypdf import PdfReader, PdfWriter
+
+    reader = PdfReader(
+        caminho_pdf,
+        strict=False
+    )
+
+    arquivos = []
+
+    coluna_nome = detectar_coluna_nome(df)
+
+    total_paginas = len(reader.pages)
+    total_linhas = len(df)
+
+    # Segurança contra inconsistências.
+    total = min(
+        total_paginas,
+        total_linhas
+    )
+
+    for i in range(total):
+
+        page = reader.pages[i]
+
+        writer = PdfWriter()
+
+        writer.add_page(page)
+
+        nome = str(
+            df.iloc[i][coluna_nome]
+        )
+
+        nome_limpo = limpar_nome_arquivo(
+            nome
+        )
+
+        # Evita nome vazio.
+        if not nome_limpo:
+            nome_limpo = f"participante_{i + 1}"
+
+        caminho = os.path.join(
+            pasta_saida,
+            f"{nome_limpo}.pdf"
+        )
+
+        with open(
+            caminho,
+            "wb"
+        ) as f:
+
+            writer.write(f)
+
+        arquivos.append(caminho)
+
+    return arquivos
+
+
+# ============================================================
+# DOWNLOAD
+# ============================================================
 
 @app.route("/download/<arquivo>")
 def baixar(arquivo):
@@ -334,7 +413,14 @@ def baixar(arquivo):
     )
 
 
-@app.route("/certificados", methods=["GET", "POST"])
+# ============================================================
+# GERAÇÃO DE CERTIFICADOS
+# ============================================================
+
+@app.route(
+    "/certificados",
+    methods=["GET", "POST"]
+)
 def certificados():
 
     if "user" not in session:
@@ -346,9 +432,18 @@ def certificados():
         planilha = request.files["planilha"]
 
         texto = request.form["texto"]
-        fonte = int(request.form["fonte"])
-        alinhamento = request.form["alinhamento"]
-        posicao_vertical = request.form["posicao_vertical"]
+
+        fonte = int(
+            request.form["fonte"]
+        )
+
+        alinhamento = request.form[
+            "alinhamento"
+        ]
+
+        posicao_vertical = request.form[
+            "posicao_vertical"
+        ]
 
         ajuste_vertical = int(
             request.form["ajuste_vertical"]
@@ -358,18 +453,44 @@ def certificados():
             request.form["largura_texto"]
         )
 
-        df = pd.read_excel(planilha)
+        # ----------------------------------------------------
+        # LEITURA DA PLANILHA
+        # ----------------------------------------------------
+
+        df = pd.read_excel(
+            planilha
+        )
+
+        quantidade = len(df)
+
+        if quantidade == 0:
+
+            return (
+                "<h2>Não foi possível gerar os certificados.</h2>"
+                "<p>A planilha não possui participantes.</p>"
+            ), 400
+
+        # ----------------------------------------------------
+        # DIRETÓRIO TEMPORÁRIO
+        # ----------------------------------------------------
 
         pasta_temp = tempfile.mkdtemp()
 
-        quantidade = len(df)
+        caminho_pdf_lote = os.path.join(
+            pasta_temp,
+            "lote_certificados.pdf"
+        )
+
+        caminho_fundo = None
 
         data = datetime.date.today().strftime(
             "%Y-%m-%d"
         )
 
         nome_zip = (
-            f"certificados_emitte_{quantidade}_{data}.zip"
+            f"certificados_emitte_"
+            f"{quantidade}_"
+            f"{data}.zip"
         )
 
         caminho_zip = os.path.join(
@@ -377,82 +498,169 @@ def certificados():
             nome_zip
         )
 
-        caminho_fundo = os.path.join(
-            pasta_temp,
-            "fundo_normalizado.jpg"
-        )
-
-        coluna_nome = detectar_coluna_nome(df)
-
         try:
 
-            # Normaliza o fundo somente uma vez.
-            preparar_imagem_fundo(
-                fundo,
-                caminho_fundo
+            # ------------------------------------------------
+            # PREPARAÇÃO DO FUNDO
+            # ------------------------------------------------
+
+            imagem = preparar_imagem_fundo(
+                fundo
             )
+
+            caminho_fundo = os.path.join(
+                pasta_temp,
+                "fundo_normalizado.png"
+            )
+
+            # Salva uma cópia temporária.
+            #
+            # A imagem PIL original continua sendo usada
+            # pelo ImageReader durante a geração.
+            imagem.save(
+                caminho_fundo,
+                format="PNG"
+            )
+
+            # ------------------------------------------------
+            # GERAÇÃO DO PDF MULTIPÁGINA
+            # ------------------------------------------------
+
+            gerar_pdf_lote(
+                imagem,
+                df,
+                texto,
+                fonte,
+                alinhamento,
+                posicao_vertical,
+                ajuste_vertical,
+                largura_texto_percent,
+                caminho_pdf_lote
+            )
+
+            # Depois que o PDF foi criado,
+            # a imagem pode ser liberada.
+            imagem.close()
+
+            # ------------------------------------------------
+            # DIVISÃO DO PDF
+            # ------------------------------------------------
+
+            arquivos = dividir_pdf(
+                caminho_pdf_lote,
+                df,
+                pasta_temp
+            )
+
+            # ------------------------------------------------
+            # CRIAÇÃO DO ZIP
+            # ------------------------------------------------
+            #
+            # ZIP_STORED:
+            # os PDFs já são arquivos compactados/estruturados,
+            # então não desperdiçamos CPU tentando comprimi-los
+            # novamente.
+            #
+            # zipf.write():
+            # adiciona o arquivo sem fazer f.read() para a RAM.
+            # ------------------------------------------------
 
             with zipfile.ZipFile(
                 caminho_zip,
-                "w",
+                mode="w",
                 compression=zipfile.ZIP_STORED
             ) as zipf:
 
-                for i, linha in df.iterrows():
+                for arquivo in arquivos:
 
-                    nome = str(
-                        linha[coluna_nome]
-                    )
-
-                    nome_limpo = limpar_nome_arquivo(
-                        nome
-                    )
-
-                    caminho_pdf = os.path.join(
-                        pasta_temp,
-                        f"{nome_limpo}.pdf"
-                    )
-
-                    gerar_pdf_individual(
-                        caminho_fundo,
-                        linha,
-                        texto,
-                        fonte,
-                        alinhamento,
-                        posicao_vertical,
-                        ajuste_vertical,
-                        largura_texto_percent,
-                        caminho_pdf
-                    )
-
-                    # Adiciona o arquivo ao ZIP diretamente,
-                    # sem carregar seu conteúdo inteiro na memória.
                     zipf.write(
-                        caminho_pdf,
-                        arcname=os.path.basename(caminho_pdf)
+                        arquivo,
+                        arcname=os.path.basename(
+                            arquivo
+                        )
                     )
 
-                    os.remove(caminho_pdf)
+            # ------------------------------------------------
+            # LIMPEZA DOS PDFs INDIVIDUAIS
+            # ------------------------------------------------
+
+            for arquivo in arquivos:
+
+                try:
+                    os.remove(arquivo)
+
+                except OSError:
+                    pass
+
+            # Remove o PDF multipágina.
+            try:
+
+                os.remove(
+                    caminho_pdf_lote
+                )
+
+            except OSError:
+                pass
 
         except ValueError as erro:
 
-            # Remove o ZIP incompleto, caso tenha sido criado.
-            if os.path.exists(caminho_zip):
-                os.remove(caminho_zip)
+            # Remove ZIP incompleto.
+            if os.path.exists(
+                caminho_zip
+            ):
+
+                try:
+                    os.remove(
+                        caminho_zip
+                    )
+
+                except OSError:
+                    pass
 
             return (
-                f"<h2>Não foi possível processar o certificado.</h2>"
+                "<h2>Não foi possível processar "
+                "os certificados.</h2>"
                 f"<p>{str(erro)}</p>"
-                f"<p>Reduza o tamanho ou a resolução da imagem "
-                f"de fundo e tente novamente.</p>"
             ), 400
+
+        except Exception as erro:
+
+            # Remove ZIP incompleto.
+            if os.path.exists(
+                caminho_zip
+            ):
+
+                try:
+                    os.remove(
+                        caminho_zip
+                    )
+
+                except OSError:
+                    pass
+
+            # Log do erro no Render.
+            app.logger.exception(
+                "Erro durante a geração dos certificados"
+            )
+
+            return (
+                "<h2>Ocorreu um erro durante "
+                "a geração dos certificados.</h2>"
+                "<p>Verifique a planilha e a imagem "
+                "de fundo e tente novamente.</p>"
+            ), 500
 
         finally:
 
+            # Libera todo o diretório temporário.
             shutil.rmtree(
                 pasta_temp,
                 ignore_errors=True
             )
+
+        # ----------------------------------------------------
+        # SUCESSO
+        # ----------------------------------------------------
 
         return render_template(
             "download.html",
@@ -463,6 +671,10 @@ def certificados():
         "certificados.html"
     )
 
+
+# ============================================================
+# EXECUÇÃO LOCAL
+# ============================================================
 
 if __name__ == "__main__":
 
