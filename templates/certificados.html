@@ -4,6 +4,7 @@
 <head>
 
 <meta charset="UTF-8">
+
 <title>Gerar Certificados</title>
 
 <style>
@@ -55,7 +56,9 @@ display:block;
 margin-top:15px;
 }
 
-input, select, textarea{
+input,
+select,
+textarea{
 width:100%;
 padding:10px;
 margin-top:5px;
@@ -85,103 +88,33 @@ button:hover{
 background:#218838;
 }
 
-<!DOCTYPE html>
-<html lang="pt-br">
 
-<head>
-
-<meta charset="UTF-8">
-<title>Gerar Certificados</title>
-
-<style>
-
-body{
-font-family: Arial, Helvetica, sans-serif;
-background:#f4f6f8;
-margin:0;
-padding:0;
-}
-
-.logo{
-text-align:center;
-margin-top:30px;
-}
-
-.logo img{
-height:60px;
-}
-
-.wrapper{
-display:flex;
-gap:40px;
-max-width:1200px;
-margin:auto;
-margin-top:40px;
-align-items:flex-start;
-}
-
-.form-box{
-flex:1;
-background:white;
-padding:30px;
-border-radius:10px;
-box-shadow:0 4px 10px rgba(0,0,0,0.1);
-}
-
-.preview-box{
-flex:1;
-background:white;
-padding:30px;
-border-radius:10px;
-box-shadow:0 4px 10px rgba(0,0,0,0.1);
-}
-
-label{
-font-weight:bold;
-display:block;
-margin-top:15px;
-}
-
-input, select, textarea{
-width:100%;
-padding:10px;
-margin-top:5px;
-border-radius:6px;
-border:1px solid #ccc;
-box-sizing:border-box;
-}
-
-textarea{
-height:150px;
-resize:vertical;
-}
-
-button{
-margin-top:25px;
-padding:15px;
-width:100%;
-border:none;
-border-radius:8px;
-background:#28a745;
-color:white;
-font-size:16px;
-cursor:pointer;
-}
-
-button:hover{
-background:#218838;
-}
+/* ==========================================================
+   ÁREA DA PRÉVIA
+   A proporção corresponde ao A4 em paisagem utilizado
+   pelo PDF: 841,89 x 595,28 pontos.
+   ========================================================== */
 
 .preview-area{
 position:relative;
 width:100%;
+aspect-ratio:841.89 / 595.28;
+overflow:hidden;
 }
 
 .preview-area img{
 width:100%;
+height:100%;
+object-fit:fill;
 border-radius:6px;
 border:1px solid #ddd;
+display:block;
 }
+
+
+/* ==========================================================
+   TEXTO DA PRÉVIA
+   ========================================================== */
 
 .preview-text{
 position:absolute;
@@ -196,74 +129,156 @@ white-space:pre-line;
 
 </head>
 
+
 <body>
 
+
 <div class="logo">
+
 <img src="/static/logo.png">
+
 </div>
 
+
 <div class="wrapper">
+
+
+<!-- ======================================================
+     FORMULÁRIO
+     ====================================================== -->
 
 <div class="form-box">
 
 <h1>Gerar Certificados</h1>
 
-<form action="/certificados" method="post" enctype="multipart/form-data">
+
+<form
+action="/certificados"
+method="post"
+enctype="multipart/form-data"
+>
+
 
 <label>Imagem do certificado</label>
-<input 
-type="file" 
-name="fundo" 
+
+<input
+type="file"
+name="fundo"
 id="fundo"
 accept=".jpg,.jpeg,.png,image/jpeg,image/png"
 required
 >
 
+
 <label>Planilha Excel (.xlsx)</label>
-<input 
-type="file" 
+
+<input
+type="file"
 name="planilha"
 accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 required
 >
 
+
 <label>Texto do certificado</label>
-<textarea id="texto" name="texto" required></textarea>
+
+<textarea
+id="texto"
+name="texto"
+required
+></textarea>
+
 
 <label>Tamanho da fonte</label>
-<input type="number" id="fonte" name="fonte" value="18">
+
+<input
+type="number"
+id="fonte"
+name="fonte"
+value="18"
+>
+
 
 <label>Alinhamento</label>
-<select id="alinhamento" name="alinhamento">
 
-<option value="centro">Centro</option>
-<option value="esquerda">Esquerda</option>
-<option value="direita">Direita</option>
+<select
+id="alinhamento"
+name="alinhamento"
+>
+
+<option value="centro">
+Centro
+</option>
+
+<option value="esquerda">
+Esquerda
+</option>
+
+<option value="direita">
+Direita
+</option>
 
 </select>
+
 
 <label>Posição vertical</label>
-<select id="posicao_vertical" name="posicao_vertical">
 
-<option value="superior">Superior</option>
-<option value="centro">Centro</option>
-<option value="inferior">Inferior</option>
+<select
+id="posicao_vertical"
+name="posicao_vertical"
+>
+
+<option value="superior">
+Superior
+</option>
+
+<option value="centro">
+Centro
+</option>
+
+<option value="inferior">
+Inferior
+</option>
 
 </select>
 
+
 <label>Ajuste fino vertical (px)</label>
-<input type="number" id="ajuste_vertical" name="ajuste_vertical" value="0">
+
+<input
+type="number"
+id="ajuste_vertical"
+name="ajuste_vertical"
+value="0"
+>
+
 
 <label>Largura do bloco de texto (%)</label>
-<input type="number" id="largura_texto" name="largura_texto" value="70">
+
+<input
+type="number"
+id="largura_texto"
+name="largura_texto"
+value="70"
+>
+
 
 <button type="submit">
+
 Gerar certificados
+
 </button>
+
 
 </form>
 
 </div>
+
+
+
+<!-- ======================================================
+     PRÉVIA
+     ====================================================== -->
 
 <div class="preview-box">
 
@@ -271,268 +286,239 @@ Gerar certificados
 
 <img id="previewImg">
 
-<div id="previewText" class="preview-text"></div>
+<div
+id="previewText"
+class="preview-text"
+></div>
 
 </div>
 
 </div>
 
+
 </div>
+
+
 
 <script>
 
-const fundo = document.getElementById("fundo")
-const texto = document.getElementById("texto")
-const fonte = document.getElementById("fonte")
-const alinhamento = document.getElementById("alinhamento")
-const posicao = document.getElementById("posicao_vertical")
-const ajuste = document.getElementById("ajuste_vertical")
-const largura = document.getElementById("largura_texto")
+/* ==========================================================
+   ELEMENTOS DO FORMULÁRIO
+   ========================================================== */
 
-const previewImg = document.getElementById("previewImg")
-const previewText = document.getElementById("previewText")
+const fundo =
+document.getElementById("fundo")
 
-fundo.addEventListener("change", function(e){
+const texto =
+document.getElementById("texto")
 
-const file = e.target.files[0]
+const fonte =
+document.getElementById("fonte")
 
-if(!file) return
+const alinhamento =
+document.getElementById("alinhamento")
 
-const reader = new FileReader()
+const posicao =
+document.getElementById("posicao_vertical")
 
-reader.onload = function(event){
-previewImg.src = event.target.result
-}
+const ajuste =
+document.getElementById("ajuste_vertical")
 
-reader.readAsDataURL(file)
+const largura =
+document.getElementById("largura_texto")
 
-})
 
-function atualizarPreview(){
+const previewImg =
+document.getElementById("previewImg")
 
-previewText.innerText = texto.value
+const previewText =
+document.getElementById("previewText")
 
-previewText.style.fontSize = fonte.value + "px"
 
-previewText.style.width = largura.value + "%"
 
-if(alinhamento.value == "centro"){
-previewText.style.textAlign = "center"
-}
+/* ==========================================================
+   CARREGAMENTO DO FUNDO
+   ========================================================== */
 
-if(alinhamento.value == "esquerda"){
-previewText.style.textAlign = "left"
-}
+fundo.addEventListener(
+"change",
+function(e){
 
-if(alinhamento.value == "direita"){
-previewText.style.textAlign = "right"
-}
-
-let top = 50
-
-if(posicao.value == "superior"){
-top = 25
-}
-
-if(posicao.value == "centro"){
-top = 50
-}
-
-if(posicao.value == "inferior"){
-top = 75
-}
-
-top = top + (parseInt(ajuste.value) / 10)
-
-previewText.style.top = top + "%"
-
-}
-
-texto.addEventListener("input", atualizarPreview)
-fonte.addEventListener("input", atualizarPreview)
-alinhamento.addEventListener("change", atualizarPreview)
-posicao.addEventListener("change", atualizarPreview)
-ajuste.addEventListener("input", atualizarPreview)
-largura.addEventListener("input", atualizarPreview)
-
-</script>
-
-</body>
-</html>
-
-.preview-text{
-position:absolute;
-left:50%;
-transform:translateX(-50%);
-width:70%;
-text-align:center;
-white-space:pre-line;
-}
-
-</style>
-
-</head>
-
-<body>
-
-<div class="logo">
-<img src="/static/logo.png">
-</div>
-
-<div class="wrapper">
-
-<div class="form-box">
-
-<h1>Gerar Certificados</h1>
-
-<form action="/certificados" method="post" enctype="multipart/form-data">
-
-<label>Imagem do certificado</label>
-<input 
-type="file" 
-name="fundo" 
-id="fundo"
-accept=".jpg,.jpeg,.png,image/jpeg,image/png"
-required
->
-
-<label>Planilha Excel (.xlsx)</label>
-<input 
-type="file" 
-name="planilha"
-accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-required
->
-
-<label>Texto do certificado</label>
-<textarea id="texto" name="texto" required></textarea>
-
-<label>Tamanho da fonte</label>
-<input type="number" id="fonte" name="fonte" value="18">
-
-<label>Alinhamento</label>
-<select id="alinhamento" name="alinhamento">
-
-<option value="centro">Centro</option>
-<option value="esquerda">Esquerda</option>
-<option value="direita">Direita</option>
-
-</select>
-
-<label>Posição vertical</label>
-<select id="posicao_vertical" name="posicao_vertical">
-
-<option value="superior">Superior</option>
-<option value="centro">Centro</option>
-<option value="inferior">Inferior</option>
-
-</select>
-
-<label>Ajuste fino vertical (px)</label>
-<input type="number" id="ajuste_vertical" name="ajuste_vertical" value="0">
-
-<label>Largura do bloco de texto (%)</label>
-<input type="number" id="largura_texto" name="largura_texto" value="70">
-
-<button type="submit">
-Gerar certificados
-</button>
-
-</form>
-
-</div>
-
-<div class="preview-box">
-
-<div class="preview-area">
-
-<img id="previewImg">
-
-<div id="previewText" class="preview-text"></div>
-
-</div>
-
-</div>
-
-</div>
-
-<script>
-
-const fundo = document.getElementById("fundo")
-const texto = document.getElementById("texto")
-const fonte = document.getElementById("fonte")
-const alinhamento = document.getElementById("alinhamento")
-const posicao = document.getElementById("posicao_vertical")
-const ajuste = document.getElementById("ajuste_vertical")
-const largura = document.getElementById("largura_texto")
-
-const previewImg = document.getElementById("previewImg")
-const previewText = document.getElementById("previewText")
-
-fundo.addEventListener("change", function(e){
-
-const file = e.target.files[0]
+const file =
+e.target.files[0]
 
 if(!file) return
 
-const reader = new FileReader()
 
-reader.onload = function(event){
-previewImg.src = event.target.result
+const reader =
+new FileReader()
+
+
+reader.onload =
+function(event){
+
+previewImg.src =
+event.target.result
+
 }
+
 
 reader.readAsDataURL(file)
 
-})
+}
+)
+
+
+
+/* ==========================================================
+   ATUALIZAÇÃO DA PRÉVIA
+   ========================================================== */
 
 function atualizarPreview(){
 
-previewText.innerText = texto.value
 
-previewText.style.fontSize = fonte.value + "px"
+/* Texto */
 
-previewText.style.width = largura.value + "%"
+previewText.innerText =
+texto.value
 
-if(alinhamento.value == "centro"){
-previewText.style.textAlign = "center"
+
+/* Fonte */
+
+previewText.style.fontSize =
+fonte.value + "px"
+
+
+/* Largura */
+
+previewText.style.width =
+largura.value + "%"
+
+
+
+/* Alinhamento */
+
+if(
+alinhamento.value == "centro"
+){
+
+previewText.style.textAlign =
+"center"
+
 }
 
-if(alinhamento.value == "esquerda"){
-previewText.style.textAlign = "left"
+
+if(
+alinhamento.value == "esquerda"
+){
+
+previewText.style.textAlign =
+"left"
+
 }
 
-if(alinhamento.value == "direita"){
-previewText.style.textAlign = "right"
+
+if(
+alinhamento.value == "direita"
+){
+
+previewText.style.textAlign =
+"right"
+
 }
+
+
+
+/* ========================================================
+   POSIÇÃO VERTICAL
+
+   Mantemos exatamente a lógica que já existia na interface.
+   ======================================================== */
 
 let top = 50
 
-if(posicao.value == "superior"){
+
+if(
+posicao.value == "superior"
+){
+
 top = 25
+
 }
 
-if(posicao.value == "centro"){
+
+if(
+posicao.value == "centro"
+){
+
 top = 50
+
 }
 
-if(posicao.value == "inferior"){
+
+if(
+posicao.value == "inferior"
+){
+
 top = 75
-}
-
-top = top + (parseInt(ajuste.value) / 10)
-
-previewText.style.top = top + "%"
 
 }
 
-texto.addEventListener("input", atualizarPreview)
-fonte.addEventListener("input", atualizarPreview)
-alinhamento.addEventListener("change", atualizarPreview)
-posicao.addEventListener("change", atualizarPreview)
-ajuste.addEventListener("input", atualizarPreview)
-largura.addEventListener("input", atualizarPreview)
+
+
+/* Ajuste fino */
+
+top =
+top +
+(
+parseInt(ajuste.value || 0) / 10
+)
+
+
+previewText.style.top =
+top + "%"
+
+}
+
+
+
+/* ==========================================================
+   EVENTOS
+   ========================================================== */
+
+texto.addEventListener(
+"input",
+atualizarPreview
+)
+
+fonte.addEventListener(
+"input",
+atualizarPreview
+)
+
+alinhamento.addEventListener(
+"change",
+atualizarPreview
+)
+
+posicao.addEventListener(
+"change",
+atualizarPreview
+)
+
+ajuste.addEventListener(
+"input",
+atualizarPreview
+)
+
+largura.addEventListener(
+"input",
+atualizarPreview
+)
 
 </script>
 
+
 </body>
+
 </html>
