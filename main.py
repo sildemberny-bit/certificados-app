@@ -1,9 +1,8 @@
 from flask import Flask, render_template, request, redirect, send_file, session
 import pandas as pd
-from PIL import Image
+from PIL import Image, ImageOps
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import landscape, A4
-from reportlab.lib.utils import ImageReader
 from reportlab.platypus import Paragraph
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
@@ -118,8 +117,107 @@ def criar_estilo(fonte, alinhamento):
     )
 
 
+def preparar_imagem_fundo(fundo, caminho_saida):
+
+    largura_pagina, altura_pagina = landscape(A4)
+
+    # A4 paisagem em aproximadamente 150 DPI.
+    # Isso mantém qualidade adequada para certificados
+    # e evita imagens gigantes no servidor.
+
+    largura_alvo = int((largura_pagina / 72) * 150)
+    altura_alvo = int((altura_pagina / 72) * 150)
+
+    imagem = Image.open(fundo)
+
+    # Corrige automaticamente a orientação de imagens
+    # que possuem informação EXIF.
+    imagem = ImageOps.exif_transpose(imagem)
+
+    largura_original, altura_original = imagem.size
+
+    # Proteção contra imagens exageradamente grandes.
+    # Evita que arquivos gigantes consumam toda a memória
+    # disponível no servidor.
+    pixels = largura_original * altura_original
+
+    limite_pixels = 40_000_000
+
+    if pixels > limite_pixels:
+
+        imagem.close()
+
+        raise ValueError(
+            "A imagem enviada possui dimensões muito grandes. "
+            "Reduza a resolução da imagem e tente novamente."
+        )
+
+    # Converte para RGBA quando houver transparência.
+    if "A" in imagem.getbands():
+
+        imagem = imagem.convert("RGBA")
+
+        fundo_final = Image.new(
+            "RGBA",
+            (largura_alvo, altura_alvo),
+            (255, 255, 255, 255)
+        )
+
+        imagem.thumbnail(
+            (largura_alvo, altura_alvo),
+            Image.Resampling.LANCZOS
+        )
+
+        x = (largura_alvo - imagem.width) // 2
+        y = (altura_alvo - imagem.height) // 2
+
+        fundo_final.alpha_composite(
+            imagem,
+            (x, y)
+        )
+
+        imagem.close()
+
+        fundo_final = fundo_final.convert("RGB")
+
+    else:
+
+        imagem = imagem.convert("RGB")
+
+        imagem.thumbnail(
+            (largura_alvo, altura_alvo),
+            Image.Resampling.LANCZOS
+        )
+
+        fundo_final = Image.new(
+            "RGB",
+            (largura_alvo, altura_alvo),
+            "white"
+        )
+
+        x = (largura_alvo - imagem.width) // 2
+        y = (altura_alvo - imagem.height) // 2
+
+        fundo_final.paste(
+            imagem,
+            (x, y)
+        )
+
+        imagem.close()
+
+    # JPEG otimizado para uso interno pelo ReportLab.
+    fundo_final.save(
+        caminho_saida,
+        "JPEG",
+        quality=85,
+        optimize=True
+    )
+
+    fundo_final.close()
+
+
 def gerar_pdf_individual(
-    imagem,
+    caminho_fundo,
     linha,
     texto,
     fonte,
@@ -136,8 +234,6 @@ def gerar_pdf_individual(
         caminho_pdf,
         pagesize=(largura_pagina, altura_pagina)
     )
-
-    fundo_reader = ImageReader(imagem)
 
     largura_texto = (
         largura_pagina * (largura_texto_percent / 100)
@@ -158,8 +254,10 @@ def gerar_pdf_individual(
         "<br/>"
     )
 
+    # O fundo já foi normalizado antes do processamento
+    # dos certificados.
     c.drawImage(
-        fundo_reader,
+        caminho_fundo,
         0,
         0,
         width=largura_pagina,
@@ -262,9 +360,6 @@ def certificados():
 
         df = pd.read_excel(planilha)
 
-        imagem = Image.open(fundo)
-        imagem = imagem.convert("RGB")
-
         pasta_temp = tempfile.mkdtemp()
 
         quantidade = len(df)
@@ -282,13 +377,20 @@ def certificados():
             nome_zip
         )
 
+        caminho_fundo = os.path.join(
+            pasta_temp,
+            "fundo_normalizado.jpg"
+        )
+
         coluna_nome = detectar_coluna_nome(df)
 
         try:
 
-            # O ZIP não comprime os PDFs.
-            # O ponto principal aqui é usar zipf.write(),
-            # evitando carregar cada PDF inteiro na memória.
+            # Normaliza o fundo somente uma vez.
+            preparar_imagem_fundo(
+                fundo,
+                caminho_fundo
+            )
 
             with zipfile.ZipFile(
                 caminho_zip,
@@ -312,7 +414,7 @@ def certificados():
                     )
 
                     gerar_pdf_individual(
-                        imagem,
+                        caminho_fundo,
                         linha,
                         texto,
                         fonte,
@@ -323,23 +425,30 @@ def certificados():
                         caminho_pdf
                     )
 
-                    # Adiciona o PDF diretamente ao ZIP.
-                    # Não usamos f.read(), evitando carregar
-                    # o arquivo inteiro novamente na memória.
-
+                    # Adiciona o arquivo ao ZIP diretamente,
+                    # sem carregar seu conteúdo inteiro na memória.
                     zipf.write(
                         caminho_pdf,
                         arcname=os.path.basename(caminho_pdf)
                     )
 
-                    # O PDF temporário não precisa permanecer
-                    # depois de ser adicionado ao ZIP.
-
                     os.remove(caminho_pdf)
+
+        except ValueError as erro:
+
+            # Remove o ZIP incompleto, caso tenha sido criado.
+            if os.path.exists(caminho_zip):
+                os.remove(caminho_zip)
+
+            return (
+                f"<h2>Não foi possível processar o certificado.</h2>"
+                f"<p>{str(erro)}</p>"
+                f"<p>Reduza o tamanho ou a resolução da imagem "
+                f"de fundo e tente novamente.</p>"
+            ), 400
 
         finally:
 
-            # Remove a pasta temporária ao terminar.
             shutil.rmtree(
                 pasta_temp,
                 ignore_errors=True
