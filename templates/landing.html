@@ -1,133 +1,78 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-br">
 <head>
-    <title>Emitte - Plataforma de Certificados</title>
-    <style>
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #1f3c88, #4a69bd);
-            color: white;
-            text-align: center;
-        }
-
-        .hero {
-            padding: 120px 20px;
-        }
-
-        .logo {
-            width: 160px;
-            margin-bottom: 30px;
-        }
-
-        .headline {
-            font-size: 22px;
-            max-width: 700px;
-            margin: auto;
-            line-height: 1.6;
-            font-weight: 300;
-        }
-
-        .buttons {
-            margin-top: 45px;
-        }
-
-        .btn-primary {
-            display: inline-block;
-            padding: 15px 40px;
-            background-color: white;
-            color: #1f3c88;
-            text-decoration: none;
-            font-weight: bold;
-            border-radius: 8px;
-            font-size: 16px;
-            margin: 10px;
-            transition: 0.3s;
-        }
-
-        .btn-primary:hover {
-            background-color: #f1f1f1;
-        }
-
-        .btn-secondary {
-            display: inline-block;
-            padding: 15px 40px;
-            background-color: transparent;
-            border: 2px solid white;
-            color: white;
-            text-decoration: none;
-            font-weight: bold;
-            border-radius: 8px;
-            font-size: 16px;
-            margin: 10px;
-            transition: 0.3s;
-        }
-
-        .btn-secondary:hover {
-            background-color: rgba(255,255,255,0.1);
-        }
-
-        .features {
-            background: white;
-            color: #333;
-            padding: 70px 20px;
-        }
-
-        .features h2 {
-            margin-bottom: 40px;
-        }
-
-        .feature-list {
-            max-width: 800px;
-            margin: auto;
-            list-style: none;
-            padding: 0;
-            text-align: left;
-        }
-
-        .feature-list li {
-            margin: 14px 0;
-            font-size: 17px;
-            position: relative;
-            padding-left: 28px;
-        }
-
-        .feature-list li::before {
-            content: "✔";
-            position: absolute;
-            left: 0;
-            color: #1f3c88;
-            font-weight: bold;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EMITTE | Plataforma de Certificados</title>
+<style>
+:root{--navy:#173B67;--blue:#285B91;--teal:#19A6A0;--ink:#263445;--muted:#617286;--bg:#F3F6FA;--line:#E2E8F0;--white:#fff}
+*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;color:var(--ink);background:var(--white)}
+.header{height:82px;display:flex;align-items:center;justify-content:space-between;max-width:1180px;margin:auto;padding:0 28px}
+.logo{width:126px;height:auto;display:block}.nav{display:flex;align-items:center;gap:30px}.nav a{color:var(--muted);text-decoration:none;font-size:14px;font-weight:600}.nav a:hover{color:var(--blue)}
+.hero{background:linear-gradient(115deg,#173B67 0%,#214D7D 68%,#285B91 100%);color:white;padding:82px 24px 88px}
+.hero-inner{max-width:1120px;margin:auto;display:grid;grid-template-columns:1.2fr .8fr;align-items:center;gap:56px}
+.eyebrow{display:inline-flex;align-items:center;gap:9px;color:#BFE9E6;font-size:12px;font-weight:700;letter-spacing:.11em;text-transform:uppercase;margin-bottom:22px}
+.eyebrow:before{content:"";width:25px;height:2px;background:var(--teal)}
+h1{font-size:42px;line-height:1.16;letter-spacing:-1px;max-width:650px;margin:0 0 20px}
+.lead{max-width:620px;color:#E3ECF6;font-size:18px;line-height:1.65;margin:0}
+.actions{display:flex;gap:13px;flex-wrap:wrap;margin-top:34px}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 24px;border-radius:7px;text-decoration:none;font-size:14px;font-weight:700;transition:background .15s,border-color .15s}
+.btn-primary{background:white;color:var(--navy)}.btn-primary:hover{background:#EAF1F8}
+.btn-secondary{border:1px solid rgba(255,255,255,.65);color:white}.btn-secondary:hover{background:rgba(255,255,255,.1)}
+.hero-panel{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);border-radius:14px;padding:28px;backdrop-filter:blur(4px)}
+.panel-label{font-size:12px;color:#BFE9E6;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin:0 0 18px}
+.workflow{display:grid;gap:16px}.workflow-item{display:flex;align-items:center;gap:14px;color:#F4F7FB;font-size:14px;line-height:1.4}
+.number{width:32px;height:32px;flex:0 0 32px;border-radius:8px;background:rgba(25,166,160,.2);border:1px solid rgba(137,225,219,.35);display:grid;place-items:center;color:#A8E7E2;font-weight:700}
+.features{padding:68px 24px 76px;background:var(--bg)}.section-inner{max-width:1120px;margin:auto}
+.section-kicker{color:var(--blue);font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin:0 0 10px}
+h2{font-size:28px;color:var(--navy);margin:0 0 12px;letter-spacing:-.4px}.section-intro{color:var(--muted);font-size:15px;line-height:1.6;margin:0;max-width:650px}
+.feature-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:32px}
+.feature{background:white;border:1px solid var(--line);border-radius:10px;padding:23px;min-height:148px}
+.feature-mark{width:34px;height:4px;border-radius:4px;background:var(--teal);margin-bottom:18px}
+.feature h3{font-size:16px;color:var(--navy);margin:0 0 8px}.feature p{font-size:13px;line-height:1.55;color:var(--muted);margin:0}
+footer{padding:22px 24px;text-align:center;color:#7B8998;font-size:12px;background:white;border-top:1px solid var(--line)}
+@media(max-width:760px){.header{height:72px}.nav{gap:14px}.nav a{font-size:12px}.hero{padding:58px 22px}.hero-inner{grid-template-columns:1fr;gap:32px}h1{font-size:34px}.lead{font-size:16px}.feature-grid{grid-template-columns:1fr}.features{padding:52px 22px}}
+@media(max-width:420px){.nav a:first-child{display:none}.logo{width:110px}.actions .btn{width:100%}}
+</style>
 </head>
 <body>
-
-<div class="hero">
-
-    <img src="{{ url_for('static', filename='logo.png') }}" class="logo">
-
-    <div class="headline">
-        Plataforma inteligente para geração automática de certificados acadêmicos e corporativos em segundos.
-    </div>
-
-    <div class="buttons">
-        <a href="/login" class="btn-primary">Acessar Plataforma</a>
-        <a href="/guia" class="btn-secondary">Como Funciona</a>
-    </div>
-
+<header class="header">
+<img src="{{ url_for('static', filename='logo.png') }}" class="logo" alt="EMITTE">
+<nav class="nav" aria-label="Navegação principal"><a href="/guia">Como funciona</a><a href="/login">Acessar plataforma</a></nav>
+</header>
+<main>
+<section class="hero">
+<div class="hero-inner">
+<div>
+<div class="eyebrow">Plataforma de emissão de certificados</div>
+<h1>Certificados profissionais, gerados em poucos minutos.</h1>
+<p class="lead">Automatize a emissão de certificados acadêmicos e corporativos com personalização, pré-visualização e integração com planilhas Excel.</p>
+<div class="actions"><a href="/login" class="btn btn-primary">Acessar plataforma</a><a href="/guia" class="btn btn-secondary">Conhecer o funcionamento</a></div>
 </div>
-
-<div class="features">
-    <h2>Por que usar a Emitte?</h2>
-    <ul class="feature-list">
-        <li>Gere centenas de certificados em minutos</li>
-        <li>Integração simples com Excel</li>
-        <li>Personalização total do layout</li>
-        <li>Visualização antes da geração</li>
-        <li>Exportação automática em PDF</li>
-    </ul>
+<aside class="hero-panel" aria-label="Etapas de utilização">
+<p class="panel-label">Um fluxo simples e eficiente</p>
+<div class="workflow">
+<div class="workflow-item"><span class="number">01</span><span>Envie o modelo visual do certificado</span></div>
+<div class="workflow-item"><span class="number">02</span><span>Importe sua lista de participantes</span></div>
+<div class="workflow-item"><span class="number">03</span><span>Configure e visualize o conteúdo</span></div>
+<div class="workflow-item"><span class="number">04</span><span>Gere e baixe os arquivos em PDF</span></div>
 </div>
-
+</aside>
+</div>
+</section>
+<section class="features">
+<div class="section-inner">
+<p class="section-kicker">Mais agilidade na rotina</p>
+<h2>Uma ferramenta para simplificar emissões em escala</h2>
+<p class="section-intro">Reduza tarefas repetitivas e mantenha o controle sobre a apresentação dos certificados.</p>
+<div class="feature-grid">
+<article class="feature"><div class="feature-mark"></div><h3>Geração em lote</h3><p>Gere centenas de certificados a partir de uma única planilha.</p></article>
+<article class="feature"><div class="feature-mark"></div><h3>Personalização</h3><p>Configure texto, fonte, alinhamento e posicionamento.</p></article>
+<article class="feature"><div class="feature-mark"></div><h3>Pré-visualização</h3><p>Confira o modelo antes de iniciar a geração dos arquivos.</p></article>
+</div>
+</div>
+</section>
+</main>
+<footer>EMITTE · Plataforma de geração automática de certificados</footer>
 </body>
 </html>
