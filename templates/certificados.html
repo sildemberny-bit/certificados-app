@@ -21,7 +21,11 @@
     --shadow: 0 8px 24px rgba(23, 59, 103, 0.07);
     --blue-soft: #EAF2F9;
     --teal-soft: #E6F5F3;
+    --amber: #E9A23B;
+    --amber-soft: #FFF5E5;
     --line: #E4EBF2;
+    --page-bg: #EEF3F8;
+    --shadow-card: 0 10px 28px rgba(23, 59, 103, 0.075);
 }
 
 * { box-sizing: border-box; }
@@ -36,25 +40,25 @@ body {
 
 .brand-header {
     max-width: 1480px;
-    height: 54px;
-    margin: 0 auto 9px;
-    padding: 4px 14px;
+    height: 58px;
+    margin: 0 auto 11px;
+    padding: 5px 17px;
     display: flex;
     align-items: center;
     gap: 13px;
     position: relative;
     overflow: hidden;
-    background: linear-gradient(105deg, #FFFFFF 0%, #F9FBFD 100%);
+    background: linear-gradient(105deg, #FFFFFF 0%, #F4F8FC 72%, #EAF4F6 100%);
     border: 1px solid #DCE6EF;
     border-radius: 12px;
-    box-shadow: 0 5px 18px rgba(23, 59, 103, 0.06);
+    box-shadow: 0 6px 20px rgba(23, 59, 103, 0.065);
 }
 .brand-header::before {
     content: "";
     position: absolute;
     inset: 0 auto 0 0;
-    width: 4px;
-    background: linear-gradient(180deg, var(--blue), var(--teal));
+    width: 5px;
+    background: linear-gradient(180deg, var(--blue) 0%, var(--teal) 72%, var(--amber) 100%);
 }
 
 .logo {
@@ -112,8 +116,11 @@ body {
 }
 
 .form-box {
-    padding: 15px 19px 16px;
+    position: relative;
+    overflow: hidden;
+    padding: 16px 19px 17px;
     border-top: 3px solid var(--blue);
+    box-shadow: var(--shadow-card);
 }
 
 .page-heading {
@@ -168,6 +175,73 @@ form { counter-reset: form-step; }
     background: #EEF0FA;
     color: #5966A6;
 }
+.section-title {
+    position: relative;
+}
+.section-title:nth-of-type(2) {
+    color: #147E79;
+}
+.section-title:nth-of-type(3) {
+    color: #5966A6;
+}
+.field-grid .field {
+    position: relative;
+}
+.field-grid .field.full:has(input[type="file"]) {
+    padding: 8px 9px 9px;
+    border: 1px solid #E2EAF2;
+    border-radius: 9px;
+    background: linear-gradient(110deg, #FBFCFE, #F5F9FC);
+}
+.field-grid .field.full:has(input[type="file"]) label {
+    margin-bottom: 5px;
+}
+input[type="file"]::file-selector-button {
+    border: 1px solid #D7E4F0;
+    box-shadow: 0 1px 2px rgba(23, 59, 103, 0.04);
+}
+input[type="file"]::file-selector-button:hover {
+    border-color: var(--blue);
+}
+.preview-box {
+    border-top: 3px solid var(--teal);
+}
+.preview-status {
+    background: var(--teal-soft);
+    border: 1px solid #CDEBE7;
+}
+.preview-area {
+    background: linear-gradient(145deg, #F7FAFD, #F0F5FA);
+    border: 1px solid #D6E2ED;
+}
+.preview-placeholder {
+    flex-direction: column;
+    gap: 10px;
+}
+.preview-placeholder::before {
+    content: " ";
+    display: block;
+    width: 46px;
+    height: 46px;
+    border: 1px solid #D5E4EF;
+    border-radius: 13px;
+    background:
+        linear-gradient(var(--blue), var(--blue)) center 13px / 18px 2px no-repeat,
+        linear-gradient(var(--blue), var(--blue)) center 20px / 22px 2px no-repeat,
+        linear-gradient(var(--blue), var(--blue)) center 27px / 14px 2px no-repeat,
+        linear-gradient(135deg, #FFFFFF, #EAF2F9);
+    box-shadow: 0 4px 10px rgba(23, 59, 103, 0.06);
+}
+.preview-placeholder::after {
+    content: "Aguardando arquivo do certificado";
+    display: block;
+    color: #8A9AAC;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.035em;
+    text-transform: uppercase;
+}
+
 
 .section-title:first-of-type { margin-top: 0; }
 
@@ -212,8 +286,8 @@ select {
 input[type="file"] {
     min-height: 42px;
     padding: 5px 7px;
-    background: #F7FAFD;
-    border-color: #D5E1EC;
+    background: linear-gradient(110deg, #F4F8FC, #F8FBFD);
+    border: 1px dashed #B9CADB;
     font-size: 12px;
     color: var(--muted);
 }
@@ -270,12 +344,12 @@ textarea:focus-visible {
     padding: 12px 18px;
     border: 0;
     border-radius: 8px;
-    background: linear-gradient(100deg, #285B91 0%, #1D6D91 100%);
+    background: linear-gradient(105deg, #173B67 0%, #285B91 58%, #168F91 100%);
     color: #fff;
-    box-shadow: 0 5px 12px rgba(40, 91, 145, 0.18);
+    box-shadow: 0 7px 16px rgba(40, 91, 145, 0.22);
     font-size: 15px;
     font-weight: 700;
-    letter-spacing: 0.01em;
+    letter-spacing: 0.025em;
     cursor: pointer;
     transition: background 0.15s ease, transform 0.15s ease;
 }
@@ -293,7 +367,8 @@ textarea:focus-visible {
 .preview-box {
     position: sticky;
     top: 22px;
-    padding: 22px;
+    padding: 20px;
+    box-shadow: var(--shadow-card);
 }
 
 .preview-header {
@@ -334,7 +409,7 @@ textarea:focus-visible {
     overflow: hidden;
     border: 1px solid var(--border);
     border-radius: 8px;
-    background: #F8FAFC;
+    background: linear-gradient(145deg, #F7FAFD 0%, #F0F5FA 100%);
 }
 
 .preview-area img {
@@ -434,11 +509,13 @@ textarea:focus-visible {
                 <div class="field full">
                     <label for="fundo">Imagem do certificado</label>
                     <input type="file" name="fundo" id="fundo" accept=".jpg,.jpeg,.png,image/jpeg,image/png" required>
+                    <p class="help">Imagem de fundo em JPG ou PNG</p>
                 </div>
 
                 <div class="field full">
                     <label for="planilha">Planilha Excel (.xlsx)</label>
                     <input type="file" name="planilha" id="planilha" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" required>
+                    <p class="help">Lista de participantes em formato Excel (.xlsx)</p>
                 </div>
             </div>
 
