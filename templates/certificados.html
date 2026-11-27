@@ -327,12 +327,12 @@ textarea:focus {
             <div class="field-grid">
                 <div class="field">
                     <label for="fonte">Tamanho da fonte (pt)</label>
-                    <input type="number" id="fonte" name="fonte" value="18" min="1" step="1">
+                    <input type="number" id="fonte" name="fonte" value="18">
                 </div>
 
                 <div class="field">
                     <label for="largura_texto">Largura do bloco (%)</label>
-                    <input type="number" id="largura_texto" name="largura_texto" value="70" min="1" max="100" step="1">
+                    <input type="number" id="largura_texto" name="largura_texto" value="70">
                 </div>
 
                 <div class="field">
@@ -348,7 +348,7 @@ textarea:focus {
                     <label for="posicao_vertical">Posição vertical</label>
                     <select id="posicao_vertical" name="posicao_vertical">
                         <option value="superior">Superior</option>
-                        <option value="centro" selected>Centro</option>
+                        <option value="centro">Centro</option>
                         <option value="inferior">Inferior</option>
                     </select>
                 </div>
@@ -422,7 +422,7 @@ function atualizarPreview() {
 
     const escala = previewWidth / PDF_PAGE_WIDTH;
     const tamanhoFonte = Math.max(1, Number(fonte.value) || 18);
-    const larguraPercentual = Math.min(100, Math.max(1, Number(largura.value) || 70));
+    const larguraPercentual = Number(largura.value) || 70;
 
     previewText.textContent = texto.value;
     previewText.style.width = larguraPercentual + "%";
