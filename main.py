@@ -335,6 +335,10 @@ def dividir_pdf(caminho_pdf, df, pasta_saida):
     """
     Divide o PDF multipágina em PDFs individuais.
 
+    Preserva o nome atual dos participantes quando ele é único.
+    Quando houver nomes repetidos (inclusive após a normalização),
+    acrescenta _2, _3 etc. para evitar sobrescrita.
+
     Retorna os caminhos dos arquivos criados.
     """
 
@@ -358,6 +362,8 @@ def dividir_pdf(caminho_pdf, df, pasta_saida):
         total_linhas
     )
 
+    nomes_utilizados = set()
+
     for i in range(total):
 
         page = reader.pages[i]
@@ -378,9 +384,20 @@ def dividir_pdf(caminho_pdf, df, pasta_saida):
         if not nome_limpo:
             nome_limpo = f"participante_{i + 1}"
 
+        # Mantém o nome original quando ainda está disponível.
+        # Se houver duplicidade ou colisão, acrescenta _2, _3 etc.
+        nome_arquivo = nome_limpo
+        sufixo = 2
+
+        while nome_arquivo.lower() in nomes_utilizados:
+            nome_arquivo = f"{nome_limpo}_{sufixo}"
+            sufixo += 1
+
+        nomes_utilizados.add(nome_arquivo.lower())
+
         caminho = os.path.join(
             pasta_saida,
-            f"{nome_limpo}.pdf"
+            f"{nome_arquivo}.pdf"
         )
 
         with open(
