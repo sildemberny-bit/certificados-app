@@ -25,25 +25,60 @@
 
 body {
     margin: 0;
-    padding: 14px 24px 20px;
+    padding: 9px 24px 14px;
     background: var(--page-bg);
     color: var(--text);
     font-family: Arial, Helvetica, sans-serif;
 }
 
-.logo {
+.brand-header {
     max-width: 1480px;
-    margin: 0 auto 10px;
+    height: 54px;
+    margin: 0 auto 9px;
+    padding: 4px 14px;
     display: flex;
     align-items: center;
-    justify-content: center;
+    gap: 13px;
+    background: var(--surface);
+    border: 1px solid #E3EAF1;
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    flex: 0 0 auto;
 }
 
 .logo img {
     display: block;
-    height: 40px;
+    height: 44px;
     width: auto;
     object-fit: contain;
+}
+
+.brand-divider {
+    width: 1px;
+    height: 30px;
+    background: var(--border);
+}
+
+.brand-caption {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    color: var(--navy);
+    font-size: 12px;
+}
+
+.brand-caption strong {
+    font-size: 13px;
+}
+
+.brand-caption span {
+    color: var(--muted);
+    font-size: 11px;
 }
 
 .wrapper {
@@ -65,27 +100,27 @@ body {
 }
 
 .form-box {
-    padding: 18px 22px 20px;
+    padding: 13px 18px 14px;
 }
 
 .page-heading {
-    margin: 0 0 5px;
+    margin: 0 0 3px;
     color: var(--navy);
-    font-size: 24px;
+    font-size: 23px;
     line-height: 1.2;
     letter-spacing: -0.45px;
 }
 
 .intro {
-    margin: 0 0 12px;
+    margin: 0 0 8px;
     color: var(--muted);
     font-size: 13px;
     line-height: 1.5;
 }
 
 .section-title {
-    margin: 14px 0 8px;
-    padding-bottom: 5px;
+    margin: 10px 0 6px;
+    padding-bottom: 4px;
     border-bottom: 1px solid #E7EDF3;
     font-size: 12px;
     font-weight: 700;
@@ -99,7 +134,7 @@ body {
 .field-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 9px 12px;
+    gap: 6px 10px;
 }
 
 .field { min-width: 0; }
@@ -107,7 +142,7 @@ body {
 
 label {
     display: block;
-    margin: 0 0 4px;
+    margin: 0 0 3px;
     color: #263342;
     font-size: 13px;
     font-weight: 700;
@@ -130,8 +165,8 @@ textarea {
 
 input,
 select {
-    min-height: 35px;
-    padding: 6px 9px;
+    min-height: 32px;
+    padding: 5px 8px;
 }
 
 input[type="file"] {
@@ -140,8 +175,8 @@ input[type="file"] {
 }
 
 textarea {
-    min-height: 82px;
-    padding: 8px 10px;
+    min-height: 64px;
+    padding: 7px 9px;
     line-height: 1.5;
     resize: vertical;
 }
@@ -155,10 +190,10 @@ textarea:focus {
 }
 
 .help {
-    margin: 3px 0 0;
+    margin: 2px 0 0;
     color: var(--muted);
-    font-size: 11px;
-    line-height: 1.4;
+    font-size: 10px;
+    line-height: 1.35;
 }
 
 .submit-button {
@@ -288,6 +323,19 @@ textarea:focus {
     .preview-box { padding: 18px; }
 }
 
+/* Em telas desktop com pouca altura disponível, reduz apenas a escala
+   visual da folha A4 para manter o botão acessível sem rolagem. */
+@media (min-width: 921px) and (max-height: 850px) {
+    .preview-box { padding: 16px; }
+    .preview-header { margin-bottom: 10px; }
+    .preview-area {
+        width: min(100%, 700px);
+        margin-inline: auto;
+    }
+    .preview-footer { margin-top: 8px; }
+    .preview-column { gap: 10px; }
+}
+
 @media (max-width: 920px) {
     .wrapper { grid-template-columns: 1fr; }
     .preview-box { position: static; }
@@ -296,9 +344,16 @@ textarea:focus {
 </head>
 
 <body>
-<div class="logo">
-    <img src="/static/logo.png" alt="EMITTE">
-</div>
+<header class="brand-header">
+    <div class="logo">
+        <img src="/static/logo.png" alt="EMITTE">
+    </div>
+    <div class="brand-divider" aria-hidden="true"></div>
+    <div class="brand-caption">
+        <strong>Plataforma EMITTE</strong>
+        <span>Geração de certificados</span>
+    </div>
+</header>
 
 <main class="wrapper">
     <section class="form-box" aria-labelledby="pageHeading">
