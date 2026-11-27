@@ -2,523 +2,479 @@
 <html lang="pt-br">
 
 <head>
-
 <meta charset="UTF-8">
-
-<title>Gerar Certificados</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gerar Certificados | EMITTE</title>
 
 <style>
-
-body{
-font-family: Arial, Helvetica, sans-serif;
-background:#f4f6f8;
-margin:0;
-padding:0;
+:root {
+    --page-bg: #f3f5f7;
+    --surface: #ffffff;
+    --text: #17212b;
+    --muted: #647181;
+    --border: #dce2e8;
+    --accent: #239b4b;
+    --accent-hover: #1c853f;
+    --shadow: 0 8px 26px rgba(22, 34, 48, 0.07);
 }
 
-.logo{
-text-align:center;
-margin-top:30px;
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    padding: 24px 28px 40px;
+    background: var(--page-bg);
+    color: var(--text);
+    font-family: Arial, Helvetica, sans-serif;
 }
 
-.logo img{
-height:60px;
+.logo {
+    max-width: 1480px;
+    margin: 0 auto 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.wrapper{
-display:flex;
-gap:40px;
-max-width:1200px;
-margin:auto;
-margin-top:40px;
-align-items:flex-start;
+.logo img {
+    display: block;
+    height: 48px;
+    width: auto;
+    object-fit: contain;
 }
 
-.form-box{
-flex:1;
-background:white;
-padding:30px;
-border-radius:10px;
-box-shadow:0 4px 10px rgba(0,0,0,0.1);
+.wrapper {
+    display: grid;
+    grid-template-columns: minmax(480px, 0.95fr) minmax(540px, 1.05fr);
+    align-items: start;
+    gap: 24px;
+    max-width: 1480px;
+    margin: 0 auto;
 }
 
-.preview-box{
-flex:1;
-background:white;
-padding:30px;
-border-radius:10px;
-box-shadow:0 4px 10px rgba(0,0,0,0.1);
+.form-box,
+.preview-box {
+    min-width: 0;
+    background: var(--surface);
+    border: 1px solid #e7ebef;
+    border-radius: 14px;
+    box-shadow: var(--shadow);
 }
 
-label{
-font-weight:bold;
-display:block;
-margin-top:15px;
+.form-box {
+    padding: 26px 28px 28px;
+}
+
+.page-heading {
+    margin: 0 0 8px;
+    font-size: 27px;
+    line-height: 1.2;
+    letter-spacing: -0.45px;
+}
+
+.intro {
+    margin: 0 0 22px;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.section-title {
+    margin: 22px 0 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #edf0f3;
+    font-size: 13px;
+    font-weight: 700;
+    color: #394655;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.section-title:first-of-type { margin-top: 0; }
+
+.field-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px 16px;
+}
+
+.field { min-width: 0; }
+.field.full { grid-column: 1 / -1; }
+
+label {
+    display: block;
+    margin: 0 0 6px;
+    color: #263342;
+    font-size: 13px;
+    font-weight: 700;
 }
 
 input,
 select,
-textarea{
-width:100%;
-padding:10px;
-margin-top:5px;
-border-radius:6px;
-border:1px solid #ccc;
-box-sizing:border-box;
+textarea {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    border: 1px solid #cbd3dc;
+    border-radius: 7px;
+    background: #fff;
+    color: var(--text);
+    font: inherit;
+    font-size: 14px;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-textarea{
-height:150px;
-resize:vertical;
+input,
+select {
+    min-height: 40px;
+    padding: 8px 10px;
 }
 
-button{
-margin-top:25px;
-padding:15px;
-width:100%;
-border:none;
-border-radius:8px;
-background:#28a745;
-color:white;
-font-size:16px;
-cursor:pointer;
+input[type="file"] {
+    padding: 7px 9px;
+    font-size: 13px;
 }
 
-button:hover{
-background:#218838;
+textarea {
+    min-height: 148px;
+    padding: 11px 12px;
+    line-height: 1.5;
+    resize: vertical;
 }
 
-
-/* ==========================================================
-   ÁREA DA PRÉVIA
-   A proporção corresponde ao A4 em paisagem utilizado
-   pelo PDF: 841,89 x 595,28 pontos.
-   ========================================================== */
-
-.preview-area{
-position:relative;
-width:100%;
-aspect-ratio:841.89 / 595.28;
-overflow:hidden;
+input:focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    border-color: #55a875;
+    box-shadow: 0 0 0 3px rgba(35, 155, 75, 0.12);
 }
 
-.preview-area img{
-width:100%;
-height:100%;
-object-fit:fill;
-border-radius:6px;
-border:1px solid #ddd;
-display:block;
+.help {
+    margin: 5px 0 0;
+    color: var(--muted);
+    font-size: 11px;
+    line-height: 1.4;
 }
 
-
-/* ==========================================================
-   TEXTO DA PRÉVIA
-   ========================================================== */
-
-.preview-text{
-position:absolute;
-left:50%;
-transform:translateX(-50%);
-width:70%;
-text-align:center;
-white-space:pre-line;
+.submit-button {
+    display: block;
+    width: 100%;
+    min-height: 48px;
+    margin-top: 24px;
+    padding: 12px 18px;
+    border: 0;
+    border-radius: 8px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s ease, transform 0.15s ease;
 }
 
+.submit-button:hover { background: var(--accent-hover); }
+.submit-button:active { transform: translateY(1px); }
+
+.preview-box {
+    position: sticky;
+    top: 22px;
+    padding: 22px;
+}
+
+.preview-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.preview-title {
+    margin: 0;
+    font-size: 18px;
+    line-height: 1.3;
+}
+
+.preview-description {
+    margin: 4px 0 0;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+.preview-status {
+    flex: 0 0 auto;
+    padding: 5px 9px;
+    border-radius: 20px;
+    background: #eef6f0;
+    color: #287643;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.preview-area {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 841.89 / 595.28;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background:
+        linear-gradient(45deg, #f5f7f9 25%, transparent 25%),
+        linear-gradient(-45deg, #f5f7f9 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #f5f7f9 75%),
+        linear-gradient(-45deg, transparent 75%, #f5f7f9 75%);
+    background-size: 18px 18px;
+    background-position: 0 0, 0 9px, 9px -9px, -9px 0;
+}
+
+.preview-area img {
+    position: absolute;
+    inset: 0;
+    display: none;
+    width: 100%;
+    height: 100%;
+    object-fit: fill;
+}
+
+.preview-placeholder {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 30px;
+    color: #84909c;
+    text-align: center;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.preview-text {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 70%;
+    color: #111;
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: 400;
+    line-height: 1.4;
+    text-align: center;
+    white-space: pre-line;
+    overflow-wrap: break-word;
+    pointer-events: none;
+}
+
+.preview-footer {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 12px;
+    color: var(--muted);
+    font-size: 11px;
+    line-height: 1.4;
+}
+
+@media (max-width: 1120px) {
+    body { padding-left: 18px; padding-right: 18px; }
+    .wrapper { grid-template-columns: minmax(420px, 0.95fr) minmax(440px, 1.05fr); gap: 16px; }
+    .form-box { padding: 22px; }
+    .preview-box { padding: 18px; }
+}
+
+@media (max-width: 920px) {
+    .wrapper { grid-template-columns: 1fr; }
+    .preview-box { position: static; }
+}
 </style>
-
 </head>
 
-
 <body>
-
-
 <div class="logo">
-
-<img src="/static/logo.png">
-
+    <img src="/static/logo.png" alt="EMITTE">
 </div>
 
+<main class="wrapper">
+    <section class="form-box" aria-labelledby="pageHeading">
+        <h1 class="page-heading" id="pageHeading">Gerar Certificados</h1>
+        <p class="intro">Configure o modelo, confira a prévia e gere os certificados da sua lista de participantes.</p>
 
-<div class="wrapper">
+        <form action="/certificados" method="post" enctype="multipart/form-data">
+            <h2 class="section-title">Arquivos de entrada</h2>
+            <div class="field-grid">
+                <div class="field full">
+                    <label for="fundo">Imagem do certificado</label>
+                    <input type="file" name="fundo" id="fundo" accept=".jpg,.jpeg,.png,image/jpeg,image/png" required>
+                </div>
 
+                <div class="field full">
+                    <label for="planilha">Planilha Excel (.xlsx)</label>
+                    <input type="file" name="planilha" id="planilha" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" required>
+                </div>
+            </div>
 
-<!-- ======================================================
-     FORMULÁRIO
-     ====================================================== -->
+            <h2 class="section-title">Conteúdo do certificado</h2>
+            <div class="field-grid">
+                <div class="field full">
+                    <label for="texto">Texto do certificado</label>
+                    <textarea id="texto" name="texto" required></textarea>
+                    <p class="help">Use os campos entre chaves, como {NOME}, {EVENTO} e {DATA}, para inserir os dados da planilha.</p>
+                </div>
+            </div>
 
-<div class="form-box">
+            <h2 class="section-title">Formatação e posicionamento</h2>
+            <div class="field-grid">
+                <div class="field">
+                    <label for="fonte">Tamanho da fonte (pt)</label>
+                    <input type="number" id="fonte" name="fonte" value="18">
+                </div>
 
-<h1>Gerar Certificados</h1>
+                <div class="field">
+                    <label for="largura_texto">Largura do bloco (%)</label>
+                    <input type="number" id="largura_texto" name="largura_texto" value="70">
+                </div>
 
+                <div class="field">
+                    <label for="alinhamento">Alinhamento</label>
+                    <select id="alinhamento" name="alinhamento">
+                        <option value="centro">Centro</option>
+                        <option value="esquerda">Esquerda</option>
+                        <option value="direita">Direita</option>
+                    </select>
+                </div>
 
-<form
-action="/certificados"
-method="post"
-enctype="multipart/form-data"
->
+                <div class="field">
+                    <label for="posicao_vertical">Posição vertical</label>
+                    <select id="posicao_vertical" name="posicao_vertical">
+                        <option value="superior">Superior</option>
+                        <option value="centro">Centro</option>
+                        <option value="inferior">Inferior</option>
+                    </select>
+                </div>
 
+                <div class="field full">
+                    <label for="ajuste_vertical">Ajuste fino vertical (pontos)</label>
+                    <input type="number" id="ajuste_vertical" name="ajuste_vertical" value="0" step="1">
+                    <p class="help">Valores positivos deslocam o texto para cima; valores negativos, para baixo.</p>
+                </div>
+            </div>
 
-<label>Imagem do certificado</label>
+            <button class="submit-button" type="submit">Gerar certificados</button>
+        </form>
+    </section>
 
-<input
-type="file"
-name="fundo"
-id="fundo"
-accept=".jpg,.jpeg,.png,image/jpeg,image/png"
-required
->
+    <section class="preview-box" aria-labelledby="previewTitle">
+        <div class="preview-header">
+            <div>
+                <h2 class="preview-title" id="previewTitle">Pré-visualização</h2>
+                <p class="preview-description">Ajuste a formatação e acompanhe o resultado nesta área.</p>
+            </div>
+            <span class="preview-status">A4 · Paisagem</span>
+        </div>
 
+        <div class="preview-area" id="previewArea">
+            <img id="previewImg" alt="Imagem de fundo do certificado">
+            <div class="preview-placeholder" id="previewPlaceholder">Selecione a imagem do certificado para visualizar o modelo.</div>
+            <div id="previewText" class="preview-text"></div>
+        </div>
 
-<label>Planilha Excel (.xlsx)</label>
-
-<input
-type="file"
-name="planilha"
-accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-required
->
-
-
-<label>Texto do certificado</label>
-
-<textarea
-id="texto"
-name="texto"
-required
-></textarea>
-
-
-<label>Tamanho da fonte</label>
-
-<input
-type="number"
-id="fonte"
-name="fonte"
-value="18"
->
-
-
-<label>Alinhamento</label>
-
-<select
-id="alinhamento"
-name="alinhamento"
->
-
-<option value="centro">
-Centro
-</option>
-
-<option value="esquerda">
-Esquerda
-</option>
-
-<option value="direita">
-Direita
-</option>
-
-</select>
-
-
-<label>Posição vertical</label>
-
-<select
-id="posicao_vertical"
-name="posicao_vertical"
->
-
-<option value="superior">
-Superior
-</option>
-
-<option value="centro">
-Centro
-</option>
-
-<option value="inferior">
-Inferior
-</option>
-
-</select>
-
-
-<label>Ajuste fino vertical (px)</label>
-
-<input
-type="number"
-id="ajuste_vertical"
-name="ajuste_vertical"
-value="0"
->
-
-
-<label>Largura do bloco de texto (%)</label>
-
-<input
-type="number"
-id="largura_texto"
-name="largura_texto"
-value="70"
->
-
-
-<button type="submit">
-
-Gerar certificados
-
-</button>
-
-
-</form>
-
-</div>
-
-
-
-<!-- ======================================================
-     PRÉVIA
-     ====================================================== -->
-
-<div class="preview-box">
-
-<div class="preview-area">
-
-<img id="previewImg">
-
-<div
-id="previewText"
-class="preview-text"
-></div>
-
-</div>
-
-</div>
-
-
-</div>
-
-
+        <div class="preview-footer">
+            <span>Prévia ilustrativa do posicionamento do texto.</span>
+            <span>Proporção A4 horizontal</span>
+        </div>
+    </section>
+</main>
 
 <script>
+const fundo = document.getElementById("fundo");
+const texto = document.getElementById("texto");
+const fonte = document.getElementById("fonte");
+const alinhamento = document.getElementById("alinhamento");
+const posicao = document.getElementById("posicao_vertical");
+const ajuste = document.getElementById("ajuste_vertical");
+const largura = document.getElementById("largura_texto");
 
-/* ==========================================================
-   ELEMENTOS DO FORMULÁRIO
-   ========================================================== */
+const previewArea = document.getElementById("previewArea");
+const previewImg = document.getElementById("previewImg");
+const previewText = document.getElementById("previewText");
+const previewPlaceholder = document.getElementById("previewPlaceholder");
 
-const fundo =
-document.getElementById("fundo")
+const PDF_PAGE_WIDTH = 841.89;
+const PDF_PAGE_HEIGHT = 595.28;
 
-const texto =
-document.getElementById("texto")
+fundo.addEventListener("change", function(event) {
+    const file = event.target.files && event.target.files[0];
+    if (!file) return;
 
-const fonte =
-document.getElementById("fonte")
+    const reader = new FileReader();
+    reader.onload = function(loadEvent) {
+        previewImg.src = loadEvent.target.result;
+        previewImg.style.display = "block";
+        previewPlaceholder.style.display = "none";
+    };
+    reader.readAsDataURL(file);
+});
 
-const alinhamento =
-document.getElementById("alinhamento")
+function atualizarPreview() {
+    const previewWidth = previewArea.clientWidth;
+    if (!previewWidth) return;
 
-const posicao =
-document.getElementById("posicao_vertical")
+    const escala = previewWidth / PDF_PAGE_WIDTH;
+    const tamanhoFonte = Math.max(1, Number(fonte.value) || 18);
+    const larguraPercentual = Number(largura.value) || 70;
 
-const ajuste =
-document.getElementById("ajuste_vertical")
+    previewText.textContent = texto.value;
+    previewText.style.width = larguraPercentual + "%";
+    previewText.style.fontSize = (tamanhoFonte * escala) + "px";
+    previewText.style.lineHeight = "1.4";
 
-const largura =
-document.getElementById("largura_texto")
+    const alinhamentos = {
+        centro: "center",
+        esquerda: "left",
+        direita: "right"
+    };
+    previewText.style.textAlign = alinhamentos[alinhamento.value] || "center";
 
+    // Converte a posição do PDF (origem no canto inferior esquerdo)
+    // para a posição CSS (origem no canto superior esquerdo).
+    const alturaTextoEmPontos = previewText.offsetHeight / escala;
+    const ajusteEmPontos = Number.parseFloat(ajuste.value) || 0;
+    let yInferior;
 
-const previewImg =
-document.getElementById("previewImg")
+    if (posicao.value === "superior") {
+        yInferior = PDF_PAGE_HEIGHT * 0.75;
+    } else if (posicao.value === "inferior") {
+        yInferior = PDF_PAGE_HEIGHT * 0.30;
+    } else {
+        yInferior = (PDF_PAGE_HEIGHT / 2) - (alturaTextoEmPontos / 2);
+    }
 
-const previewText =
-document.getElementById("previewText")
+    yInferior += ajusteEmPontos;
 
-
-
-/* ==========================================================
-   CARREGAMENTO DO FUNDO
-   ========================================================== */
-
-fundo.addEventListener(
-"change",
-function(e){
-
-const file =
-e.target.files[0]
-
-if(!file) return
-
-
-const reader =
-new FileReader()
-
-
-reader.onload =
-function(event){
-
-previewImg.src =
-event.target.result
-
+    const topoEmPontos = PDF_PAGE_HEIGHT - yInferior - alturaTextoEmPontos;
+    previewText.style.top = (topoEmPontos * escala) + "px";
 }
 
+[
+    texto, fonte, largura, ajuste
+].forEach(function(elemento) {
+    elemento.addEventListener("input", atualizarPreview);
+});
 
-reader.readAsDataURL(file)
+[
+    alinhamento, posicao
+].forEach(function(elemento) {
+    elemento.addEventListener("change", atualizarPreview);
+});
 
-}
-)
-
-
-
-/* ==========================================================
-   ATUALIZAÇÃO DA PRÉVIA
-   ========================================================== */
-
-function atualizarPreview(){
-
-
-/* Texto */
-
-previewText.innerText =
-texto.value
-
-
-/* Fonte */
-
-previewText.style.fontSize =
-fonte.value + "px"
-
-
-/* Largura */
-
-previewText.style.width =
-largura.value + "%"
-
-
-
-/* Alinhamento */
-
-if(
-alinhamento.value == "centro"
-){
-
-previewText.style.textAlign =
-"center"
-
+if ("ResizeObserver" in window) {
+    new ResizeObserver(atualizarPreview).observe(previewArea);
+} else {
+    window.addEventListener("resize", atualizarPreview);
 }
 
-
-if(
-alinhamento.value == "esquerda"
-){
-
-previewText.style.textAlign =
-"left"
-
-}
-
-
-if(
-alinhamento.value == "direita"
-){
-
-previewText.style.textAlign =
-"right"
-
-}
-
-
-
-/* ========================================================
-   POSIÇÃO VERTICAL
-
-   Mantemos exatamente a lógica que já existia na interface.
-   ======================================================== */
-
-let top = 50
-
-
-if(
-posicao.value == "superior"
-){
-
-top = 25
-
-}
-
-
-if(
-posicao.value == "centro"
-){
-
-top = 50
-
-}
-
-
-if(
-posicao.value == "inferior"
-){
-
-top = 75
-
-}
-
-
-
-/* Ajuste fino */
-
-top =
-top +
-(
-parseInt(ajuste.value || 0) / 10
-)
-
-
-previewText.style.top =
-top + "%"
-
-}
-
-
-
-/* ==========================================================
-   EVENTOS
-   ========================================================== */
-
-texto.addEventListener(
-"input",
-atualizarPreview
-)
-
-fonte.addEventListener(
-"input",
-atualizarPreview
-)
-
-alinhamento.addEventListener(
-"change",
-atualizarPreview
-)
-
-posicao.addEventListener(
-"change",
-atualizarPreview
-)
-
-ajuste.addEventListener(
-"input",
-atualizarPreview
-)
-
-largura.addEventListener(
-"input",
-atualizarPreview
-)
-
+atualizarPreview();
 </script>
-
-
 </body>
-
 </html>
