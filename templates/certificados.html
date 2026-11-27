@@ -25,7 +25,7 @@
 
 body {
     margin: 0;
-    padding: 24px 28px 40px;
+    padding: 14px 24px 20px;
     background: var(--page-bg);
     color: var(--text);
     font-family: Arial, Helvetica, sans-serif;
@@ -33,7 +33,7 @@ body {
 
 .logo {
     max-width: 1480px;
-    margin: 0 auto 18px;
+    margin: 0 auto 10px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -41,7 +41,7 @@ body {
 
 .logo img {
     display: block;
-    height: 48px;
+    height: 40px;
     width: auto;
     object-fit: contain;
 }
@@ -50,7 +50,7 @@ body {
     display: grid;
     grid-template-columns: minmax(480px, 0.95fr) minmax(540px, 1.05fr);
     align-items: start;
-    gap: 24px;
+    gap: 20px;
     max-width: 1480px;
     margin: 0 auto;
 }
@@ -65,27 +65,27 @@ body {
 }
 
 .form-box {
-    padding: 26px 28px 28px;
+    padding: 18px 22px 20px;
 }
 
 .page-heading {
-    margin: 0 0 8px;
+    margin: 0 0 5px;
     color: var(--navy);
-    font-size: 27px;
+    font-size: 24px;
     line-height: 1.2;
     letter-spacing: -0.45px;
 }
 
 .intro {
-    margin: 0 0 22px;
+    margin: 0 0 12px;
     color: var(--muted);
     font-size: 13px;
     line-height: 1.5;
 }
 
 .section-title {
-    margin: 22px 0 12px;
-    padding-bottom: 8px;
+    margin: 14px 0 8px;
+    padding-bottom: 5px;
     border-bottom: 1px solid #E7EDF3;
     font-size: 12px;
     font-weight: 700;
@@ -99,7 +99,7 @@ body {
 .field-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 14px 16px;
+    gap: 9px 12px;
 }
 
 .field { min-width: 0; }
@@ -107,7 +107,7 @@ body {
 
 label {
     display: block;
-    margin: 0 0 6px;
+    margin: 0 0 4px;
     color: #263342;
     font-size: 13px;
     font-weight: 700;
@@ -130,18 +130,18 @@ textarea {
 
 input,
 select {
-    min-height: 40px;
-    padding: 8px 10px;
+    min-height: 35px;
+    padding: 6px 9px;
 }
 
 input[type="file"] {
-    padding: 7px 9px;
+    padding: 5px 7px;
     font-size: 13px;
 }
 
 textarea {
-    min-height: 148px;
-    padding: 11px 12px;
+    min-height: 82px;
+    padding: 8px 10px;
     line-height: 1.5;
     resize: vertical;
 }
@@ -155,7 +155,7 @@ textarea:focus {
 }
 
 .help {
-    margin: 5px 0 0;
+    margin: 3px 0 0;
     color: var(--muted);
     font-size: 11px;
     line-height: 1.4;
@@ -165,7 +165,7 @@ textarea:focus {
     display: block;
     width: 100%;
     min-height: 48px;
-    margin-top: 24px;
+    margin-top: 0;
     padding: 12px 18px;
     border: 0;
     border-radius: 8px;
@@ -179,6 +179,13 @@ textarea:focus {
 
 .submit-button:hover { background: var(--accent-hover); }
 .submit-button:active { transform: translateY(1px); }
+
+.preview-column {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    min-width: 0;
+}
 
 .preview-box {
     position: sticky;
@@ -298,7 +305,7 @@ textarea:focus {
         <h1 class="page-heading" id="pageHeading">Gerar Certificados</h1>
         <p class="intro">Configure o modelo, confira a prévia e gere os certificados da sua lista de participantes.</p>
 
-        <form action="/certificados" method="post" enctype="multipart/form-data">
+        <form id="certificateForm" action="/certificados" method="post" enctype="multipart/form-data">
             <h2 class="section-title">Arquivos de entrada</h2>
             <div class="field-grid">
                 <div class="field full">
@@ -358,10 +365,10 @@ textarea:focus {
                 </div>
             </div>
 
-            <button class="submit-button" type="submit">Gerar certificados</button>
         </form>
     </section>
 
+    <div class="preview-column">
     <section class="preview-box" aria-labelledby="previewTitle">
         <div class="preview-header">
             <div>
@@ -382,6 +389,8 @@ textarea:focus {
             <span>Proporção A4 horizontal</span>
         </div>
     </section>
+    <button class="submit-button" type="submit" form="certificateForm">Gerar certificados</button>
+    </div>
 </main>
 
 <script>
